@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "../styles/tokens.generated.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Mobile first: unprefixed utilities target phones; these widths layer on top. */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 25.75rem; /* 412px: large phones */
+  --breakpoint-md: 48rem; /* 768px: tablets */
+  --breakpoint-lg: 90rem; /* 1440px: desktop */
+}
+
+@layer base {
+  * {
+    @apply border-border-default outline-brand-primary/50;
+  }
+  html {
+    @apply bg-background-primary font-sans text-body-regular text-text-primary antialiased;
+  }
+}
+
+@layer components {
+  .leaflet-container {
+    @apply bg-grey-100 font-sans;
+  }
+  .leaflet-control-attribution {
+    @apply text-label-regular! text-text-tertiary;
+  }
+  .leaflet-control-attribution a {
+    @apply text-text-secondary;
+  }
+  .leaflet-div-icon {
+    @apply border-0 bg-transparent;
+  }
+}
