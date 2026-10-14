@@ -112,7 +112,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
 
               <section className="flex flex-col gap-3">
                 <h2 className="text-heading-semibold text-text-primary">Where you&apos;ll work</h2>
-                <div className="h-56 overflow-hidden rounded-lg border md:h-72">
+                <div className="isolate h-56 overflow-hidden rounded-lg border md:h-72">
                   <LocationMap
                     position={job.company.position}
                     name={job.company.name}

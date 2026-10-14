@@ -11,6 +11,7 @@ import type { Company } from "@/lib/jobs";
 import { MapControls } from "./map-controls";
 import { clusterMarkerHtml, companyMarkerHtml } from "./markers";
 import { tileLayer } from "./tiles";
+import { useMapGeneration } from "./use-map-generation";
 
 export type MapCompany = { company: Company; jobCount: number };
 
@@ -53,6 +54,7 @@ export default function JobsMap({
   selectedSlug: string | null;
   onSelectCompany: (slug: string) => void;
 }) {
+  const generation = useMapGeneration();
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [zoom, setZoom] = useState<number | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
@@ -117,6 +119,7 @@ export default function JobsMap({
   return (
     <div className="relative size-full">
       <MapContainer
+        key={generation}
         ref={setMap}
         center={center}
         zoom={DEFAULT_ZOOM}

@@ -83,7 +83,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
     <>
       <TopBar query={query} onQueryChange={setQuery} locationLabel={`Shankar Nagar, ${city.name}`} />
 
-      <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <main className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden">
         <h1 className="sr-only">Jobs near you in {city.name}</h1>
         <div
           className={cn(
