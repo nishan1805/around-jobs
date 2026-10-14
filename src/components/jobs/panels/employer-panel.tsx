@@ -42,7 +42,7 @@ export function EmployerPanel({
   const saveLabel = saved ? "Saved" : "Save";
 
   return (
-    <MapPanel label={`${company.name} overview`}>
+    <MapPanel label={`${company.name} overview`} sheet="half" onDismiss={onClose}>
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <GalleryHeader
           name={company.name}

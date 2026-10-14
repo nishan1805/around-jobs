@@ -1,36 +1,90 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type ComponentProps, type PointerEvent, type ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 
+const DRAG_THRESHOLD = 48;
+
+/** Vertical drag on a grab handle: up past the threshold calls `onUp`, down calls `onDown`. */
+export function useSheetDrag({ onUp, onDown }: { onUp?: () => void; onDown?: () => void }) {
+  const [startY, setStartY] = useState<number | null>(null);
+  const [offset, setOffset] = useState(0);
+  return {
+    offset,
+    handlers: {
+      onPointerDown: (event: PointerEvent<HTMLElement>) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        setStartY(event.clientY);
+      },
+      onPointerMove: (event: PointerEvent<HTMLElement>) => {
+        if (startY !== null) setOffset(event.clientY - startY);
+      },
+      onPointerUp: () => {
+        if (offset < -DRAG_THRESHOLD) onUp?.();
+        else if (offset > DRAG_THRESHOLD) onDown?.();
+        setStartY(null);
+        setOffset(0);
+      },
+      onPointerCancel: () => {
+        setStartY(null);
+        setOffset(0);
+      },
+    },
+  };
+}
+
+/** Figma "Bottom Sheet" grab handle (1952:18519): 40×4, grey-300. */
+export function GrabHandle({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div aria-hidden className={cn("flex h-5 shrink-0 cursor-grab touch-none justify-center pt-2", className)} {...props}>
+      <span className="h-1 w-10 rounded-full bg-grey-300" />
+    </div>
+  );
+}
+
 /**
  * Floating overlay panel on the map (Figma S01–S05): 448px wide, docked 24px
- * from the top-left of the map on tablet and desktop, full screen on phones.
+ * from the top-left of the map on tablet and desktop. On phones it's a bottom
+ * sheet (M01–M04): "half" opens at a third of the screen and drags up to full,
+ * "full" leaves 24px of map visible. Dragging the handle down calls `onDismiss`.
  */
 export function MapPanel({
   label,
   width = "wide",
+  sheet = "full",
+  onDismiss,
   className,
   children,
 }: {
   label: string;
   width?: "wide" | "narrow";
+  sheet?: "half" | "full";
+  onDismiss?: () => void;
   className?: string;
   children: ReactNode;
 }) {
+  const [expanded, setExpanded] = useState(sheet === "full");
+  const drag = useSheetDrag({
+    onUp: () => setExpanded(true),
+    onDown: () => (expanded && sheet === "half" ? setExpanded(false) : onDismiss?.()),
+  });
+
   return (
     <section
       aria-label={label}
+      style={drag.offset > 0 ? { transform: `translateY(${drag.offset}px)` } : undefined}
       className={cn(
-        "absolute inset-0 z-1001 flex flex-col overflow-hidden bg-surface-default",
-        "md:inset-auto md:top-6 md:bottom-6 md:left-6 md:shadow-lg",
+        "absolute inset-x-0 bottom-0 z-1001 flex flex-col overflow-hidden rounded-t-lg bg-surface-default shadow-lg transition-[top] duration-200",
+        expanded ? "top-6" : "top-1/3",
+        "md:inset-auto md:top-6 md:bottom-6 md:left-6 md:transform-none!",
         width === "wide" ? "md:w-112 md:rounded-md" : "md:w-76 md:rounded-xl",
         className,
       )}
     >
+      <GrabHandle className="md:hidden" {...drag.handlers} />
       {children}
     </section>
   );

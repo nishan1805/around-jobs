@@ -42,7 +42,7 @@ export function TopBar({
   }, []);
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 border-b bg-background-primary px-4 md:h-18 md:gap-4 md:px-6">
+    <header className="hidden h-18 shrink-0 items-center gap-4 border-b bg-background-primary px-6 md:flex">
       <Wordmark className="md:hidden" />
       <label className="flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-full border bg-grey-100 pr-3 pl-3.5 transition-colors focus-within:border-brand-primary focus-within:bg-surface-default">
         <Icon name="search" className="text-text-disabled" />

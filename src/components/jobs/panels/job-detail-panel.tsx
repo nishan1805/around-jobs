@@ -55,7 +55,7 @@ export function JobDetailPanel({
   const isRemote = job.workMode === "REMOTE";
 
   return (
-    <MapPanel label={`${job.title} details`}>
+    <MapPanel label={`${job.title} details`} onDismiss={onBack}>
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <GalleryHeader
           name={job.company.name}

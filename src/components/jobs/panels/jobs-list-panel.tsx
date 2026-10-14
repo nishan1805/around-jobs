@@ -74,9 +74,16 @@ export function JobsListPanel({
             : `${plural(jobs.length, "result")} in ${cityName}`;
 
   return (
-    <MapPanel label={`Jobs in ${cityName}`}>
-      <div className="flex shrink-0 flex-col gap-4 p-6 pb-4">
-        <div className="flex items-start gap-3">
+    <MapPanel label={`Jobs in ${cityName}`} onDismiss={onClose}>
+      <div className="flex shrink-0 flex-col gap-4 px-5 pt-1 pb-4 md:p-6 md:pb-4">
+        <div className="flex items-center gap-2 md:hidden">
+          <IconButton variant="plain" icon="chevronLeft" label="Back to map" onClick={onClose} className="-ml-2" />
+          <h2 className="text-heading-semibold text-text-primary">Jobs near you</h2>
+          <p aria-live="polite" className="sr-only">
+            {subtitle}
+          </p>
+        </div>
+        <div className="hidden items-start gap-3 md:flex">
           <div className="min-w-0 flex-1">
             <h2 className="text-heading-semibold text-text-primary">Jobs in {cityName}</h2>
             <p aria-live="polite" className="text-label-medium text-text-tertiary">
@@ -115,7 +122,7 @@ export function JobsListPanel({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto overscroll-contain px-6 pb-6">
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-6 md:px-6">
         {status === "loading" ? (
           <div className="flex flex-col gap-3" aria-busy="true">
             <span className="sr-only">Loading jobs</span>

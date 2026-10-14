@@ -232,14 +232,14 @@ export default function JobsMap({
           map={map}
           onLocate={locate}
           locating={locating}
-          className="absolute right-3 bottom-8 z-1000 md:right-5 md:bottom-9"
+          className="absolute right-3 bottom-[calc(var(--map-inset-bottom,0rem)+2rem)] z-1000 md:right-5 md:bottom-9"
         />
       )}
 
       {(tilesFailed || notice) && (
         <p
           role="status"
-          className="absolute bottom-24 left-1/2 z-1000 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-grey-900 px-4 py-2 text-center text-body-sm-medium text-text-on-brand shadow-md md:bottom-9"
+          className="absolute bottom-[calc(var(--map-inset-bottom,0rem)+6rem)] left-1/2 z-1000 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-grey-900 px-4 py-2 text-center text-body-sm-medium text-text-on-brand shadow-md md:bottom-9"
         >
           {notice ?? "Map tiles couldn't load. Job pins are still accurate."}
         </p>

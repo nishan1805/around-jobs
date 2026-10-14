@@ -35,6 +35,10 @@
   .leaflet-div-icon {
     @apply border-0 bg-transparent;
   }
+  /* Keeps attribution clear of the mobile peek sheet (set on the explorer's <main>). */
+  .leaflet-bottom {
+    bottom: var(--map-inset-bottom, 0);
+  }
 
   /* Two stacked native range inputs make the dual-thumb salary slider; only the thumbs take pointer input. */
   .range-dual input[type="range"] {
@@ -57,5 +61,13 @@
   }
   .range-dual input[type="range"]:focus-visible::-moz-range-thumb {
     @apply ring-3 ring-brand-primary/40;
+  }
+}
+
+/* Full-height mobile sheets (job detail, filters, apply) cover the tab bar, as in M02 / M04.
+   Unlayered so it wins over the tab bar's display utility. */
+@media (width < theme(--breakpoint-md)) {
+  body[data-sheet="full"] [data-mobile-tabbar] {
+    display: none;
   }
 }

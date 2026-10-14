@@ -173,23 +173,26 @@ export function FiltersPanel({
 }) {
   const reset = () => onChange({ ...defaultFilters, query: filters.query });
   return (
-    <MapPanel label="Filters" width="narrow">
-      <div className="flex shrink-0 items-center gap-3 p-4 pb-0 md:pb-0">
-        <IconButton icon="arrowLeft" label="Back to jobs" onClick={onDone} className="-ml-1 shadow-none md:hidden" iconClassName="size-4" />
-        <h2 className="flex-1 text-subheading-semibold text-text-primary">Filters</h2>
-        <button type="button" onClick={reset} className="text-body-sm-semibold text-brand-primary hover:underline">
+    <MapPanel label="Filters" width="narrow" onDismiss={onDone}>
+      <div className="flex shrink-0 items-center gap-3 px-5 pt-1 md:p-4 md:pb-0">
+        <h2 className="flex-1 text-heading-semibold text-text-primary md:text-subheading-semibold">Filters</h2>
+        <button type="button" onClick={reset} className="hidden text-body-sm-semibold text-brand-primary hover:underline md:block">
           Reset
         </button>
+        <IconButton variant="plain" icon="close" label="Close filters" onClick={onDone} className="-mr-2 md:hidden" />
       </div>
-      <div className="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain p-4">
+      <div className="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-10 py-5 md:p-4">
         <FilterFields filters={filters} onChange={onChange} />
       </div>
-      <div className="flex shrink-0 gap-3 p-4 pt-0">
-        <Button variant="outline" shape="rect" className="flex-1" onClick={reset}>
+      <div className="flex shrink-0 gap-3 border-t px-5 py-3 md:border-t-0 md:p-4 md:pt-0">
+        <Button variant="outline" shape="rect" className="h-11 flex-1" onClick={reset}>
           Reset
         </Button>
-        <Button shape="rect" className="flex-1" onClick={onDone}>
-          Show {resultCount} {resultCount === 1 ? "job" : "jobs"}
+        <Button shape="rect" className="h-11 flex-1" onClick={onDone}>
+          <span className="md:hidden">Apply</span>
+          <span className="hidden md:inline">
+            Show {resultCount} {resultCount === 1 ? "job" : "jobs"}
+          </span>
         </Button>
       </div>
     </MapPanel>

@@ -4,6 +4,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useState, useSyncExt
 
 import { Chip } from "@/components/jobs/chip";
 import { FiltersButton } from "@/components/jobs/filters-button";
+import { MapPeek, MobileSearchBar } from "@/components/jobs/mobile-map-controls";
 import { EmployerPanel } from "@/components/jobs/panels/employer-panel";
 import { FiltersPanel } from "@/components/jobs/panels/filters-panel";
 import { JobDetailPanel } from "@/components/jobs/panels/job-detail-panel";
@@ -27,6 +28,9 @@ type Panel =
   | { kind: "filters"; back: Panel };
 
 const none: Panel = { kind: "none" };
+
+/** The searched location; GPS isn't used for the list yet. */
+const LOCATION_AREA = "Shankar Nagar";
 
 const subscribeToUrl = (onChange: () => void) => {
   window.addEventListener("popstate", onChange);
@@ -132,6 +136,15 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
 
   const panelWidth = panel.kind === "filters" ? "narrow" : "wide";
   const panelOpen = panel.kind !== "none";
+  const coversTabBar = panel.kind === "job" || panel.kind === "filters";
+
+  useEffect(() => {
+    if (!coversTabBar) return;
+    document.body.dataset.sheet = "full";
+    return () => {
+      delete document.body.dataset.sheet;
+    };
+  }, [coversTabBar]);
   const insetLeft = isTablet && panelOpen ? panelInset[panelWidth] : 0;
 
   const openJob = (job: Job) => open({ kind: "job", slug: job.slug, back: panel });
@@ -198,10 +211,15 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
       <TopBar
         query={filters.query}
         onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
-        locationLabel={`Shankar Nagar, ${city.name}`}
+        locationLabel={`${LOCATION_AREA}, ${city.name}`}
       />
 
-      <main className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden">
+      <main
+        className={cn(
+          "relative isolate flex min-h-0 flex-1 flex-col overflow-hidden",
+          !panelOpen && "max-md:[--map-inset-bottom:8.75rem]",
+        )}
+      >
         <h1 className="sr-only">Jobs near you in {city.name}</h1>
 
         <div className="absolute inset-0">
@@ -219,15 +237,21 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
 
         <div
           className={cn(
-            "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col items-end gap-3 p-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
+            "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col gap-2 px-5 pt-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
             panelOpen && "max-md:hidden",
             panelOpen && (panelWidth === "wide" ? "md:pl-124" : "md:pl-88"),
           )}
         >
+          <MobileSearchBar
+            query={filters.query}
+            onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
+            filterCount={chips.length}
+            onOpenFilters={openFilters}
+          />
           <div
             role="group"
             aria-label="Job categories"
-            className="pointer-events-auto flex w-full gap-2 overflow-x-auto [scrollbar-width:none] md:w-auto md:min-w-0 md:flex-1 md:flex-wrap md:pt-1.5 [&::-webkit-scrollbar]:hidden"
+            className="pointer-events-auto -mx-1 flex flex-wrap gap-2 md:mx-0 md:w-auto md:min-w-0 md:flex-1 md:flex-nowrap md:overflow-x-auto md:py-1.5 md:[scrollbar-width:none] md:*:shrink-0"
           >
             {categories.map((category) => (
               <Chip
@@ -243,9 +267,16 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <ViewToggle
             view={panel.kind === "list" ? "list" : "map"}
             onChange={(view) => open(view === "list" ? { kind: "list" } : none)}
-            className="pointer-events-auto"
+            className="pointer-events-auto max-md:hidden"
           />
         </div>
+
+        {!panelOpen && (
+          <MapPeek
+            title={`${matching.length} ${matching.length === 1 ? "job" : "jobs"} near ${LOCATION_AREA}`}
+            onOpenList={() => open({ kind: "list" })}
+          />
+        )}
 
         {renderPanel()}
 
@@ -268,8 +299,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           expanded={panel.kind === "filters"}
           onClick={openFilters}
           className={cn(
-            "absolute bottom-8 left-3 z-1000 md:bottom-6 md:left-6",
-            panelOpen && "max-md:hidden",
+            "absolute bottom-6 left-6 z-1000 max-md:hidden",
             panelOpen && (panelWidth === "wide" ? "md:left-124" : "md:left-88"),
           )}
         />

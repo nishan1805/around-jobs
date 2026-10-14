@@ -2,14 +2,22 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Icon, type IconName } from "@/components/icon";
+import { TabIcon, type TabIconName } from "@/components/tab-bar-icons";
 import { cn } from "@/lib/utils";
 
-type NavKey = "jobs" | "applications" | "saved";
+export type NavKey = "jobs" | "applications" | "saved" | "profile";
 
-const navItems: { key: NavKey; label: string; href: string; icon: IconName }[] = [
+const navItems: { key: Exclude<NavKey, "profile">; label: string; href: string; icon: IconName }[] = [
   { key: "jobs", label: "Jobs", href: "/", icon: "navJobs" },
   { key: "applications", label: "My applications", href: "/applications", icon: "navApplications" },
   { key: "saved", label: "Saved", href: "/saved", icon: "navSaved" },
+];
+
+const tabs: { key: NavKey; label: string; href: string; icon: TabIconName }[] = [
+  { key: "jobs", label: "Jobs", href: "/", icon: "jobs" },
+  { key: "applications", label: "Applied", href: "/applications", icon: "applications" },
+  { key: "saved", label: "Saved", href: "/saved", icon: "saved" },
+  { key: "profile", label: "Profile", href: "/profile", icon: "profile" },
 ];
 
 export function Wordmark({ className }: { className?: string }) {
@@ -42,31 +50,51 @@ export function AppShell({ active, children }: { active?: NavKey; children: Reac
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
 
-      <nav
-        aria-label="Primary"
-        className="grid shrink-0 grid-cols-3 border-t bg-background-primary pb-[env(safe-area-inset-bottom)] md:hidden"
-      >
-        {navItems.map((item) => {
-          const isActive = item.key === active;
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "flex flex-col items-center gap-1 py-2 text-label-medium",
-                isActive ? "text-brand-primary" : "text-text-secondary",
-              )}
-            >
-              <span className={cn("flex h-8 w-14 items-center justify-center rounded-lg", isActive && "bg-primary-50")}>
-                <Icon name={item.icon} />
-              </span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <MobileTabBar active={active} />
     </div>
+  );
+}
+
+/**
+ * Figma "Mobile Tab Bar" (1952:18438): four tabs around a raised "Post a job" button.
+ * Full-height sheets hide it by setting `data-sheet="full"` on <body>.
+ */
+function MobileTabBar({ active }: { active?: NavKey }) {
+  const [left, right] = [tabs.slice(0, 2), tabs.slice(2)];
+  const renderTab = (tab: (typeof tabs)[number]) => {
+    const isActive = tab.key === active;
+    return (
+      <Link
+        key={tab.key}
+        href={tab.href}
+        aria-current={isActive ? "page" : undefined}
+        className={cn(
+          "flex w-18 flex-col items-center gap-1 pt-2 pb-1.5 outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/40 rounded-sm",
+          isActive ? "text-label-semibold text-brand-primary" : "text-label-regular text-text-tertiary",
+        )}
+      >
+        <TabIcon name={tab.icon} active={isActive} />
+        {tab.label}
+      </Link>
+    );
+  };
+
+  return (
+    <nav
+      aria-label="Primary"
+      data-mobile-tabbar
+      className="relative z-1100 flex h-17 shrink-0 items-start justify-between bg-surface-primary px-2 shadow-sm pb-[env(safe-area-inset-bottom)] box-content md:hidden"
+    >
+      <div className="flex gap-1">{left.map(renderTab)}</div>
+      <Link
+        href="/post-a-job"
+        aria-label="Post a job"
+        className="absolute -top-5 left-1/2 flex -translate-x-1/2 items-center justify-center rounded-2xl border-4 border-primary-100 bg-brand-primary p-4 text-text-on-brand outline-none transition-colors hover:bg-primary-600 focus-visible:ring-3 focus-visible:ring-brand-primary/40"
+      >
+        <Icon name="plus" className="size-8" />
+      </Link>
+      <div className="flex gap-1">{right.map(renderTab)}</div>
+    </nav>
   );
 }
 
