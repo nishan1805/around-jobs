@@ -8,7 +8,7 @@ import { LogoPlaceholder } from "@/components/jobs/job-card";
 import { Banner } from "@/components/ui/banner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogHeader, Field } from "@/components/ui/dialog";
-import { eventText, eventWhen, nextStep } from "@/lib/applications";
+import { eventText, eventWhen, isEnded, nextStep } from "@/lib/applications";
 import { isOpen, jobPath, locationLine, type Job } from "@/lib/jobs";
 import type { Application } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ export function ApplicationPreview({
   className?: string;
 }) {
   const [messageOpen, setMessageOpen] = useState(false);
-  const canMessage = application.stage !== "rejected" && isOpen(job);
+  const canMessage = !isEnded(application) && isOpen(job);
 
   return (
     <section aria-label={`${job.title} application`} className={cn("flex flex-col gap-5", className)}>
@@ -49,7 +49,7 @@ export function ApplicationPreview({
                 aria-hidden
                 className={cn(
                   "mt-1.5 size-2.5 shrink-0 rounded-full",
-                  event.stage === "applied" ? "bg-grey-300" : event.stage === "rejected" ? "bg-error-500" : "bg-brand-primary",
+                  event.stage === "applied" ? "bg-grey-300" : event.stage === "rejected" ? "bg-error-500" : event.stage === "withdrawn" ? "bg-grey-400" : "bg-brand-primary",
                 )}
               />
               <div className="flex flex-col gap-1">

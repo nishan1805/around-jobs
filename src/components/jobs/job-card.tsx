@@ -19,7 +19,7 @@ import {
 } from "@/lib/jobs";
 import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import { ApplyButton } from "@/components/jobs/apply-button";
-import { applicationFor, useSeeker } from "@/lib/seeker-store";
+import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 export function LogoPlaceholder({ className }: { className?: string }) {
@@ -59,7 +59,7 @@ export function JobCard({
   const seeker = useSeeker();
   const actions = useSeekerActions();
   const saved = seeker.savedJobs.includes(job.slug);
-  const applied = applicationFor(seeker, job.slug) !== null;
+  const applied = activeApplicationFor(seeker, job.slug) !== null;
   const isSavedTile = variant === "saved";
 
   const bookmark = (

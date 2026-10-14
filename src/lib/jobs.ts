@@ -555,6 +555,10 @@ export async function getJob(citySlug: string, jobSlug: string) {
   return jobs.find((job) => job.city.slug === citySlug && job.slug === jobSlug) ?? null;
 }
 
+export async function getJobBySlug(jobSlug: string) {
+  return jobs.find((job) => job.slug === jobSlug) ?? null;
+}
+
 export async function getAllJobs() {
   return jobs;
 }

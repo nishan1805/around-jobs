@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-import { stageLabels } from "@/lib/applications";
+import { isEnded, stageLabels } from "@/lib/applications";
 import { applicationStages, type Application } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ export function reachedStep(application: Application) {
  */
 export function ProgressStepper({ application, className }: { application: Application; className?: string }) {
   const reached = reachedStep(application);
-  const muted = application.stage === "rejected";
+  const muted = isEnded(application);
 
   return (
     <ol aria-label="Application progress" className={cn("flex items-center gap-2", className)}>

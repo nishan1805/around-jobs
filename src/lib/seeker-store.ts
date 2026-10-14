@@ -7,7 +7,23 @@ import { SAMPLE_TODAY } from "@/lib/jobs";
 
 /** Steps shown on the My applications progress stepper, in order. */
 export const applicationStages = ["applied", "viewed", "shortlisted", "interview"] as const;
-export type ApplicationStage = (typeof applicationStages)[number] | "rejected";
+export type ApplicationStage = (typeof applicationStages)[number] | "rejected" | "withdrawn";
+
+/** What the seeker sent with an application (Apply flow, M08–M12). */
+export type Submission = {
+  name: string;
+  phone: string;
+  email: string;
+  location: string;
+  latestTitle: string;
+  latestCompany: string;
+  experience: string;
+  education: string;
+  skills: string[];
+  resumeName: string | null;
+  resumeKb: number | null;
+  coverNote: string;
+};
 
 export type ApplicationEvent = { stage: ApplicationStage; on: string; time?: string };
 
@@ -18,6 +34,7 @@ export type Application = {
   /** Newest first. */
   history: ApplicationEvent[];
   interviewOn?: string;
+  submission?: Submission;
   /** Seeded demo data, labelled "(Sample)" in the UI. */
   sample?: boolean;
 };
@@ -31,6 +48,21 @@ export type SeekerState = {
 };
 
 const STORAGE_KEY = "around-jobs:seeker:v2";
+
+const sampleSubmission: Submission = {
+  name: "Sample · Aarti Sahu",
+  phone: "",
+  email: "aarti.sample@email.com",
+  location: "Pandri, Raipur",
+  latestTitle: "Sales Assistant",
+  latestCompany: "Sample · City Bazaar, Raipur",
+  experience: "2 years",
+  education: "Class 12",
+  skills: ["Billing", "Customer service"],
+  resumeName: "Aarti_Sahu_Resume.pdf",
+  resumeKb: 240,
+  coverNote: "",
+};
 
 /** Sample data matching the My applications and Saved screens in Figma. */
 const sampleState: SeekerState = {
@@ -61,6 +93,7 @@ const sampleState: SeekerState = {
         { stage: "viewed", on: "2026-10-13" },
         { stage: "applied", on: "2026-10-11" },
       ],
+      submission: sampleSubmission,
       sample: true,
     },
     {
@@ -71,6 +104,7 @@ const sampleState: SeekerState = {
         { stage: "viewed", on: "2026-10-12", time: "4:15 PM" },
         { stage: "applied", on: "2026-10-09" },
       ],
+      submission: sampleSubmission,
       sample: true,
     },
     {
@@ -84,6 +118,7 @@ const sampleState: SeekerState = {
         { stage: "viewed", on: "2026-10-08" },
         { stage: "applied", on: "2026-10-07" },
       ],
+      submission: sampleSubmission,
       sample: true,
     },
     {
@@ -91,6 +126,7 @@ const sampleState: SeekerState = {
       appliedOn: "2026-10-14",
       stage: "applied",
       history: [{ stage: "applied", on: "2026-10-14", time: "9:05 AM" }],
+      submission: sampleSubmission,
       sample: true,
     },
   ],
@@ -158,22 +194,39 @@ export const seekerActions = {
     const current = read();
     write({ ...current, savedEmployers: setIn(current.savedEmployers, slug, saved) });
   },
-  apply(jobSlug: string) {
+  /** Re-applying after a withdrawal replaces the old application. */
+  apply(jobSlug: string, submission?: Submission) {
     const current = read();
-    if (current.applications.some((item) => item.jobSlug === jobSlug)) return;
+    const existing = current.applications.find((item) => item.jobSlug === jobSlug);
+    if (existing && existing.stage !== "withdrawn") return;
     const application: Application = {
       jobSlug,
       appliedOn: SAMPLE_TODAY,
       stage: "applied",
       history: [{ stage: "applied", on: SAMPLE_TODAY }],
+      submission,
     };
-    write({ ...current, applications: [application, ...current.applications] });
+    const others = current.applications.filter((item) => item.jobSlug !== jobSlug);
+    write({ ...current, applications: [application, ...others] });
   },
   withdraw(jobSlug: string) {
     const current = read();
-    write({ ...current, applications: current.applications.filter((item) => item.jobSlug !== jobSlug) });
+    write({
+      ...current,
+      applications: current.applications.map((item) =>
+        item.jobSlug === jobSlug
+          ? { ...item, stage: "withdrawn", history: [{ stage: "withdrawn", on: SAMPLE_TODAY }, ...item.history] }
+          : item,
+      ),
+    });
   },
 };
 
 export const applicationFor = (seeker: SeekerState, jobSlug: string) =>
   seeker.applications.find((item) => item.jobSlug === jobSlug) ?? null;
+
+/** An application that still counts: withdrawn ones let the seeker apply again. */
+export const activeApplicationFor = (seeker: SeekerState, jobSlug: string) => {
+  const application = applicationFor(seeker, jobSlug);
+  return application && application.stage !== "withdrawn" ? application : null;
+};

@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { JobStatus } from "@/lib/jobs";
-import { applicationFor, useSeeker } from "@/lib/seeker-store";
+import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
-/** Apply / View application / closed states, shared by the job page and its mobile bar. */
+export const applyPath = (jobSlug: string) => `/apply/${jobSlug}`;
+export const applicationPath = (jobSlug: string) => `/applications/${jobSlug}`;
+
+/** Apply / View application / closed states, shared by the job page, map panel and saved cards. */
 export function ApplyButton({
   jobSlug,
   status,
@@ -21,8 +25,9 @@ export function ApplyButton({
   className?: string;
 }) {
   const seeker = useSeeker();
-  const actions = useSeekerActions();
-  const applied = applicationFor(seeker, jobSlug) !== null;
+  const router = useRouter();
+  const { requireAuth } = useAuth();
+  const applied = activeApplicationFor(seeker, jobSlug) !== null;
 
   if (status !== "open") {
     return (
@@ -33,13 +38,19 @@ export function ApplyButton({
   }
   if (applied) {
     return (
-      <Link href="/applications" className={cn(buttonVariants({ variant: "outline", shape: "rect" }), className)}>
+      <Link href={applicationPath(jobSlug)} className={cn(buttonVariants({ variant: "outline", shape: "rect" }), className)}>
         View application
       </Link>
     );
   }
   return (
-    <Button shape="rect" className={className} onClick={() => actions.apply(jobSlug)}>
+    <Button
+      shape="rect"
+      className={className}
+      onClick={() =>
+        requireAuth(() => router.push(applyPath(jobSlug)), "Log in with your mobile number to apply. It takes a minute.")
+      }
+    >
       {applyLabel}
     </Button>
   );

@@ -103,3 +103,31 @@ code does today so a designer can confirm or correct it.
   and into the disabled closed/expired button for jobs that stopped hiring.
 - **Logged out.** Both pages show a login prompt in the empty-state layout (not in
   Figma).
+
+## Mobile pass (M00–M20)
+
+- **Tab bar.** M00 shows four tabs around a raised "+" button. The "+" goes to Post a
+  job. Profile is a fifth destination that only exists on phones; on tablet and desktop
+  it lives in the account menu.
+- **Search.** The phone search bar sits on the map (M00), so the desktop top bar is
+  hidden below 768px. M00's "24 jobs near Pandri" uses the searched area instead
+  ("near Shankar Nagar"), matching the desktop location pill.
+- **Sheets.** Employer opens as a half sheet that drags up to full (M01). Job detail
+  and Filters open full height and cover the tab bar (M02, M04). The list sheet keeps
+  the tab bar (M03). Dragging the handle down closes a sheet.
+- **Tablet chips.** Next to an open panel there isn't room for the six category chips,
+  so they scroll sideways in one row from 768px up. On phones they wrap, as in M00.
+- **Login and Complete profile** are full-screen pages on phones (M05–M07) and stay as
+  centred popups from 768px up. Back on the OTP screen goes to "Change number".
+- **Apply flow.** M08–M14 become a real route (`/apply/[jobSlug]`) at every size: full
+  screen on phones, a 560px card beside the sidebar from 768px. The job pages, map
+  panel and Saved tiles all link to it. Figma doesn't show a desktop apply flow.
+- **Apply fields.** Phone is the login number and read-only. Email is optional (Figma
+  doesn't mark it). Total experience is free text so "Fresher" works. Highest
+  education is a native select. Skill chips come from the job's skills plus any added
+  with "+ Add".
+- **Apply review.** "Edit" jumps to that step, and its button reads "Save and review"
+  to return. Submitting fails with a banner when the browser is offline (mock error
+  state, not in Figma).
+- **Resume size.** A profile resume has no real file, so the review and resume card
+  show a sample 240 KB.

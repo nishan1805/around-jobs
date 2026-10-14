@@ -22,6 +22,9 @@ import {
 } from "@/lib/jobs";
 import { jobPostingJsonLd, serializeJsonLd } from "@/lib/structured-data";
 
+/** Every slug is prerendered, so the page blocks on its params instead of streaming a shell. */
+export const instant = false;
+
 export async function generateStaticParams() {
   const jobs = await getAllJobs();
   return jobs.map((job) => ({ city: job.city.slug, jobSlug: job.slug }));

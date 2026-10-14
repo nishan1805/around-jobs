@@ -9,7 +9,7 @@ import { LogoPlaceholder, VerifiedBadge } from "@/components/jobs/job-card";
 import { LocationMap } from "@/components/map";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { ApplyButton } from "@/components/jobs/apply-button";
 import { IconButton } from "@/components/ui/icon-button";
 import {
   employmentTypes,
@@ -22,7 +22,7 @@ import {
   type Job,
 } from "@/lib/jobs";
 import { useSeekerActions } from "@/components/auth/use-seeker-actions";
-import { applicationFor, useSeeker } from "@/lib/seeker-store";
+import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 import { BulletList, GalleryHeader, MapPanel, SectionHeader, shareLink } from "./panel-parts";
@@ -48,7 +48,7 @@ export function JobDetailPanel({
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
-  const application = applicationFor(seeker, job.slug);
+  const application = activeApplicationFor(seeker, job.slug);
   const saved = seeker.savedJobs.includes(job.slug);
   const [expanded, setExpanded] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -198,23 +198,7 @@ export function JobDetailPanel({
       </div>
 
       <div className="shrink-0 border-t bg-surface-default px-6 py-4">
-        {job.status === "expired" ? (
-          <Button shape="rect" disabled className="w-full bg-grey-100 text-text-disabled opacity-100">
-            Applications closed
-          </Button>
-        ) : job.status === "closed" ? (
-          <Button shape="rect" disabled className="w-full bg-grey-100 text-text-disabled opacity-100">
-            Position closed
-          </Button>
-        ) : application ? (
-          <Link href="/applications" className={cn(buttonVariants({ variant: "outline", shape: "rect" }), "w-full")}>
-            View application
-          </Link>
-        ) : (
-          <Button shape="rect" className="w-full" onClick={() => actions.apply(job.slug)}>
-            Apply now
-          </Button>
-        )}
+        <ApplyButton jobSlug={job.slug} status={job.status} className="w-full" />
       </div>
     </MapPanel>
   );

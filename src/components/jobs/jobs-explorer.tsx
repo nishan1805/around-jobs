@@ -19,6 +19,7 @@ import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
 import { activeFilters, defaultFilters, matchesFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
 import { categories, distanceKm, isOpen, type City, type Company, type Job } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
+import { useCoverTabBar } from "@/hooks/use-cover-tab-bar";
 
 type Panel =
   | { kind: "none" }
@@ -138,13 +139,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const panelOpen = panel.kind !== "none";
   const coversTabBar = panel.kind === "job" || panel.kind === "filters";
 
-  useEffect(() => {
-    if (!coversTabBar) return;
-    document.body.dataset.sheet = "full";
-    return () => {
-      delete document.body.dataset.sheet;
-    };
-  }, [coversTabBar]);
+  useCoverTabBar(coversTabBar);
   const insetLeft = isTablet && panelOpen ? panelInset[panelWidth] : 0;
 
   const openJob = (job: Job) => open({ kind: "job", slug: job.slug, back: panel });

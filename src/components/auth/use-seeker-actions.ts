@@ -12,7 +12,5 @@ export function useSeekerActions() {
       requireAuth(() => seekerActions.setSavedJob(slug, saved), "Log in to save jobs and find them later."),
     setSavedEmployer: (slug: string, saved: boolean) =>
       requireAuth(() => seekerActions.setSavedEmployer(slug, saved), "Log in to save employers and hear about new jobs."),
-    apply: (slug: string) =>
-      requireAuth(() => seekerActions.apply(slug), "Log in with your mobile number to apply. It takes a minute."),
   };
 }

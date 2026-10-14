@@ -11,9 +11,11 @@ export const applicationGroups: { key: ApplicationGroup; label: string }[] = [
   { key: "closed", label: "Closed" },
 ];
 
-/** Rejected applications and jobs that stopped hiring are "Closed". */
+export const isEnded = (application: Application) => application.stage === "rejected" || application.stage === "withdrawn";
+
+/** Rejected and withdrawn applications, and jobs that stopped hiring, are "Closed". */
 export const groupOf = (application: Application, job: Job): ApplicationGroup =>
-  application.stage === "rejected" || !isOpen(job) ? "closed" : application.stage;
+  application.stage === "rejected" || application.stage === "withdrawn" || !isOpen(job) ? "closed" : application.stage;
 
 export const stageLabels: Record<ApplicationStage, string> = {
   applied: "Applied",
@@ -21,10 +23,11 @@ export const stageLabels: Record<ApplicationStage, string> = {
   shortlisted: "Shortlisted",
   interview: "Interview",
   rejected: "Not selected",
+  withdrawn: "Withdrawn",
 };
 
 export function statusLabel(application: Application, job: Job) {
-  if (application.stage === "rejected") return stageLabels.rejected;
+  if (isEnded(application)) return stageLabels[application.stage];
   if (!isOpen(job)) return "Closed";
   if (application.stage === "interview" && application.interviewOn)
     return `Interview on ${formatDayMonth(application.interviewOn)}`;
@@ -37,6 +40,7 @@ const eventCopy: Record<ApplicationStage, string> = {
   shortlisted: "You were shortlisted",
   interview: "Interview scheduled",
   rejected: "The employer chose other candidates",
+  withdrawn: "You withdrew this application",
 };
 
 export function eventText(event: ApplicationEvent, application: Application) {
@@ -59,6 +63,8 @@ export function appliedWhen(application: Application) {
 }
 
 export function nextStep(application: Application, job: Job) {
+  if (application.stage === "withdrawn")
+    return isOpen(job) ? "You can apply again while the job is open." : "The employer has stopped taking applications for this job.";
   if (application.stage === "rejected")
     return "This one didn't work out. New jobs near you are added every day, so keep applying.";
   if (!isOpen(job)) return "The employer has stopped taking applications for this job.";

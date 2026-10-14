@@ -1,9 +1,9 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 
-import { Icon } from "@/components/icon";
 import { Chip } from "@/components/jobs/chip";
+import { ResumeDropzone } from "@/components/resume-upload";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogHeader, DialogNav, Field, TextInput } from "@/components/ui/dialog";
 import { authActions, type User } from "@/lib/auth-store";
@@ -11,8 +11,6 @@ import { toggleValue } from "@/lib/job-filters";
 import { employmentTypes, type EmploymentType } from "@/lib/jobs";
 
 const preferredOptions: EmploymentType[] = ["FULL_TIME", "PART_TIME", "INTERN"];
-const MAX_RESUME_BYTES = 5 * 1024 * 1024;
-const RESUME_TYPES = ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 /** Figma "Around / Jobs / Complete Profile Popup" (1953:19248). */
 export function ProfileDialog({
@@ -29,8 +27,6 @@ export function ProfileDialog({
   const [types, setTypes] = useState<EmploymentType[]>(user?.preferredTypes.length ? user.preferredTypes : ["FULL_TIME"]);
   const [resumeName, setResumeName] = useState<string | null>(user?.resumeName ?? null);
   const [nameError, setNameError] = useState<string | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const groupId = useId();
 
   const skip = () => {
@@ -95,36 +91,7 @@ export function ProfileDialog({
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-label-medium text-text-secondary">Resume (Optional)</span>
-          <div className="flex flex-col items-center gap-2 rounded-md border border-dashed bg-background-secondary p-6 text-center">
-            <span className="flex rounded-full bg-primary-50 p-3 text-brand-primary">
-              <Icon name="upload" className="size-5" />
-            </span>
-            <p className="text-body-semibold text-text-primary">{resumeName ?? "Upload your resume"}</p>
-            <p className="text-label-medium text-text-tertiary" aria-live="polite">
-              {fileError ?? (resumeName ? "Stays on this device in the Sample app" : "PDF or DOC, up to 5 MB")}
-            </p>
-            <input
-              ref={fileRef}
-              type="file"
-              accept={RESUME_TYPES}
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                if (file.size > MAX_RESUME_BYTES) {
-                  setFileError("That file is over 5 MB. Choose a smaller one.");
-                  return;
-                }
-                setFileError(null);
-                setResumeName(file.name);
-              }}
-            />
-            <Button type="button" variant="outline" shape="rect" onClick={() => fileRef.current?.click()}>
-              {resumeName ? "Replace file" : "Choose file"}
-            </Button>
-          </div>
+          <ResumeDropzone fileName={resumeName} onPick={(file) => setResumeName(file.name)} />
         </div>
         <div className="flex items-center gap-4">
           <button type="button" onClick={skip} className="text-body-sm-semibold text-brand-primary hover:underline">
