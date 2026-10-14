@@ -21,7 +21,8 @@ import {
   workModes,
   type Job,
 } from "@/lib/jobs";
-import { applicationFor, seekerActions, useSeeker } from "@/lib/seeker-store";
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { applicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 import { BulletList, GalleryHeader, MapPanel, SectionHeader, shareLink } from "./panel-parts";
@@ -46,6 +47,7 @@ export function JobDetailPanel({
   backLabel: string;
 }) {
   const seeker = useSeeker();
+  const actions = useSeekerActions();
   const application = applicationFor(seeker, job.slug);
   const saved = seeker.savedJobs.includes(job.slug);
   const [expanded, setExpanded] = useState(false);
@@ -84,7 +86,7 @@ export function JobDetailPanel({
                 icon={saved ? "bookmarkFilled" : "bookmark"}
                 label={saved ? "Remove job from saved" : "Save job"}
                 aria-pressed={saved}
-                onClick={() => seekerActions.toggleSavedJob(job.slug)}
+                onClick={() => actions.setSavedJob(job.slug, !saved)}
                 className={cn(saved && "text-brand-primary")}
               />
               <IconButton
@@ -209,7 +211,7 @@ export function JobDetailPanel({
             View application
           </Link>
         ) : (
-          <Button shape="rect" className="w-full" onClick={() => seekerActions.apply(job.slug)}>
+          <Button shape="rect" className="w-full" onClick={() => actions.apply(job.slug)}>
             Apply now
           </Button>
         )}

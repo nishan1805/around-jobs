@@ -31,6 +31,8 @@ export const icons = {
   plus: "/icons/plus.svg",
   search: "/icons/search.svg",
   share: "/icons/share.svg",
+  spinner: "/icons/spinner.svg",
+  upload: "/icons/upload.svg",
 } as const;
 
 export type IconName = keyof typeof icons;

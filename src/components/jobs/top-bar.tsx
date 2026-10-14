@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { Wordmark } from "@/components/app-shell";
+import { AccountButton } from "@/components/auth/account-button";
 import { Icon } from "@/components/icon";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
 
@@ -60,12 +61,7 @@ export function TopBar({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icons/notifications.svg" alt="" className="size-10" />
         </button>
-        <span
-          aria-label="Signed in as N"
-          className="flex size-10 items-center justify-center rounded-full bg-grey-200 text-body-sm-semibold text-text-primary"
-        >
-          N
-        </span>
+        <AccountButton />
       </div>
     </header>
   );

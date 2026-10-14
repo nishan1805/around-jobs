@@ -15,7 +15,8 @@ import {
   timeAgo,
   type Job,
 } from "@/lib/jobs";
-import { applicationFor, seekerActions, useSeeker } from "@/lib/seeker-store";
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { applicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 export function LogoPlaceholder({ className }: { className?: string }) {
@@ -50,6 +51,7 @@ export function JobCard({
   className?: string;
 }) {
   const seeker = useSeeker();
+  const actions = useSeekerActions();
   const saved = seeker.savedJobs.includes(job.slug);
   const applied = applicationFor(seeker, job.slug) !== null;
 
@@ -99,7 +101,7 @@ export function JobCard({
         icon={saved ? "bookmarkFilled" : "bookmark"}
         label={saved ? `Remove ${job.title} from saved` : `Save ${job.title}`}
         aria-pressed={saved}
-        onClick={() => seekerActions.toggleSavedJob(job.slug)}
+        onClick={() => actions.setSavedJob(job.slug, !saved)}
         className={cn("relative z-1 -m-0.5", saved && "text-brand-primary")}
       />
     </article>

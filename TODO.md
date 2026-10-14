@@ -52,3 +52,22 @@ code does today so a designer can confirm or correct it.
 - **Loading / error states** have no trigger in a static prototype. They can be
   previewed with `/?view=list&state=loading` and `/?view=list&state=error`, and loading
   shows while a search is being applied.
+
+## Login and Complete Profile
+
+- **Auth is mocked.** Phone + OTP happens in the browser (`src/lib/auth-store.ts`); the
+  Sample OTP is `123456` and is shown under the OTP boxes. Three wrong attempts lock
+  the code until "Resend OTP".
+- **Logged-out avatar.** Figma only shows the "N" avatar. Logged out, the top bar shows
+  a "Log in" button in that slot; logged in, the avatar shows the user's initial and
+  opens a small account menu (not in Figma).
+- **What needs login.** Apply, save job and save employer open the Login popup with a
+  reason line, then finish the action after login. Saved items and applications are
+  per user, so logged out the app shows none.
+- **When Complete Profile shows.** Right after the first login if there is no name yet.
+  "Skip for now" (or closing) doesn't ask again; it can be reopened from the account
+  menu.
+- **Resume upload.** Only the file name is kept (on the device). There's no upload
+  endpoint yet.
+- **"Verify" button.** It stays disabled until all six digits are entered; Figma shows
+  it enabled with three digits.

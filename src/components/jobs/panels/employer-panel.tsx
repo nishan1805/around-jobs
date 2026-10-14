@@ -9,7 +9,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { IconButton } from "@/components/ui/icon-button";
 import type { Company, Job } from "@/lib/jobs";
-import { seekerActions, useSeeker } from "@/lib/seeker-store";
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 import { GalleryHeader, MapPanel, SectionHeader, shareLink } from "./panel-parts";
@@ -36,7 +37,8 @@ export function EmployerPanel({
   const seeker = useSeeker();
   const saved = seeker.savedEmployers.includes(company.slug);
   const [notice, setNotice] = useState<string | null>(null);
-  const toggleSave = () => seekerActions.toggleSavedEmployer(company.slug);
+  const actions = useSeekerActions();
+  const toggleSave = () => actions.setSavedEmployer(company.slug, !saved);
   const saveLabel = saved ? "Saved" : "Save";
 
   return (

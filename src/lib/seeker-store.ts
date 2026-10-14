@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
+import { useUser } from "@/lib/auth-store";
 import { SAMPLE_TODAY } from "@/lib/jobs";
 
 export const applicationStages = ["applied", "viewed", "shortlisted", "interview", "hired"] as const;
@@ -68,21 +69,24 @@ function subscribe(listener: () => void) {
   };
 }
 
+/** Saved items and applications belong to the logged-in (mock) user; logged out there are none. */
 export function useSeeker() {
-  return useSyncExternalStore(subscribe, read, () => emptyState);
+  const user = useUser();
+  const seeker = useSyncExternalStore(subscribe, read, () => emptyState);
+  return user ? seeker : emptyState;
 }
 
-const toggleIn = (list: string[], value: string) =>
-  list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
+const setIn = (list: string[], value: string, present: boolean) =>
+  present ? (list.includes(value) ? list : [...list, value]) : list.filter((item) => item !== value);
 
 export const seekerActions = {
-  toggleSavedJob(slug: string) {
+  setSavedJob(slug: string, saved: boolean) {
     const current = read();
-    write({ ...current, savedJobs: toggleIn(current.savedJobs, slug) });
+    write({ ...current, savedJobs: setIn(current.savedJobs, slug, saved) });
   },
-  toggleSavedEmployer(slug: string) {
+  setSavedEmployer(slug: string, saved: boolean) {
     const current = read();
-    write({ ...current, savedEmployers: toggleIn(current.savedEmployers, slug) });
+    write({ ...current, savedEmployers: setIn(current.savedEmployers, slug, saved) });
   },
   apply(jobSlug: string) {
     const current = read();
