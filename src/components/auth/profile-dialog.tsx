@@ -5,7 +5,7 @@ import { useId, useRef, useState } from "react";
 import { Icon } from "@/components/icon";
 import { Chip } from "@/components/jobs/chip";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogHeader, Field, TextInput } from "@/components/ui/dialog";
+import { Dialog, DialogHeader, DialogNav, Field, TextInput } from "@/components/ui/dialog";
 import { authActions, type User } from "@/lib/auth-store";
 import { toggleValue } from "@/lib/job-filters";
 import { employmentTypes, type EmploymentType } from "@/lib/jobs";
@@ -48,7 +48,8 @@ export function ProfileDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && skip()}>
+    <Dialog screen open={open} onOpenChange={(next) => !next && skip()}>
+      <DialogNav onBack={skip} onClose={skip} />
       <form
         className="flex flex-col gap-5"
         onSubmit={(event) => {

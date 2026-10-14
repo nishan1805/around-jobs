@@ -83,7 +83,7 @@ function MobileTabBar({ active }: { active?: NavKey }) {
     <nav
       aria-label="Primary"
       data-mobile-tabbar
-      className="relative z-1100 flex h-17 shrink-0 items-start justify-between bg-surface-primary px-2 shadow-sm pb-[env(safe-area-inset-bottom)] box-content md:hidden"
+      className="relative z-10 flex h-17 shrink-0 items-start justify-between bg-surface-primary px-2 shadow-sm pb-[env(safe-area-inset-bottom)] box-content md:hidden"
     >
       <div className="flex gap-1">{left.map(renderTab)}</div>
       <Link

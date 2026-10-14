@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } 
 
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogHeader, Field } from "@/components/ui/dialog";
+import { Dialog, DialogHeader, DialogNav, Field } from "@/components/ui/dialog";
 import {
   authActions,
   isValidIndianMobile,
@@ -186,7 +186,16 @@ export function LoginDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
+    <Dialog screen open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
+      <DialogNav
+        onClose={close}
+        backLabel={step === "otp" ? "Change number" : "Back"}
+        onBack={() => {
+          if (step === "phone" || busy) return close();
+          setStep("phone");
+          setOtpError(null);
+        }}
+      />
       {step === "phone" ? (
         <form
           className="flex flex-col gap-5"

@@ -9,17 +9,19 @@ import { cn } from "@/lib/utils";
 /**
  * Popup used for Login and Complete Profile: a centred 400px card on tablet and
  * desktop (Figma "Desktop" variants), a bottom sheet with 20px padding on phones
- * ("Mobile" variants).
+ * ("Mobile" variants). `screen` makes it a full-height page on phones (M05–M07).
  */
 export function Dialog({
   open,
   onOpenChange,
   children,
+  screen = false,
   className,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
+  screen?: boolean;
   className?: string;
 }) {
   return (
@@ -29,6 +31,8 @@ export function Dialog({
         <DialogPrimitive.Popup
           className={cn(
             "fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col gap-5 overflow-y-auto rounded-t-xl bg-surface-default px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-text-primary shadow-xl outline-none transition duration-200 data-ending-style:translate-y-10 data-ending-style:opacity-0 data-starting-style:translate-y-10 data-starting-style:opacity-0",
+            screen &&
+              "max-md:top-0 max-md:max-h-none max-md:gap-8 max-md:rounded-none max-md:pt-[max(0.75rem,env(safe-area-inset-top))] max-md:shadow-none",
             "md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:w-100 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-md md:p-6 md:shadow-lg md:data-ending-style:-translate-y-1/2 md:data-ending-style:scale-95 md:data-starting-style:-translate-y-1/2 md:data-starting-style:scale-95",
             className,
           )}
@@ -37,6 +41,16 @@ export function Dialog({
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
+  );
+}
+
+/** Back and close row at the top of a full-screen mobile dialog (M05–M07). */
+export function DialogNav({ onBack, onClose, backLabel = "Back" }: { onBack: () => void; onClose: () => void; backLabel?: string }) {
+  return (
+    <div className="-mx-2 flex items-center justify-between md:hidden">
+      <IconButton variant="plain" icon="chevronLeft" label={backLabel} onClick={onBack} className="size-12" iconClassName="size-5" />
+      <IconButton variant="plain" icon="close" label="Close" onClick={onClose} className="size-12" iconClassName="size-5" />
+    </div>
   );
 }
 
