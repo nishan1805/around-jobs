@@ -10,12 +10,15 @@ import {
   employmentTypes,
   experienceLabel,
   formatSalaryShort,
+  isExpiringSoon,
+  isOpen,
   jobPath,
   locationLine,
   timeAgo,
   type Job,
 } from "@/lib/jobs";
 import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { ApplyButton } from "@/components/jobs/apply-button";
 import { applicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
@@ -43,23 +46,43 @@ export function JobCard({
   job,
   from,
   onSelect,
+  variant = "default",
   className,
 }: {
   job: Job;
   from: [number, number];
   onSelect?: (job: Job) => void;
+  /** "saved": Saved jobs tile (1988:24572) with unsave + Apply actions under the details. */
+  variant?: "default" | "saved";
   className?: string;
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
   const saved = seeker.savedJobs.includes(job.slug);
   const applied = applicationFor(seeker, job.slug) !== null;
+  const isSavedTile = variant === "saved";
+
+  const bookmark = (
+    <IconButton
+      variant="plain"
+      icon={saved ? "bookmarkFilled" : "bookmark"}
+      label={saved ? `Remove ${job.title} from saved` : `Save ${job.title}`}
+      aria-pressed={saved}
+      onClick={() => actions.setSavedJob(job.slug, !saved)}
+      className={cn(
+        "relative z-1",
+        isSavedTile ? "size-9 rounded-lg bg-primary-50 hover:bg-primary-100" : "-m-0.5",
+        saved && "text-brand-primary",
+      )}
+    />
+  );
 
   return (
     <article
       className={cn(
         "relative flex w-full items-start gap-3 rounded-md border bg-surface-default p-4 transition-colors hover:border-border-strong",
-        applied && "border-brand-primary hover:border-brand-primary",
+        applied && !isSavedTile && "border-brand-primary hover:border-brand-primary",
+        isSavedTile && "rounded-xl shadow-sm",
         className,
       )}
     >
@@ -91,19 +114,20 @@ export function JobCard({
           <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
           <Badge type="experience">{experienceLabel(job.experience)}</Badge>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-label-medium text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
           {applied && <Badge type="applied">Applied</Badge>}
+          {isSavedTile && isExpiringSoon(job) && <Badge type="expiring">Expiring soon</Badge>}
+          {isSavedTile && !isOpen(job) && <Badge type={job.status === "expired" ? "expired" : "closed"}>{job.status === "expired" ? "Expired" : "Closed"}</Badge>}
         </div>
+        {isSavedTile && (
+          <div className="flex items-center gap-2 pt-1.5">
+            {bookmark}
+            <ApplyButton jobSlug={job.slug} status={job.status} applyLabel="Apply" className="relative z-1 h-11 min-w-0 flex-1" />
+          </div>
+        )}
       </div>
-      <IconButton
-        variant="plain"
-        icon={saved ? "bookmarkFilled" : "bookmark"}
-        label={saved ? `Remove ${job.title} from saved` : `Save ${job.title}`}
-        aria-pressed={saved}
-        onClick={() => actions.setSavedJob(job.slug, !saved)}
-        className={cn("relative z-1 -m-0.5", saved && "text-brand-primary")}
-      />
+      {!isSavedTile && bookmark}
     </article>
   );
 }

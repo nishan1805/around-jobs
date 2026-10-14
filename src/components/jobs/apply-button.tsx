@@ -9,7 +9,17 @@ import { applicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 /** Apply / View application / closed states, shared by the job page and its mobile bar. */
-export function ApplyButton({ jobSlug, status, className }: { jobSlug: string; status: JobStatus; className?: string }) {
+export function ApplyButton({
+  jobSlug,
+  status,
+  applyLabel = "Apply now",
+  className,
+}: {
+  jobSlug: string;
+  status: JobStatus;
+  applyLabel?: string;
+  className?: string;
+}) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
   const applied = applicationFor(seeker, jobSlug) !== null;
@@ -30,7 +40,7 @@ export function ApplyButton({ jobSlug, status, className }: { jobSlug: string; s
   }
   return (
     <Button shape="rect" className={className} onClick={() => actions.apply(jobSlug)}>
-      Apply now
+      {applyLabel}
     </Button>
   );
 }

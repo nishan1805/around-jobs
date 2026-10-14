@@ -71,3 +71,35 @@ code does today so a designer can confirm or correct it.
   endpoint yet.
 - **"Verify" button.** It stays disabled until all six digits are entered; Figma shows
   it enabled with three digits.
+
+## My applications and Saved
+
+- **Desktop frames are 1440 wide.** The list + 400px preview layout (and the 3-column
+  Saved grid) start at 1280px (`min-[80rem]:`, `breakpoints.split`). Between 768 and
+  1280 the list is a single column and tapping a card opens the preview as a popup,
+  because a 400px preview next to the list doesn't fit beside the sidebar at tablet
+  width. Phones get the same popup as a bottom sheet.
+- **Status groups.** Chips are All, Applied, Viewed, Shortlisted, Interview and Closed.
+  "Closed" collects applications the employer turned down ("Not selected", red pill)
+  and applications whose job closed or expired (grey "Closed" pill). Figma doesn't
+  show either pill.
+- **Selected card border.** Figma uses a 2px brand border; the code draws a 1px
+  border plus a 1px ring so the card doesn't shift when it's selected.
+- **Stepper on phones.** The four labels don't fit a 412px card, so below a 320px card
+  width only the current step keeps its visible label (the rest stay for screen
+  readers).
+- **Update dots.** Figma shows brand dots for employer updates and a grey dot for
+  "Application sent"; the code follows that and uses a red dot for "Not selected".
+- **Preview description.** Figma shows a one-line role summary; the code shows the job
+  summary clamped to three lines.
+- **Message employer** opens a mock message popup ("Sample chat"); nothing is sent.
+  It's hidden when the application or the job is closed.
+- **Map thumbnail.** A grey 120px placeholder as in Figma; it links to the employer
+  on the map.
+- **Saved filters.** "Nearby" = within 4 km of the searched location (Shankar Nagar).
+  "Recently added" = saved in the last 3 days, so the store now keeps a saved date.
+  "Expiring soon" = applications close within 7 days.
+- **Saved tile actions.** "Apply" turns into "View application" when already applied,
+  and into the disabled closed/expired button for jobs that stopped hiring.
+- **Logged out.** Both pages show a login prompt in the empty-state layout (not in
+  Figma).

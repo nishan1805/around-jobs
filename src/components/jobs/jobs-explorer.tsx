@@ -59,6 +59,12 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const viewParam = useSearchParam("view");
   const filtersParam = useSearchParam("filters");
   const stateParam = useSearchParam("state");
+  const queryParam = useSearchParam("q");
+  const [seenQueryParam, setSeenQueryParam] = useState<string | null>(null);
+  if (queryParam !== seenQueryParam) {
+    setSeenQueryParam(queryParam);
+    if (queryParam) setFilters((current) => ({ ...current, query: queryParam }));
+  }
   const linkedPanel = (): Panel => {
     const list: Panel = viewParam === "list" ? { kind: "list" } : none;
     if (jobParam && jobs.some((item) => item.slug === jobParam)) return { kind: "job", slug: jobParam, back: list };

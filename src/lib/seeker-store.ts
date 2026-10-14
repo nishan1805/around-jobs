@@ -5,31 +5,98 @@ import { useSyncExternalStore } from "react";
 import { useUser } from "@/lib/auth-store";
 import { SAMPLE_TODAY } from "@/lib/jobs";
 
-export const applicationStages = ["applied", "viewed", "shortlisted", "interview", "hired"] as const;
+/** Steps shown on the My applications progress stepper, in order. */
+export const applicationStages = ["applied", "viewed", "shortlisted", "interview"] as const;
 export type ApplicationStage = (typeof applicationStages)[number] | "rejected";
 
-export type Application = { jobSlug: string; appliedOn: string; stage: ApplicationStage };
+export type ApplicationEvent = { stage: ApplicationStage; on: string; time?: string };
+
+export type Application = {
+  jobSlug: string;
+  appliedOn: string;
+  stage: ApplicationStage;
+  /** Newest first. */
+  history: ApplicationEvent[];
+  interviewOn?: string;
+  /** Seeded demo data, labelled "(Sample)" in the UI. */
+  sample?: boolean;
+};
 
 export type SeekerState = {
+  /** Newest first. */
   savedJobs: string[];
+  savedOn: Record<string, string>;
   savedEmployers: string[];
   applications: Application[];
 };
 
-const STORAGE_KEY = "around-jobs:seeker:v1";
+const STORAGE_KEY = "around-jobs:seeker:v2";
 
-/** Sample applications so the Applied badges and My applications page have something to show. */
+/** Sample data matching the My applications and Saved screens in Figma. */
 const sampleState: SeekerState = {
-  savedJobs: ["barista-urban-bites-cafe", "junior-frontend-developer-raipur-tech-hub"],
+  savedJobs: [
+    "barista-urban-bites-cafe",
+    "retail-sales-associate-magneto-retail",
+    "wellness-centre-receptionist-patanjali-wellness",
+    "stock-associate-shree-shyam-mart",
+    "waiter-waitress-nds-cafe",
+    "billing-executive-shree-shyam-mart",
+  ],
+  savedOn: {
+    "barista-urban-bites-cafe": "2026-10-06",
+    "retail-sales-associate-magneto-retail": "2026-10-05",
+    "wellness-centre-receptionist-patanjali-wellness": "2026-10-13",
+    "stock-associate-shree-shyam-mart": "2026-10-02",
+    "waiter-waitress-nds-cafe": "2026-10-12",
+    "billing-executive-shree-shyam-mart": "2026-10-04",
+  },
   savedEmployers: [],
   applications: [
-    { jobSlug: "retail-sales-associate-magneto-retail", appliedOn: "2026-10-12", stage: "viewed" },
-    { jobSlug: "qa-tester-raipur-tech-hub", appliedOn: "2026-10-08", stage: "applied" },
-    { jobSlug: "night-shift-pharmacist-lakeside-pharmacy", appliedOn: "2026-10-03", stage: "rejected" },
+    {
+      jobSlug: "barista-urban-bites-cafe",
+      appliedOn: "2026-10-11",
+      stage: "shortlisted",
+      history: [
+        { stage: "shortlisted", on: "2026-10-14", time: "10:30 AM" },
+        { stage: "viewed", on: "2026-10-13" },
+        { stage: "applied", on: "2026-10-11" },
+      ],
+      sample: true,
+    },
+    {
+      jobSlug: "customer-service-associate-shree-shyam-mart",
+      appliedOn: "2026-10-09",
+      stage: "viewed",
+      history: [
+        { stage: "viewed", on: "2026-10-12", time: "4:15 PM" },
+        { stage: "applied", on: "2026-10-09" },
+      ],
+      sample: true,
+    },
+    {
+      jobSlug: "front-office-executive-ghatarani-resort",
+      appliedOn: "2026-10-07",
+      stage: "interview",
+      interviewOn: "2026-10-17",
+      history: [
+        { stage: "interview", on: "2026-10-13", time: "11:00 AM" },
+        { stage: "shortlisted", on: "2026-10-10" },
+        { stage: "viewed", on: "2026-10-08" },
+        { stage: "applied", on: "2026-10-07" },
+      ],
+      sample: true,
+    },
+    {
+      jobSlug: "cashier-magneto-retail",
+      appliedOn: "2026-10-14",
+      stage: "applied",
+      history: [{ stage: "applied", on: "2026-10-14", time: "9:05 AM" }],
+      sample: true,
+    },
   ],
 };
 
-const emptyState: SeekerState = { savedJobs: [], savedEmployers: [], applications: [] };
+const emptyState: SeekerState = { savedJobs: [], savedOn: {}, savedEmployers: [], applications: [] };
 
 let state: SeekerState | null = null;
 const listeners = new Set<() => void>();
@@ -77,12 +144,15 @@ export function useSeeker() {
 }
 
 const setIn = (list: string[], value: string, present: boolean) =>
-  present ? (list.includes(value) ? list : [...list, value]) : list.filter((item) => item !== value);
+  present ? (list.includes(value) ? list : [value, ...list]) : list.filter((item) => item !== value);
 
 export const seekerActions = {
   setSavedJob(slug: string, saved: boolean) {
     const current = read();
-    write({ ...current, savedJobs: setIn(current.savedJobs, slug, saved) });
+    const savedOn = { ...current.savedOn };
+    if (saved) savedOn[slug] ??= SAMPLE_TODAY;
+    else delete savedOn[slug];
+    write({ ...current, savedJobs: setIn(current.savedJobs, slug, saved), savedOn });
   },
   setSavedEmployer(slug: string, saved: boolean) {
     const current = read();
@@ -91,10 +161,13 @@ export const seekerActions = {
   apply(jobSlug: string) {
     const current = read();
     if (current.applications.some((item) => item.jobSlug === jobSlug)) return;
-    write({
-      ...current,
-      applications: [{ jobSlug, appliedOn: SAMPLE_TODAY, stage: "applied" }, ...current.applications],
-    });
+    const application: Application = {
+      jobSlug,
+      appliedOn: SAMPLE_TODAY,
+      stage: "applied",
+      history: [{ stage: "applied", on: SAMPLE_TODAY }],
+    };
+    write({ ...current, applications: [application, ...current.applications] });
   },
   withdraw(jobSlug: string) {
     const current = read();

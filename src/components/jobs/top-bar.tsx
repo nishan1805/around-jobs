@@ -1,23 +1,34 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { Wordmark } from "@/components/app-shell";
 import { AccountButton } from "@/components/auth/account-button";
 import { Icon } from "@/components/icon";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
 
+export const DEFAULT_LOCATION_LABEL = "Shankar Nagar, Raipur";
+
+/**
+ * Figma "Around / Top Bar". On the map the query filters jobs live; on other pages
+ * (no `onQueryChange`) pressing Enter opens the map with `?q=`.
+ */
 export function TopBar({
-  query,
+  query: controlledQuery,
   onQueryChange,
-  locationLabel,
+  locationLabel = DEFAULT_LOCATION_LABEL,
 }: {
-  query: string;
-  onQueryChange: (value: string) => void;
-  locationLabel: string;
+  query?: string;
+  onQueryChange?: (value: string) => void;
+  locationLabel?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const isTablet = useMediaQuery(breakpoints.md);
+  const router = useRouter();
+  const [localQuery, setLocalQuery] = useState("");
+  const query = controlledQuery ?? localQuery;
+  const setQuery = onQueryChange ?? setLocalQuery;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -40,7 +51,13 @@ export function TopBar({
           ref={inputRef}
           type="search"
           value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (onQueryChange || event.key !== "Enter") return;
+            const value = query.trim();
+            router.push(value ? `/?q=${encodeURIComponent(value)}` : "/");
+          }}
+          enterKeyHint="search"
           placeholder={isTablet ? "Search places, restaurants, events, offers..." : "Search jobs nearby"}
           className="min-w-0 flex-1 bg-transparent text-body-regular text-text-primary outline-none placeholder:text-text-tertiary [&::-webkit-search-cancel-button]:hidden"
         />

@@ -103,6 +103,8 @@ type JobOptions = {
   mode?: WorkMode;
   salaryHidden?: boolean;
   status?: Exclude<JobStatus, "open">;
+  /** Days from SAMPLE_TODAY until applications close, for "Expiring soon" samples. */
+  expiresIn?: number;
 };
 
 type JobSeed = [title: string, type: EmploymentType, min: number, max: number, options?: JobOptions];
@@ -137,7 +139,7 @@ const companySeeds: CompanySeed[] = [
     postalCode: "492004",
     position: [21.2632, 81.6211],
     jobs: [
-      ["Barista", "FULL_TIME", 12000, 16000],
+      ["Barista", "FULL_TIME", 12000, 16000, { expiresIn: 5 }],
       ["Kitchen Helper", "PART_TIME", 9000, 12000, { experience: [0, 0] }],
     ],
   },
@@ -206,7 +208,7 @@ const companySeeds: CompanySeed[] = [
     jobs: [
       ["Store Manager", "FULL_TIME", 28000, 35000, { experience: [5, 8] }],
       ["Billing Executive", "FULL_TIME", 13000, 16000],
-      ["Stock Associate", "FULL_TIME", 12000, 15000],
+      ["Stock Associate", "FULL_TIME", 12000, 15000, { expiresIn: 4 }],
       ["Delivery Partner", "CONTRACTOR", 10000, 15000, { experience: [0, 0] }],
       ["Customer Service Associate", "FULL_TIME", 13000, 17000],
     ],
@@ -475,7 +477,12 @@ export const jobs: Job[] = companySeeds.flatMap((seed, companyIndex) => {
       salary: { min, max, currency: "INR" as const, unit: "MONTH" as const },
       salaryDisclosed: !options.salaryHidden,
       datePosted,
-      validThrough: status === "expired" ? addDays(SAMPLE_TODAY, -2) : addDays(datePosted, 31),
+      validThrough:
+        status === "expired"
+          ? addDays(SAMPLE_TODAY, -2)
+          : options.expiresIn !== undefined
+            ? addDays(SAMPLE_TODAY, options.expiresIn)
+            : addDays(datePosted, 31),
       status,
       applicants: ((companyIndex * 7 + jobIndex * 5) % 28) + 3,
       summary: `${company.name} is hiring a ${title} at its ${company.area} location in ${raipur.name}. ${copy.pitch}`,
@@ -529,6 +536,21 @@ export function timeAgo(isoDate: string) {
 
 export const daysSince = (isoDate: string) => daysBetween(isoDate, SAMPLE_TODAY);
 
+export const EXPIRING_SOON_DAYS = 7;
+
+export const isExpiringSoon = (job: Pick<Job, "status" | "validThrough">) =>
+  isOpen(job) && daysBetween(SAMPLE_TODAY, job.validThrough) <= EXPIRING_SOON_DAYS;
+
+/** "Today", "Yesterday", "3 days ago", "1 week ago" for timelines and application cards. */
+export function relativeDay(isoDate: string) {
+  const days = daysSince(isoDate);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  const weeks = Math.floor(days / 7);
+  return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+}
+
 export async function getJob(citySlug: string, jobSlug: string) {
   return jobs.find((job) => job.city.slug === citySlug && job.slug === jobSlug) ?? null;
 }
@@ -557,3 +579,8 @@ export const formatRupees = (value: number) => rupees.format(value);
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 export const formatDate = (isoDate: string) => longDate.format(new Date(`${isoDate}T00:00:00Z`));
+
+const dayMonth = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "UTC" });
+
+/** "17 Oct" */
+export const formatDayMonth = (isoDate: string) => dayMonth.format(new Date(`${isoDate}T00:00:00Z`));

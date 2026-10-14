@@ -16,6 +16,7 @@ const badgeVariants = cva("inline-flex shrink-0 items-center rounded-full px-2 p
       closed: "bg-grey-100 text-text-tertiary",
       unverified: "bg-secondary-50 text-secondary-600",
       expired: "bg-error-50 text-error-500",
+      expiring: "bg-warning-50 py-1 text-warning-700",
     },
   },
   defaultVariants: { type: "employment" },
