@@ -18,6 +18,7 @@ type Cluster = { key: string; members: MapCompany[]; center: L.LatLng };
 
 const CLUSTER_RADIUS_PX = 72;
 const DEFAULT_ZOOM = 14;
+const MIN_INITIAL_ZOOM = 13;
 
 function clusterCompanies(map: LeafletMap, items: MapCompany[], zoom: number): Cluster[] {
   const clusters: { point: L.Point; members: MapCompany[] }[] = [];
@@ -41,17 +42,19 @@ function clusterCompanies(map: LeafletMap, items: MapCompany[], zoom: number): C
 
 export default function JobsMap({
   companies,
+  initialBounds,
   center,
   selectedSlug,
   onSelectCompany,
 }: {
   companies: MapCompany[];
+  initialBounds: [number, number][];
   center: [number, number];
   selectedSlug: string | null;
   onSelectCompany: (slug: string) => void;
 }) {
   const [map, setMap] = useState<LeafletMap | null>(null);
-  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [zoom, setZoom] = useState<number | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
   const [locating, setLocating] = useState(false);
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
@@ -60,10 +63,24 @@ export default function JobsMap({
   useEffect(() => {
     if (!map) return;
     const update = () => setZoom(map.getZoom());
+    update();
     map.on("zoomend", update);
     return () => {
       map.off("zoomend", update);
     };
+  }, [map]);
+
+  useEffect(() => {
+    if (!map) return;
+    map.fitBounds(L.latLngBounds(initialBounds), {
+      paddingTopLeft: [80, 140],
+      paddingBottomRight: [80, 56],
+      maxZoom: DEFAULT_ZOOM,
+      animate: false,
+    });
+    if (map.getZoom() < MIN_INITIAL_ZOOM) map.setView(center, MIN_INITIAL_ZOOM, { animate: false });
+    // Only frame the businesses once; later filter changes keep the user's viewport.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
   useEffect(() => {
@@ -72,7 +89,7 @@ export default function JobsMap({
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
-  const clusters = useMemo(() => (map ? clusterCompanies(map, companies, zoom) : []), [map, companies, zoom]);
+  const clusters = useMemo(() => (map && zoom !== null ? clusterCompanies(map, companies, zoom) : []), [map, companies, zoom]);
 
   const locate = () => {
     if (!map) return;

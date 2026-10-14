@@ -86,7 +86,7 @@ const companySeeds: CompanySeed[] = [
     name: "Urban Bites Café (Sample)",
     category: "Hospitality",
     area: "Devendra Nagar",
-    streetAddress: "Sector 2, Devendra Nagar",
+    streetAddress: "Sector 2",
     postalCode: "492004",
     position: [21.2632, 81.6211],
     jobs: [
@@ -109,7 +109,7 @@ const companySeeds: CompanySeed[] = [
     name: "Raipur Tech Hub (Sample)",
     category: "Technology",
     area: "Anupam Nagar",
-    streetAddress: "Anupam Nagar Main Road",
+    streetAddress: "Main Road",
     postalCode: "492007",
     position: [21.2624, 81.6629],
     jobs: [
@@ -126,7 +126,7 @@ const companySeeds: CompanySeed[] = [
     name: "NDS Café (Sample)",
     category: "Hospitality",
     area: "Gayatri Nagar",
-    streetAddress: "Gayatri Nagar Square",
+    streetAddress: "Near Gayatri Mandir",
     postalCode: "492006",
     position: [21.2424, 81.676],
     jobs: [
@@ -153,7 +153,7 @@ const companySeeds: CompanySeed[] = [
     name: "Shree Shyam Mart (Sample)",
     category: "Retail",
     area: "Avanti Vihar",
-    streetAddress: "Avanti Vihar Colony",
+    streetAddress: "Sector 1",
     postalCode: "492006",
     position: [21.2292, 81.6842],
     jobs: [
@@ -169,7 +169,7 @@ const companySeeds: CompanySeed[] = [
     name: "Patanjali Wellness (Sample)",
     category: "Healthcare support",
     area: "Bhawna Nagar",
-    streetAddress: "Bhawna Nagar Road",
+    streetAddress: "Main Road",
     postalCode: "492007",
     position: [21.254, 81.6873],
     jobs: [
@@ -182,7 +182,7 @@ const companySeeds: CompanySeed[] = [
     name: "Lakeside Pharmacy (Sample)",
     category: "Healthcare support",
     area: "Pandri",
-    streetAddress: "Pandri Main Road",
+    streetAddress: "Main Road",
     postalCode: "492004",
     position: [21.2541, 81.6455],
     jobs: [
@@ -197,7 +197,7 @@ const companySeeds: CompanySeed[] = [
     name: "Swift Couriers (Sample)",
     category: "Office admin",
     area: "Pandri",
-    streetAddress: "Lodhipara Chowk, Pandri",
+    streetAddress: "Lodhipara Chowk",
     postalCode: "492004",
     position: [21.253, 81.6471],
     jobs: [
@@ -211,7 +211,7 @@ const companySeeds: CompanySeed[] = [
     name: "CG Mobile Point (Sample)",
     category: "Sales",
     area: "Pandri",
-    streetAddress: "Mobile Market, Pandri",
+    streetAddress: "Mobile Market",
     postalCode: "492004",
     position: [21.2547, 81.6469],
     jobs: [
@@ -224,8 +224,8 @@ const companySeeds: CompanySeed[] = [
     slug: "pandri-textiles",
     name: "Pandri Textiles (Sample)",
     category: "Retail",
-    area: "Pandri Cloth Market",
-    streetAddress: "Pandri Cloth Market",
+    area: "Pandri",
+    streetAddress: "Cloth Market",
     postalCode: "492004",
     position: [21.2527, 81.6451],
     jobs: [

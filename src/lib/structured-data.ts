@@ -28,7 +28,7 @@ export function jobPostingJsonLd(job: Job) {
       "@type": "Place",
       address: {
         "@type": "PostalAddress",
-        streetAddress: job.company.streetAddress,
+        streetAddress: `${job.company.streetAddress}, ${job.company.area}`,
         addressLocality: job.city.name,
         addressRegion: job.city.region,
         postalCode: job.company.postalCode,

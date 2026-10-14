@@ -34,7 +34,7 @@ export function AppShell({ active, children }: { active?: NavKey; children: Reac
         <div className="flex-1" />
         <Link
           href="/post-a-job"
-          className="flex w-full items-center justify-center rounded-sm border bg-surface-default px-2 py-3 text-center text-body-sm-semibold text-text-primary transition-colors hover:bg-grey-100"
+          className="flex w-full items-center justify-center rounded-sm border bg-surface-default px-1 py-3 text-center text-label-semibold text-text-primary lg:px-2 lg:text-body-sm-semibold transition-colors hover:bg-grey-100"
         >
           Post a job
         </Link>

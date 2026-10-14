@@ -66,6 +66,8 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
     [companies, filteredJobs],
   );
 
+  const initialBounds = useMemo(() => companies.map((item) => item.position), [companies]);
+
   const activeFilterCount = selectedCategories.length + selectedTypes.length;
   const hasAnyFilter = activeFilterCount > 0 || deferredQuery.length > 0;
   const clearAll = () => {
@@ -101,6 +103,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <div className="absolute inset-0">
             <JobsMap
               companies={mapCompanies}
+              initialBounds={initialBounds}
               center={city.center}
               selectedSlug={selectedCompany}
               onSelectCompany={setSelectedCompany}

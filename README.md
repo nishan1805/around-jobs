@@ -29,10 +29,14 @@ Other scripts:
 | Variable                            | Default                       | Purpose                                      |
 | ----------------------------------- | ----------------------------- | -------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`              | `http://localhost:4612`       | Absolute URLs in the sitemap, canonical tags and JSON-LD |
-| `NEXT_PUBLIC_MAP_TILES_URL`         | CARTO Positron (light) tiles  | Leaflet tile URL template                    |
-| `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | OpenStreetMap + CARTO credit  | Attribution shown on the map                 |
+| `NEXT_PUBLIC_STADIA_API_KEY`        | none                          | Key for the default Stadia Maps tiles        |
+| `NEXT_PUBLIC_MAP_TILES_URL`         | Stadia "Alidade Smooth" tiles | Leaflet tile URL template (overrides Stadia) |
+| `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | Stadia + OpenMapTiles + OSM   | Attribution shown on the map                 |
 
-No API keys are needed. Before going to production, use a tile provider plan that covers your traffic.
+No keys are needed locally: Stadia serves `localhost` without one. To deploy, either register your
+domain in the Stadia dashboard or set `NEXT_PUBLIC_STADIA_API_KEY`. To use plain OpenStreetMap
+instead, set `NEXT_PUBLIC_MAP_TILES_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png`.
+If tiles fail to load, the map shows a notice and the job pins still work.
 
 ## Design tokens
 
