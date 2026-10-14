@@ -1,4 +1,4 @@
-import { ProgressStepper } from "@/components/applications/progress-stepper";
+import { ProgressBar, ProgressStepper } from "@/components/applications/progress-stepper";
 import { LogoPlaceholder } from "@/components/jobs/job-card";
 import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
 import { appliedWhen, groupOf, statusLabel } from "@/lib/applications";
@@ -9,13 +9,18 @@ import { cn } from "@/lib/utils";
 export const statusTone = (application: Application, job: Job): StatusTone =>
   application.stage === "rejected" ? "rejected" : groupOf(application, job);
 
+const salaryText = (job: Job) => (job.salaryDisclosed ? formatSalaryShort(job.salary) : "Salary not disclosed");
+
 /** "Urban Bites Café (Sample) · Devendra Nagar · 1.2 km" */
 export const companyLine = (job: Job, from: [number, number]) =>
   job.workMode === "REMOTE"
     ? `${job.company.name} · Remote`
     : `${job.company.name} · ${job.company.area} · ${distanceKm(from, job.company.position).toFixed(1)} km`;
 
-/** Figma "Application card" (1988:24392). The whole card selects the application. */
+/**
+ * Figma "Application card" (1988:24392); compact on phones (M15). The whole card selects
+ * the application, or opens its detail page where there's no preview panel.
+ */
 export function ApplicationCard({
   application,
   job,
@@ -44,15 +49,20 @@ export function ApplicationCard({
         <span className="flex items-start gap-2">
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-body-semibold text-text-primary">{job.title}</span>
-            <span className="text-body-sm-regular text-text-secondary">{companyLine(job, from)}</span>
+            <span className="truncate text-label-medium text-text-secondary md:whitespace-normal md:text-body-sm-regular">
+              {companyLine(job, from)}
+            </span>
           </span>
           <StatusPill tone={statusTone(application, job)}>{statusLabel(application, job)}</StatusPill>
         </span>
-        <span className="text-body-sm-semibold text-text-primary">
-          {job.salaryDisclosed ? formatSalaryShort(job.salary) : "Salary not disclosed"}
+        <span className="flex items-baseline justify-between gap-2 md:hidden">
+          <span className="text-body-sm-semibold text-text-primary">{salaryText(job)}</span>
+          <span className="text-label-medium text-text-tertiary">{appliedWhen(application)}</span>
         </span>
-        <ProgressStepper application={application} />
-        <span className="text-label-medium text-text-tertiary">{appliedWhen(application)}</span>
+        <ProgressBar application={application} className="md:hidden" />
+        <span className="hidden text-body-sm-semibold text-text-primary md:inline">{salaryText(job)}</span>
+        <ProgressStepper application={application} className="max-md:hidden" />
+        <span className="hidden text-label-medium text-text-tertiary md:inline">{appliedWhen(application)}</span>
       </span>
     </button>
   );

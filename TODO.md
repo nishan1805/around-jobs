@@ -131,3 +131,16 @@ code does today so a designer can confirm or correct it.
   state, not in Figma).
 - **Resume size.** A profile resume has no real file, so the review and resume card
   show a sample 240 KB.
+- **My applications on phones.** Cards switch to M15's compact layout with a
+  four-segment bar. Tapping a card below 1280px opens `/applications/[jobSlug]` (M16)
+  instead of the preview popup. "View application" links there at every size.
+- **Status chips on phones.** M15 and M18 disagree (M15 has status chips with counts,
+  M18 has All/Active/Closed tabs and "Submitted"/"Interviewing" pills). The code keeps
+  one set: the desktop chips and pill labels and colours, with "Withdrawn" added as a
+  grey pill in the Closed group. M16's orange "Under review" pill also uses the
+  standard Viewed pill.
+- **Application timeline.** M16's five steps end in "Decision", which shows "Not
+  selected", "Withdrawn" or "Job closed" when relevant. Sample dates get "(Sample)".
+- **Withdraw.** The application stays in the list as "Withdrawn" (M18), and the job can
+  be applied to again. The success banner shows once after withdrawing. The resume
+  "View" opens a note, since the Sample app keeps no file.

@@ -182,6 +182,16 @@ export function useSeeker() {
 const setIn = (list: string[], value: string, present: boolean) =>
   present ? (list.includes(value) ? list : [value, ...list]) : list.filter((item) => item !== value);
 
+let lastWithdrawn: string | null = null;
+
+/** The job slug just withdrawn, for the success banner on My applications (M18). */
+export const withdrawnNotice = {
+  peek: () => lastWithdrawn,
+  clear: () => {
+    lastWithdrawn = null;
+  },
+};
+
 export const seekerActions = {
   setSavedJob(slug: string, saved: boolean) {
     const current = read();
@@ -211,6 +221,7 @@ export const seekerActions = {
   },
   withdraw(jobSlug: string) {
     const current = read();
+    lastWithdrawn = jobSlug;
     write({
       ...current,
       applications: current.applications.map((item) =>

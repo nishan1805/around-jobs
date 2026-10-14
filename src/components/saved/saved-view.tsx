@@ -91,7 +91,11 @@ function SavedContent() {
 
   return (
     <>
-      <PageHeader title="Saved jobs" subtitle={subtitle} />
+      <PageHeader
+        title="Saved jobs"
+        subtitle={subtitle}
+        mobileSubtitle={`${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? ` · ${expiring} expiring soon` : ""}`}
+      />
 
       <div role="group" aria-label="Filter saved jobs" className="-mx-5 flex shrink-0 gap-2 overflow-x-auto px-5 md:mx-0 md:px-0">
         {savedFilters.map(({ key, label }) => (

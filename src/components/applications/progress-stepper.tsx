@@ -52,3 +52,29 @@ export function ProgressStepper({ application, className }: { application: Appli
     </ol>
   );
 }
+
+/** Phone version of the stepper (M15): four segments with their labels underneath. */
+export function ProgressBar({ application, className }: { application: Application; className?: string }) {
+  const reached = reachedStep(application);
+  const muted = isEnded(application);
+
+  return (
+    <ol aria-label="Application progress" className={cn("grid grid-cols-4 gap-1", className)}>
+      {applicationStages.map((stage, index) => {
+        const done = index <= reached;
+        return (
+          <li key={stage} aria-current={index === reached ? "step" : undefined} className="flex min-w-0 flex-col gap-1.5">
+            <span
+              aria-hidden
+              className={cn("h-1 rounded-4xl", done && !muted ? "bg-brand-primary" : done ? "bg-grey-500" : "bg-grey-200")}
+            />
+            <span className={cn("truncate text-label-regular", done ? "text-text-secondary" : "text-text-tertiary")}>
+              {stageLabels[stage]}
+              {!done && <span className="sr-only"> (not yet)</span>}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}

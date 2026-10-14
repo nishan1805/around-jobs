@@ -94,7 +94,7 @@ export function ApplicationPreview({
   );
 }
 
-function MessageDialog({ job, onClose }: { job: Job; onClose: () => void }) {
+export function MessageDialog({ job, onClose }: { job: Job; onClose: () => void }) {
   const [text, setText] = useState("");
   const [sent, setSent] = useState(false);
 

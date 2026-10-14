@@ -3,12 +3,40 @@ import type { ReactNode } from "react";
 import { Icon, type IconName } from "@/components/icon";
 import { cn } from "@/lib/utils";
 
-/** Title block at the top of My applications and Saved. */
-export function PageHeader({ title, subtitle }: { title: string; subtitle: ReactNode }) {
+/** Title block at the top of My applications and Saved. Phones can use shorter copy (M15, M19). */
+export function PageHeader({
+  title,
+  subtitle,
+  mobileTitle,
+  mobileSubtitle,
+}: {
+  title: string;
+  subtitle: ReactNode;
+  mobileTitle?: string;
+  mobileSubtitle?: ReactNode;
+}) {
   return (
-    <header className="flex flex-col gap-1">
-      <h1 className="text-heading-semibold text-text-primary md:text-display-small-semibold">{title}</h1>
-      <p className="text-body-sm-regular text-text-secondary">{subtitle}</p>
+    <header className="flex flex-col gap-1 max-md:gap-3">
+      <h1 className="text-heading-semibold text-text-primary md:text-display-small-semibold">
+        {mobileTitle ? (
+          <>
+            <span className="md:hidden">{mobileTitle}</span>
+            <span className="max-md:hidden">{title}</span>
+          </>
+        ) : (
+          title
+        )}
+      </h1>
+      <p className="text-body-sm-regular text-text-secondary">
+        {mobileSubtitle ? (
+          <>
+            <span className="md:hidden">{mobileSubtitle}</span>
+            <span className="max-md:hidden">{subtitle}</span>
+          </>
+        ) : (
+          subtitle
+        )}
+      </p>
     </header>
   );
 }

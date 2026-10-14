@@ -18,6 +18,7 @@ import { useHydrated } from "@/hooks/use-hydrated";
 export function SeekerPage({
   active,
   title,
+  mobileTitle,
   intro,
   loginIcon,
   loginTitle,
@@ -25,8 +26,9 @@ export function SeekerPage({
   skeleton,
   children,
 }: {
-  active: "applications" | "saved";
+  active: "applications" | "saved" | "profile";
   title: string;
+  mobileTitle?: string;
   /** Subtitle used while loading and when logged out. */
   intro: string;
   loginIcon: IconName;
@@ -44,7 +46,7 @@ export function SeekerPage({
       <main className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-background-secondary px-5 py-6 md:gap-6 md:px-10 md:py-8">
         {!hydrated ? (
           <>
-            <PageHeader title={title} subtitle={intro} />
+            <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} />
             <div aria-busy className="flex flex-col gap-4">
               <span className="sr-only">Loading</span>
               {skeleton}
@@ -52,7 +54,7 @@ export function SeekerPage({
           </>
         ) : !user ? (
           <>
-            <PageHeader title={title} subtitle={intro} />
+            <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} />
             <EmptyPage
               icon={loginIcon}
               title={loginTitle}
