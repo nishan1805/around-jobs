@@ -1,361 +1,273 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-import { Icon } from "@/components/icon";
-import { CategoryTag, JobCard } from "@/components/jobs/job-card";
+import { Chip } from "@/components/jobs/chip";
+import { FiltersButton } from "@/components/jobs/filters-button";
+import { EmployerPanel } from "@/components/jobs/panels/employer-panel";
+import { FiltersPanel } from "@/components/jobs/panels/filters-panel";
+import { JobDetailPanel } from "@/components/jobs/panels/job-detail-panel";
+import { JobsListPanel, type ListStatus } from "@/components/jobs/panels/jobs-list-panel";
+import { panelInset } from "@/components/jobs/panels/panel-parts";
 import { TopBar } from "@/components/jobs/top-bar";
-import { JobsMap, type MapCompany } from "@/components/map";
+import { ViewToggle } from "@/components/jobs/view-toggle";
+import { JobsMap, type FitRequest, type MapCompany, type MapView } from "@/components/map";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { EmptyBlock } from "@/components/ui/empty-block";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
-import {
-  categories,
-  employmentTypes,
-  type Category,
-  type City,
-  type Company,
-  type EmploymentType,
-  type Job,
-} from "@/lib/jobs";
+import { activeFilters, defaultFilters, matchesFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
+import { categories, distanceKm, isOpen, type City, type Company, type Job } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 
-type View = "map" | "list";
+type Panel =
+  | { kind: "none" }
+  | { kind: "list" }
+  | { kind: "company"; slug: string; back: Panel }
+  | { kind: "job"; slug: string; back: Panel }
+  | { kind: "filters"; back: Panel };
 
-const toggle = <T,>(list: T[], value: T) =>
-  list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
+const none: Panel = { kind: "none" };
 
-const matchesQuery = (job: Job, query: string) => {
-  if (!query) return true;
-  const haystack = `${job.title} ${job.company.name} ${job.company.area} ${job.category}`.toLowerCase();
-  return query
-    .toLowerCase()
-    .split(/\s+/)
-    .every((term) => haystack.includes(term));
+const subscribeToUrl = (onChange: () => void) => {
+  window.addEventListener("popstate", onChange);
+  return () => window.removeEventListener("popstate", onChange);
 };
+const useSearchParam = (name: string) =>
+  useSyncExternalStore(
+    subscribeToUrl,
+    () => new URLSearchParams(window.location.search).get(name),
+    () => null,
+  );
+
+const inView = (view: MapView | null, [lat, lng]: [number, number]) =>
+  !view || (lat >= view[0][0] && lat <= view[1][0] && lng >= view[0][1] && lng <= view[1][1]);
 
 export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies: Company[]; city: City }) {
-  const [query, setQuery] = useState("");
-  const deferredQuery = useDeferredValue(query.trim());
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<EmploymentType[]>([]);
-  const [view, setView] = useState<View>("map");
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<JobFilters>(defaultFilters);
+  const deferredFilters = useDeferredValue(filters);
+  const [panelState, setPanel] = useState<Panel | null>(null);
+  const [mapView, setMapView] = useState<MapView | null>(null);
+  const [fitRequest, setFitRequest] = useState<FitRequest | null>(null);
+  const [retried, setRetried] = useState(false);
   const isTablet = useMediaQuery(breakpoints.md);
 
-  const filteredJobs = useMemo(
+  // Deep links: `?view=list`, `?company=<slug>` (shared employer links), `?job=<slug>`,
+  // `?filters=open`. `?state=loading|error` previews the Jobs List loading and error
+  // states until a real API is wired in.
+  const companyParam = useSearchParam("company");
+  const jobParam = useSearchParam("job");
+  const viewParam = useSearchParam("view");
+  const filtersParam = useSearchParam("filters");
+  const stateParam = useSearchParam("state");
+  const linkedPanel = (): Panel => {
+    const list: Panel = viewParam === "list" ? { kind: "list" } : none;
+    if (jobParam && jobs.some((item) => item.slug === jobParam)) return { kind: "job", slug: jobParam, back: list };
+    if (companyParam && companies.some((item) => item.slug === companyParam))
+      return { kind: "company", slug: companyParam, back: list };
+    if (filtersParam === "open") return { kind: "filters", back: list };
+    return list;
+  };
+  const panel: Panel = panelState ?? linkedPanel();
+
+  const from = city.center;
+  const openJobs = useMemo(() => jobs.filter(isOpen), [jobs]);
+  const matching = useMemo(
     () =>
-      jobs.filter(
-        (job) =>
-          (selectedCategories.length === 0 || selectedCategories.includes(job.category)) &&
-          (selectedTypes.length === 0 || selectedTypes.includes(job.employmentType)) &&
-          matchesQuery(job, deferredQuery),
-      ),
-    [jobs, selectedCategories, selectedTypes, deferredQuery],
+      openJobs
+        .filter((job) => matchesFilters(job, deferredFilters))
+        .sort((a, b) => distanceKm(from, a.company.position) - distanceKm(from, b.company.position)),
+    [openJobs, deferredFilters, from],
   );
+  const chips = activeFilters(filters);
+  const hasAnyFilter = chips.length > 0 || filters.categories.length > 0 || filters.query.trim().length > 0;
 
   const mapCompanies = useMemo<MapCompany[]>(
     () =>
       companies
         .map((company) => ({
           company,
-          jobCount: filteredJobs.filter((job) => job.company.slug === company.slug).length,
+          jobCount: matching.filter((job) => job.company.slug === company.slug && job.workMode !== "REMOTE").length,
         }))
-        .filter((item) => item.jobCount > 0),
-    [companies, filteredJobs],
+        .filter((item) => item.jobCount > 0 || (!hasAnyFilter && !openJobs.some((job) => job.company.slug === item.company.slug))),
+    [companies, matching, hasAnyFilter, openJobs],
+  );
+  const initialBounds = useMemo(() => companies.map((item) => item.position), [companies]);
+  const listJobs = useMemo(
+    () => matching.filter((job) => job.workMode === "REMOTE" || inView(mapView, job.company.position)),
+    [matching, mapView],
   );
 
-  const initialBounds = useMemo(() => companies.map((item) => item.position), [companies]);
+  const status: ListStatus =
+    !retried && (stateParam === "loading" || stateParam === "error")
+      ? stateParam
+      : filters !== deferredFilters
+        ? "loading"
+        : "ready";
 
-  const activeFilterCount = selectedCategories.length + selectedTypes.length;
-  const hasAnyFilter = activeFilterCount > 0 || deferredQuery.length > 0;
-  const clearAll = () => {
-    setSelectedCategories([]);
-    setSelectedTypes([]);
-    setQuery("");
+  const open = useCallback((next: Panel) => setPanel(next), []);
+  const close = useCallback(() => setPanel(none), []);
+  const back = (current: Panel) => ("back" in current ? current.back : none);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      setPanel((current) => (current && "back" in current ? current.back : none));
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const selectedCompanySlug =
+    panel.kind === "company"
+      ? panel.slug
+      : panel.kind === "job"
+        ? (jobs.find((job) => job.slug === panel.slug)?.company.slug ?? null)
+        : null;
+
+  const panelWidth = panel.kind === "filters" ? "narrow" : "wide";
+  const panelOpen = panel.kind !== "none";
+  const insetLeft = isTablet && panelOpen ? panelInset[panelWidth] : 0;
+
+  const openJob = (job: Job) => open({ kind: "job", slug: job.slug, back: panel });
+  const openFilters = () => open(panel.kind === "filters" ? back(panel) : { kind: "filters", back: panel });
+
+  const renderPanel = () => {
+    switch (panel.kind) {
+      case "none":
+        return null;
+      case "list":
+        return (
+          <JobsListPanel
+            cityName={city.name}
+            status={status}
+            jobs={listJobs}
+            totalMatching={matching.length}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onOpenFilters={openFilters}
+            onClose={close}
+            onSelectJob={openJob}
+            onSearchArea={() => setFitRequest((current) => ({ key: (current?.key ?? 0) + 1, positions: matching.map((job) => job.company.position) }))}
+            onRetry={() => setRetried(true)}
+            from={from}
+          />
+        );
+      case "company": {
+        const company = companies.find((item) => item.slug === panel.slug);
+        if (!company) return null;
+        return (
+          <EmployerPanel
+            key={company.slug}
+            company={company}
+            jobs={openJobs.filter((job) => job.company.slug === company.slug)}
+            from={from}
+            cityName={city.name}
+            onClose={() => open(back(panel))}
+            onSelectJob={openJob}
+          />
+        );
+      }
+      case "job": {
+        const job = jobs.find((item) => item.slug === panel.slug);
+        if (!job) return null;
+        const previous = back(panel);
+        return (
+          <JobDetailPanel
+            key={job.slug}
+            job={job}
+            onBack={() => open(previous)}
+            backLabel={previous.kind === "list" ? "Back to jobs list" : previous.kind === "company" ? "Back to employer" : "Close job details"}
+          />
+        );
+      }
+      case "filters":
+        return (
+          <FiltersPanel filters={filters} onChange={setFilters} resultCount={matching.length} onDone={() => open(back(panel))} />
+        );
+    }
   };
-
-  const company = companies.find((item) => item.slug === selectedCompany) ?? null;
-  const companyJobs = company ? filteredJobs.filter((job) => job.company.slug === company.slug) : [];
 
   return (
     <>
-      <TopBar query={query} onQueryChange={setQuery} locationLabel={`Shankar Nagar, ${city.name}`} />
+      <TopBar
+        query={filters.query}
+        onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
+        locationLabel={`Shankar Nagar, ${city.name}`}
+      />
 
       <main className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden">
         <h1 className="sr-only">Jobs near you in {city.name}</h1>
+
+        <div className="absolute inset-0">
+          <JobsMap
+            companies={mapCompanies}
+            initialBounds={initialBounds}
+            center={city.center}
+            selectedSlug={selectedCompanySlug}
+            onSelectCompany={(slug) => open({ kind: "company", slug, back: panel.kind === "list" ? panel : none })}
+            onViewChange={setMapView}
+            fitRequest={fitRequest}
+            insetLeft={insetLeft}
+          />
+        </div>
+
         <div
           className={cn(
-            "z-1000 flex flex-col items-end gap-3 p-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-5",
-            view === "map" ? "pointer-events-none absolute inset-x-0 top-0" : "border-b bg-background-primary",
+            "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col items-end gap-3 p-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
+            panelOpen && "max-md:hidden",
+            panelOpen && (panelWidth === "wide" ? "md:pl-124" : "md:pl-88"),
           )}
         >
-          <CategoryChips
-            selected={selectedCategories}
-            onToggle={(category) => setSelectedCategories((current) => toggle(current, category))}
-            className="pointer-events-auto w-full md:w-auto md:min-w-0 md:flex-1 md:pt-1.5"
+          <div
+            role="group"
+            aria-label="Job categories"
+            className="pointer-events-auto flex w-full gap-2 overflow-x-auto [scrollbar-width:none] md:w-auto md:min-w-0 md:flex-1 md:flex-wrap md:pt-1.5 [&::-webkit-scrollbar]:hidden"
+          >
+            {categories.map((category) => (
+              <Chip
+                key={category}
+                selected={filters.categories.includes(category)}
+                onClick={() => setFilters((current) => ({ ...current, categories: toggleValue(current.categories, category) }))}
+                className={cn(!filters.categories.includes(category) && "border-transparent shadow-sm")}
+              >
+                {category}
+              </Chip>
+            ))}
+          </div>
+          <ViewToggle
+            view={panel.kind === "list" ? "list" : "map"}
+            onChange={(view) => open(view === "list" ? { kind: "list" } : none)}
+            className="pointer-events-auto"
           />
-          <ViewToggle view={view} onChange={setView} className="pointer-events-auto" />
         </div>
 
-        {view === "map" ? (
-          <div className="absolute inset-0">
-            <JobsMap
-              companies={mapCompanies}
-              initialBounds={initialBounds}
-              center={city.center}
-              selectedSlug={selectedCompany}
-              onSelectCompany={setSelectedCompany}
+        {renderPanel()}
+
+        {!panelOpen && matching.length === 0 && status === "ready" && (
+          <div className="absolute top-1/2 left-1/2 z-1000 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl bg-surface-default shadow-xl">
+            <EmptyBlock
+              title="No jobs match your filters"
+              body="Try another category, widen the salary range or clear filters."
+              action={
+                <Button variant="outline" shape="rect" onClick={() => setFilters(defaultFilters)}>
+                  Clear filters
+                </Button>
+              }
             />
-            {filteredJobs.length === 0 && <NoResults onClear={clearAll} floating />}
           </div>
-        ) : (
-          <JobList jobs={filteredJobs} cityName={city.name} onClear={clearAll} hasAnyFilter={hasAnyFilter} />
         )}
 
-        <Button
-          variant="dark"
-          onClick={() => setFiltersOpen(true)}
-          className="absolute bottom-8 left-3 z-1000 gap-2.5 pr-3 pl-4 text-body-sm-medium md:bottom-9 md:left-5"
-        >
-          <Icon name="filters" className="size-4" />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="flex size-5.5 items-center justify-center rounded-full bg-surface-default text-label-semibold text-grey-900">
-              {activeFilterCount}
-            </span>
+        <FiltersButton
+          count={chips.length}
+          expanded={panel.kind === "filters"}
+          onClick={openFilters}
+          className={cn(
+            "absolute bottom-8 left-3 z-1000 md:bottom-6 md:left-6",
+            panelOpen && "max-md:hidden",
+            panelOpen && (panelWidth === "wide" ? "md:left-124" : "md:left-88"),
           )}
-        </Button>
+        />
       </main>
-
-      <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <SheetContent side={isTablet ? "right" : "bottom"}>
-          <SheetHeader>
-            <SheetTitle>Filters</SheetTitle>
-            <SheetDescription>Narrow down jobs around {city.name}.</SheetDescription>
-          </SheetHeader>
-          <div className="flex flex-col gap-6 overflow-y-auto px-4">
-            <FilterGroup
-              label="Category"
-              options={categories.map((value) => ({ value, label: value }))}
-              selected={selectedCategories}
-              onToggle={(value) => setSelectedCategories((current) => toggle(current, value))}
-            />
-            <FilterGroup
-              label="Job type"
-              options={(Object.keys(employmentTypes) as EmploymentType[]).map((value) => ({
-                value,
-                label: employmentTypes[value],
-              }))}
-              selected={selectedTypes}
-              onToggle={(value) => setSelectedTypes((current) => toggle(current, value))}
-            />
-          </div>
-          <SheetFooter className="flex-row border-t">
-            <Button variant="outline" className="flex-1" onClick={clearAll} disabled={!hasAnyFilter}>
-              Clear all
-            </Button>
-            <Button className="flex-1" onClick={() => setFiltersOpen(false)}>
-              Show {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"}
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <Sheet open={company !== null} onOpenChange={(open) => !open && setSelectedCompany(null)}>
-        <SheetContent side={isTablet ? "right" : "bottom"}>
-          {company && (
-            <>
-              <SheetHeader className="pr-12">
-                <div className="flex items-center gap-2">
-                  <CategoryTag>{company.category}</CategoryTag>
-                </div>
-                <SheetTitle className="mt-2">{company.name}</SheetTitle>
-                <SheetDescription className="flex items-center gap-1">
-                  <Icon name="pin" className="size-3.5" />
-                  {company.streetAddress}, {company.area}
-                </SheetDescription>
-              </SheetHeader>
-              <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-4">
-                <p className="text-label-semibold text-text-tertiary uppercase">
-                  {companyJobs.length} open {companyJobs.length === 1 ? "role" : "roles"}
-                </p>
-                {companyJobs.map((job) => (
-                  <JobCard key={job.slug} job={job} showCompany={false} />
-                ))}
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
     </>
-  );
-}
-
-function CategoryChips({
-  selected,
-  onToggle,
-  className,
-}: {
-  selected: Category[];
-  onToggle: (category: Category) => void;
-  className?: string;
-}) {
-  return (
-    <div
-      role="group"
-      aria-label="Job categories"
-      className={cn("flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
-    >
-      {categories.map((category) => {
-        const isSelected = selected.includes(category);
-        return (
-          <button
-            key={category}
-            type="button"
-            aria-pressed={isSelected}
-            onClick={() => onToggle(category)}
-            className={cn(
-              "shrink-0 rounded-full border px-3 py-1.5 text-label-medium whitespace-nowrap transition-colors",
-              isSelected
-                ? "border-brand-primary bg-brand-primary text-text-on-brand"
-                : "bg-surface-default text-text-secondary shadow-sm hover:bg-grey-100",
-            )}
-          >
-            {category}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function ViewToggle({ view, onChange, className }: { view: View; onChange: (view: View) => void; className?: string }) {
-  const options: { value: View; label: string; icon: "map" | "list" }[] = [
-    { value: "map", label: "Map", icon: "map" },
-    { value: "list", label: "List", icon: "list" },
-  ];
-  return (
-    <div
-      role="group"
-      aria-label="View"
-      className={cn("flex shrink-0 items-center rounded-4xl bg-surface-default p-1 shadow-md", className)}
-    >
-      {options.map((option) => {
-        const isActive = option.value === view;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={isActive}
-            onClick={() => onChange(option.value)}
-            className={cn(
-              "flex h-8 items-center justify-center gap-2 rounded-4xl px-4 text-body-sm-semibold transition-colors",
-              isActive ? "bg-brand-primary text-text-on-brand" : "text-text-primary hover:bg-grey-100",
-            )}
-          >
-            <Icon name={option.icon} />
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function FilterGroup<T extends string>({
-  label,
-  options,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  options: { value: T; label: string }[];
-  selected: T[];
-  onToggle: (value: T) => void;
-}) {
-  return (
-    <fieldset className="flex flex-col gap-3">
-      <legend className="mb-3 text-body-sm-semibold text-text-primary">{label}</legend>
-      <div className="flex flex-wrap gap-2">
-        {options.map((option) => {
-          const isSelected = selected.includes(option.value);
-          return (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => onToggle(option.value)}
-              className={cn(
-                "rounded-full border px-3 py-2 text-body-sm-medium transition-colors",
-                isSelected
-                  ? "border-brand-primary bg-primary-50 text-brand-primary"
-                  : "bg-surface-default text-text-secondary hover:bg-grey-100",
-              )}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    </fieldset>
-  );
-}
-
-function JobList({
-  jobs,
-  cityName,
-  onClear,
-  hasAnyFilter,
-}: {
-  jobs: Job[];
-  cityName: string;
-  onClear: () => void;
-  hasAnyFilter: boolean;
-}) {
-  if (jobs.length === 0) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-6">
-        <NoResults onClear={onClear} />
-      </div>
-    );
-  }
-  return (
-    <div className="flex-1 overflow-y-auto bg-background-secondary">
-      <div className="flex flex-col gap-4 p-4 pb-28 md:p-6 md:pb-28">
-        <p className="text-body-sm-medium text-text-secondary">
-          {jobs.length} {jobs.length === 1 ? "job" : "jobs"} {hasAnyFilter ? "match your search" : `around ${cityName}`}
-        </p>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-          {jobs.map((job) => (
-            <JobCard key={job.slug} job={job} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NoResults({ onClear, floating = false }: { onClear: () => void; floating?: boolean }) {
-  return (
-    <div
-      role="status"
-      className={cn(
-        "flex max-w-sm flex-col items-center gap-3 rounded-xl bg-surface-default p-6 text-center",
-        floating && "absolute top-1/2 left-1/2 z-1000 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 shadow-xl",
-      )}
-    >
-      <span className="flex size-12 items-center justify-center rounded-full bg-primary-50 text-brand-primary">
-        <Icon name="briefcase" className="size-5" />
-      </span>
-      <div className="flex flex-col gap-1">
-        <p className="text-subheading-semibold text-text-primary">No jobs match these filters</p>
-        <p className="text-body-sm-regular text-text-secondary">Try another category or a broader search.</p>
-      </div>
-      <Button variant="outline" onClick={onClear}>
-        Clear filters
-      </Button>
-    </div>
   );
 }

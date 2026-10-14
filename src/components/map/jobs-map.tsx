@@ -15,6 +15,12 @@ import { useMapGeneration } from "./use-map-generation";
 
 export type MapCompany = { company: Company; jobCount: number };
 
+/** South-west and north-east corners of the visible map. */
+export type MapView = [[number, number], [number, number]];
+
+/** Bump `key` to fly the map so `positions` are all visible. */
+export type FitRequest = { key: number; positions: [number, number][] };
+
 type Cluster = { key: string; members: MapCompany[]; center: L.LatLng };
 
 const CLUSTER_RADIUS_PX = 72;
@@ -47,12 +53,19 @@ export default function JobsMap({
   center,
   selectedSlug,
   onSelectCompany,
+  onViewChange,
+  fitRequest,
+  insetLeft = 0,
 }: {
   companies: MapCompany[];
   initialBounds: [number, number][];
   center: [number, number];
   selectedSlug: string | null;
   onSelectCompany: (slug: string) => void;
+  onViewChange?: (view: MapView) => void;
+  fitRequest?: FitRequest | null;
+  /** Pixels on the left covered by an overlay panel; the map keeps selections clear of it. */
+  insetLeft?: number;
 }) {
   const generation = useMapGeneration();
   const [map, setMap] = useState<LeafletMap | null>(null);
@@ -90,6 +103,39 @@ export default function JobsMap({
     const timeout = window.setTimeout(() => setNotice(null), 4000);
     return () => window.clearTimeout(timeout);
   }, [notice]);
+
+  useEffect(() => {
+    if (!map || !onViewChange) return;
+    const report = () => {
+      const bounds = map.getBounds();
+      onViewChange([
+        [bounds.getSouth(), bounds.getWest()],
+        [bounds.getNorth(), bounds.getEast()],
+      ]);
+    };
+    report();
+    map.on("moveend", report);
+    return () => {
+      map.off("moveend", report);
+    };
+  }, [map, onViewChange]);
+
+  const selectedPosition = companies.find((item) => item.company.slug === selectedSlug)?.company.position;
+  useEffect(() => {
+    if (!map || !selectedPosition) return;
+    map.panInside(selectedPosition, { paddingTopLeft: [insetLeft + 64, 160], paddingBottomRight: [64, 96] });
+  }, [map, selectedPosition, insetLeft]);
+
+  useEffect(() => {
+    if (!map || !fitRequest || fitRequest.positions.length === 0) return;
+    map.flyToBounds(L.latLngBounds(fitRequest.positions), {
+      paddingTopLeft: [insetLeft + 64, 140],
+      paddingBottomRight: [64, 56],
+      maxZoom: DEFAULT_ZOOM,
+    });
+    // Only react to new requests, not to the panel opening or closing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, fitRequest?.key]);
 
   const clusters = useMemo(() => (map && zoom !== null ? clusterCompanies(map, companies, zoom) : []), [map, companies, zoom]);
 

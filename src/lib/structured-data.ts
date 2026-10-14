@@ -36,16 +36,29 @@ export function jobPostingJsonLd(job: Job) {
       },
       geo: { "@type": "GeoCoordinates", latitude: job.company.position[0], longitude: job.company.position[1] },
     },
-    baseSalary: {
-      "@type": "MonetaryAmount",
-      currency: job.salary.currency,
-      value: {
-        "@type": "QuantitativeValue",
-        minValue: job.salary.min,
-        maxValue: job.salary.max,
-        unitText: job.salary.unit,
+    ...(job.workMode === "REMOTE" && {
+      jobLocationType: "TELECOMMUTE",
+      applicantLocationRequirements: { "@type": "State", name: job.city.region },
+    }),
+    experienceRequirements:
+      job.experience.max === 0
+        ? "No experience required"
+        : { "@type": "OccupationalExperienceRequirements", monthsOfExperience: job.experience.min * 12 },
+    educationRequirements: job.education,
+    skills: job.skills.join(", "),
+    jobBenefits: job.benefits.join(", "),
+    ...(job.salaryDisclosed && {
+      baseSalary: {
+        "@type": "MonetaryAmount",
+        currency: job.salary.currency,
+        value: {
+          "@type": "QuantitativeValue",
+          minValue: job.salary.min,
+          maxValue: job.salary.max,
+          unitText: job.salary.unit,
+        },
       },
-    },
+    }),
   };
 }
 

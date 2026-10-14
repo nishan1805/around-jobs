@@ -4,13 +4,17 @@ import { notFound } from "next/navigation";
 
 import { AppShell, Wordmark } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
-import { CategoryTag, JobCard } from "@/components/jobs/job-card";
+import { JobCard, VerifiedBadge } from "@/components/jobs/job-card";
+import { Badge } from "@/components/ui/badge";
 import { LocationMap } from "@/components/map";
 import { buttonVariants } from "@/components/ui/button";
 import {
   employmentTypes,
+  experienceLabel,
   formatDate,
   formatSalary,
+  isOpen,
+  workModes,
   getAllJobs,
   getJob,
   jobPath,
@@ -30,7 +34,8 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[city]/[jobS
   const job = await getJob(city, jobSlug);
   if (!job) return {};
   const title = `${job.title} at ${job.company.name}, ${job.company.area}`;
-  const description = `${employmentTypes[job.employmentType]} · ${formatSalary(job.salary)}. ${job.summary}`;
+  const pay = job.salaryDisclosed ? formatSalary(job.salary) : "Salary not disclosed";
+  const description = `${employmentTypes[job.employmentType]} · ${pay}. ${job.summary}`;
   return {
     title,
     description,
@@ -48,10 +53,14 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
   if (!job) notFound();
 
   const companyJobs = allJobs.filter((other) => other.company.slug === job.company.slug);
-  const moreAtCompany = companyJobs.filter((other) => other.slug !== job.slug);
+  const moreAtCompany = companyJobs.filter((other) => other.slug !== job.slug && isOpen(other));
+  const pay = job.salaryDisclosed ? formatSalary(job.salary) : "Salary not disclosed";
+  const canApply = isOpen(job);
 
   const facts = [
     { label: "Job type", value: employmentTypes[job.employmentType] },
+    { label: "Work mode", value: workModes[job.workMode] },
+    { label: "Experience", value: experienceLabel(job.experience) },
     { label: "Category", value: job.category },
     { label: "Posted", value: formatDate(job.datePosted) },
     { label: "Apply by", value: formatDate(job.validThrough) },
@@ -93,12 +102,18 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem] md:gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-8">
             <article className="flex flex-col gap-8 rounded-xl border bg-surface-default p-5 md:p-8">
               <header className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <CategoryTag>{job.category}</CategoryTag>
-                  <span className="text-label-medium text-text-tertiary">{employmentTypes[job.employmentType]}</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
+                  <Badge type="mode">{workModes[job.workMode]}</Badge>
+                  <Badge type="experience">{experienceLabel(job.experience)}</Badge>
+                  {job.status === "expired" && <Badge type="expired">Expired</Badge>}
+                  {job.status === "closed" && <Badge type="closed">Closed</Badge>}
                 </div>
-                <h1 className="text-display-small-semibold text-text-primary lg:text-display-32-semibold">{job.title}</h1>
-                <p className="text-subheading-medium text-text-secondary">{job.company.name}</p>
+                <h1 className="text-heading-semibold text-text-primary md:text-display-small-semibold">{job.title}</h1>
+                <p className="flex flex-wrap items-center gap-2 text-subheading-medium text-text-secondary">
+                  {job.company.name}
+                  <VerifiedBadge verified={job.company.verified} />
+                </p>
                 <p className="flex items-center gap-1.5 text-body-sm-regular text-text-tertiary">
                   <Icon name="pin" className="size-4 text-brand-primary" />
                   {job.company.streetAddress}, {job.company.area}, {job.city.name}
@@ -130,7 +145,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
               <div className="flex flex-col gap-5 rounded-xl border bg-surface-default p-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-label-medium text-text-tertiary">Salary</span>
-                  <span className="text-heading-semibold text-text-primary">{formatSalary(job.salary)}</span>
+                  <span className="text-heading-semibold text-text-primary">{pay}</span>
                 </div>
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
                   {facts.map((fact) => (
@@ -140,16 +155,22 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
                     </div>
                   ))}
                 </dl>
-                <a href={applyHref(job)} className={cn(buttonVariants({ size: "lg" }), "hidden w-full md:inline-flex")}>
-                  Apply now
-                </a>
+                {canApply ? (
+                  <a href={applyHref(job)} className={cn(buttonVariants({ size: "lg" }), "hidden w-full md:inline-flex")}>
+                    Apply now
+                  </a>
+                ) : (
+                  <p className="hidden rounded-sm bg-grey-100 px-4 py-3 text-center text-body-sm-semibold text-text-disabled md:block">
+                    {job.status === "expired" ? "Applications closed" : "Position closed"}
+                  </p>
+                )}
               </div>
 
               {moreAtCompany.length > 0 && (
                 <div className="flex flex-col gap-3">
                   <h2 className="text-body-sm-semibold text-text-primary">More jobs at {job.company.name}</h2>
                   {moreAtCompany.map((other) => (
-                    <JobCard key={other.slug} job={other} showCompany={false} />
+                    <JobCard key={other.slug} job={other} from={job.city.center} />
                   ))}
                 </div>
               )}
@@ -161,11 +182,17 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
       <div className="flex shrink-0 items-center justify-between gap-3 border-t bg-surface-default px-4 py-3 md:hidden">
         <div className="flex min-w-0 flex-col">
           <span className="text-label-medium text-text-tertiary">Salary</span>
-          <span className="truncate text-body-sm-semibold text-text-primary">{formatSalary(job.salary)}</span>
+          <span className="truncate text-body-sm-semibold text-text-primary">{pay}</span>
         </div>
-        <a href={applyHref(job)} className={buttonVariants()}>
-          Apply now
-        </a>
+        {canApply ? (
+          <a href={applyHref(job)} className={buttonVariants()}>
+            Apply now
+          </a>
+        ) : (
+          <span className="text-body-sm-semibold text-text-disabled">
+            {job.status === "expired" ? "Applications closed" : "Position closed"}
+          </span>
+        )}
       </div>
     </AppShell>
   );

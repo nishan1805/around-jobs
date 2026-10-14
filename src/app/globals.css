@@ -35,4 +35,27 @@
   .leaflet-div-icon {
     @apply border-0 bg-transparent;
   }
+
+  /* Two stacked native range inputs make the dual-thumb salary slider; only the thumbs take pointer input. */
+  .range-dual input[type="range"] {
+    @apply pointer-events-none absolute inset-0 m-0 h-5 w-full appearance-none bg-transparent;
+  }
+  .range-dual input[type="range"]::-webkit-slider-runnable-track {
+    @apply bg-transparent;
+  }
+  .range-dual input[type="range"]::-moz-range-track {
+    @apply bg-transparent;
+  }
+  .range-dual input[type="range"]::-webkit-slider-thumb {
+    @apply pointer-events-auto size-4 cursor-grab appearance-none rounded-full border-2 border-brand-primary bg-surface-default shadow-sm;
+  }
+  .range-dual input[type="range"]::-moz-range-thumb {
+    @apply pointer-events-auto size-4 cursor-grab rounded-full border-2 border-brand-primary bg-surface-default shadow-sm;
+  }
+  .range-dual input[type="range"]:focus-visible::-webkit-slider-thumb {
+    @apply ring-3 ring-brand-primary/40;
+  }
+  .range-dual input[type="range"]:focus-visible::-moz-range-thumb {
+    @apply ring-3 ring-brand-primary/40;
+  }
 }

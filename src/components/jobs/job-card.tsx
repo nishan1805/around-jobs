@@ -1,40 +1,120 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import type { MouseEvent } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { IconButton } from "@/components/ui/icon-button";
 import { Icon } from "@/components/icon";
-import { employmentTypes, formatDate, formatSalary, jobPath, type Job } from "@/lib/jobs";
+import {
+  employmentTypes,
+  experienceLabel,
+  formatSalaryShort,
+  jobPath,
+  locationLine,
+  timeAgo,
+  type Job,
+} from "@/lib/jobs";
+import { applicationFor, seekerActions, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
-export function CategoryTag({ children }: { children: string }) {
-  return (
-    <span className="rounded-full bg-primary-50 px-2 py-0.5 text-label-medium text-brand-primary">{children}</span>
-  );
+export function LogoPlaceholder({ className }: { className?: string }) {
+  return <span aria-hidden className={cn("block size-12 shrink-0 rounded-sm bg-grey-100", className)} />;
 }
 
-export function JobCard({ job, showCompany = true, className }: { job: Job; showCompany?: boolean; className?: string }) {
+export function VerifiedBadge({ verified }: { verified: boolean }) {
+  return verified ? <Badge type="verified">Verified</Badge> : <Badge type="unverified">Unverified</Badge>;
+}
+
+export function SalaryBadge({ job }: { job: Job }) {
+  return <Badge type="salary">{job.salaryDisclosed ? formatSalaryShort(job.salary) : "Salary not disclosed"}</Badge>;
+}
+
+const isPlainClick = (event: MouseEvent) =>
+  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
+/**
+ * Figma "Around / Jobs / Job Card" (1888:42501). The title is a real link to the
+ * job page (so it can be opened in a new tab and crawled); `onSelect` lets the
+ * map explorer open the in-map detail panel instead on a plain click.
+ */
+export function JobCard({
+  job,
+  from,
+  onSelect,
+  className,
+}: {
+  job: Job;
+  from: [number, number];
+  onSelect?: (job: Job) => void;
+  className?: string;
+}) {
+  const seeker = useSeeker();
+  const saved = seeker.savedJobs.includes(job.slug);
+  const applied = applicationFor(seeker, job.slug) !== null;
+
   return (
-    <Link
-      href={jobPath(job)}
+    <article
       className={cn(
-        "group flex flex-col gap-3 rounded-lg border bg-surface-default p-4 transition-shadow hover:shadow-md focus-visible:outline-2",
+        "relative flex w-full items-start gap-3 rounded-md border bg-surface-default p-4 transition-colors hover:border-border-strong",
+        applied && "border-brand-primary hover:border-brand-primary",
         className,
       )}
     >
-      <div className="flex items-center gap-2">
-        <CategoryTag>{job.category}</CategoryTag>
-        <span className="text-label-medium text-text-tertiary">{employmentTypes[job.employmentType]}</span>
-      </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="text-body-semibold text-text-primary group-hover:text-brand-primary">{job.title}</h3>
-        {showCompany && <p className="text-body-sm-medium text-text-secondary">{job.company.name}</p>}
-        <p className="flex items-center gap-1 text-label-regular text-text-tertiary">
-          <Icon name="pin" className="size-3.5" />
-          {job.company.area}, {job.city.name}
+      <LogoPlaceholder />
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <h3 className="text-body-semibold text-text-primary">
+          <Link
+            href={jobPath(job)}
+            onClick={(event) => {
+              if (!onSelect || !isPlainClick(event)) return;
+              event.preventDefault();
+              onSelect(job);
+            }}
+            className="rounded-md outline-none after:absolute after:inset-0 after:rounded-md focus-visible:after:ring-3 focus-visible:after:ring-brand-primary/40"
+          >
+            {job.title}
+          </Link>
+        </h3>
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+          <span className="text-body-sm-regular text-text-secondary">{job.company.name}</span>
+          <VerifiedBadge verified={job.company.verified} />
+        </div>
+        <p className="flex items-center gap-1 text-label-medium text-text-tertiary">
+          <Icon name="pinSm" className="size-4" />
+          {locationLine(job, from)}
         </p>
+        <div className="flex flex-wrap gap-1.5">
+          <SalaryBadge job={job} />
+          <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
+          <Badge type="experience">{experienceLabel(job.experience)}</Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-label-medium text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
+          {applied && <Badge type="applied">Applied</Badge>}
+        </div>
       </div>
-      <div className="mt-auto flex items-end justify-between gap-2 border-t pt-3">
-        <span className="text-body-sm-semibold text-text-primary">{formatSalary(job.salary)}</span>
-        <span className="text-label-regular text-text-tertiary">{formatDate(job.datePosted)}</span>
+      <IconButton
+        variant="plain"
+        icon={saved ? "bookmarkFilled" : "bookmark"}
+        label={saved ? `Remove ${job.title} from saved` : `Save ${job.title}`}
+        aria-pressed={saved}
+        onClick={() => seekerActions.toggleSavedJob(job.slug)}
+        className={cn("relative z-1 -m-0.5", saved && "text-brand-primary")}
+      />
+    </article>
+  );
+}
+
+export function JobCardSkeleton() {
+  return (
+    <div aria-hidden className="flex w-full items-start gap-3 rounded-md border bg-surface-default p-4">
+      <span className="size-12 shrink-0 animate-pulse rounded-sm bg-grey-100" />
+      <div className="flex flex-1 flex-col gap-2 pt-1">
+        <span className="h-4 w-3/5 animate-pulse rounded-xs bg-grey-100" />
+        <span className="h-3 w-4/5 animate-pulse rounded-xs bg-grey-100" />
+        <span className="h-3 w-2/5 animate-pulse rounded-xs bg-grey-100" />
       </div>
-    </Link>
+    </div>
   );
 }

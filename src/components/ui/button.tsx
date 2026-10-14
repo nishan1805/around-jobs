@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-4xl border border-transparent bg-clip-padding whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-brand-primary/40 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-brand-primary/40 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -21,10 +21,16 @@ const buttonVariants = cva(
         icon: "size-10",
         "icon-sm": "size-8",
       },
+      shape: {
+        pill: "rounded-4xl",
+        /** Figma "Around / Button": 8px corners, used inside panels and forms. */
+        rect: "rounded-sm",
+      },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      shape: "pill",
     },
   }
 )
@@ -33,12 +39,13 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  shape = "pill",
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, shape, className }))}
       {...props}
     />
   )

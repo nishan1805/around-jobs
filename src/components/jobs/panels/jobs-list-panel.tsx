@@ -1,0 +1,170 @@
+"use client";
+
+import { Chip, RemovableChip } from "@/components/jobs/chip";
+import { FiltersButton } from "@/components/jobs/filters-button";
+import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
+import { ViewToggle } from "@/components/jobs/view-toggle";
+import { Button } from "@/components/ui/button";
+import { EmptyBlock } from "@/components/ui/empty-block";
+import { IconButton } from "@/components/ui/icon-button";
+import { activeFilters, defaultFilters, describeFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
+import { categories, type Job } from "@/lib/jobs";
+
+import { MapPanel } from "./panel-parts";
+
+export type ListStatus = "ready" | "loading" | "error";
+
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+/** Figma "Around / Jobs / Jobs List Panel" (1889:41885), screens S03 and S05. */
+export function JobsListPanel({
+  cityName,
+  status,
+  jobs,
+  totalMatching,
+  filters,
+  onFiltersChange,
+  onOpenFilters,
+  onClose,
+  onSelectJob,
+  onSearchArea,
+  onRetry,
+  from,
+}: {
+  cityName: string;
+  status: ListStatus;
+  /** Matching jobs inside the visible map area (plus remote jobs). */
+  jobs: Job[];
+  /** Matching jobs anywhere in the city. */
+  totalMatching: number;
+  filters: JobFilters;
+  onFiltersChange: (filters: JobFilters) => void;
+  onOpenFilters: () => void;
+  onClose: () => void;
+  onSelectJob: (job: Job) => void;
+  onSearchArea: () => void;
+  onRetry: () => void;
+  from: [number, number];
+}) {
+  const chips = activeFilters(filters);
+  const description = describeFilters(filters);
+  const clearAll = () => onFiltersChange({ ...defaultFilters, query: filters.query, categories: filters.categories });
+  const resetEverything = () => onFiltersChange(defaultFilters);
+
+  const subtitle =
+    status === "loading"
+      ? "Finding jobs…"
+      : status === "error"
+        ? "Something went wrong"
+        : jobs.length === 0 && totalMatching > 0
+          ? "0 jobs in this area"
+          : chips.length > 0
+            ? `${plural(jobs.length, "job")} · ${plural(chips.length, "filter")} applied`
+            : `${plural(jobs.length, "job")} near you`;
+
+  const resultsLine =
+    status === "loading"
+      ? "Searching jobs…"
+      : status === "error"
+        ? "Results unavailable right now"
+        : jobs.length === 0 && totalMatching > 0
+          ? "0 results in this area"
+          : description
+            ? `${plural(jobs.length, "result")} for “${description}” in ${cityName}`
+            : `${plural(jobs.length, "result")} in ${cityName}`;
+
+  return (
+    <MapPanel label={`Jobs in ${cityName}`}>
+      <div className="flex shrink-0 flex-col gap-4 p-6 pb-4">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-heading-semibold text-text-primary">Jobs in {cityName}</h2>
+            <p aria-live="polite" className="text-label-medium text-text-tertiary">
+              {subtitle}
+            </p>
+          </div>
+          <FiltersButton count={chips.length} onClick={onOpenFilters} />
+          <IconButton variant="outline" icon="close" label="Close jobs list" onClick={onClose} iconClassName="size-4" />
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="min-w-0 flex-1 truncate text-body-sm-regular text-text-secondary" title={resultsLine}>
+            {resultsLine}
+          </p>
+          <ViewToggle view="list" size="sm" onChange={(view) => view === "map" && onClose()} />
+        </div>
+        <div role="group" aria-label="Job categories" className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Chip
+              key={category}
+              selected={filters.categories.includes(category)}
+              onClick={() => onFiltersChange({ ...filters, categories: toggleValue(filters.categories, category) })}
+            >
+              {category}
+            </Chip>
+          ))}
+        </div>
+        {chips.length > 0 && (
+          <div role="group" aria-label="Applied filters" className="flex flex-wrap items-center gap-2">
+            {chips.map((chip) => (
+              <RemovableChip key={chip.key} label={chip.label} onRemove={() => onFiltersChange(chip.remove(filters))} />
+            ))}
+            <button type="button" onClick={clearAll} className="text-label-semibold text-brand-primary hover:underline">
+              Clear all
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto overscroll-contain px-6 pb-6">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-3" aria-busy="true">
+            <span className="sr-only">Loading jobs</span>
+            {Array.from({ length: 4 }, (_, index) => (
+              <JobCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : status === "error" ? (
+          <EmptyBlock
+            icon="alertCircle"
+            title="Couldn't load jobs"
+            body="Check your internet connection and try again."
+            action={
+              <Button variant="outline" shape="rect" onClick={onRetry}>
+                Retry
+              </Button>
+            }
+          />
+        ) : totalMatching === 0 ? (
+          <EmptyBlock
+            title="No jobs match your filters"
+            body="Try another category, widen the salary range or clear filters."
+            action={
+              <Button variant="outline" shape="rect" onClick={resetEverything}>
+                Clear filters
+              </Button>
+            }
+          />
+        ) : jobs.length === 0 ? (
+          <EmptyBlock
+            icon="map"
+            title="No jobs in this area yet"
+            body="Move or zoom out the map to see jobs nearby."
+            action={
+              <Button variant="outline" shape="rect" onClick={onSearchArea}>
+                Search this area
+              </Button>
+            }
+          />
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {jobs.map((job) => (
+              <li key={job.slug}>
+                <JobCard job={job} from={from} onSelect={onSelectJob} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </MapPanel>
+  );
+}

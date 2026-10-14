@@ -9,13 +9,38 @@ export const categories = [
 
 export type Category = (typeof categories)[number];
 
+/** Keys are schema.org JobPosting `employmentType` values. */
 export const employmentTypes = {
   FULL_TIME: "Full-time",
   PART_TIME: "Part-time",
+  CONTRACTOR: "Contract",
   INTERN: "Internship",
 } as const;
 
 export type EmploymentType = keyof typeof employmentTypes;
+
+export const workModes = {
+  ON_SITE: "On-site",
+  HYBRID: "Hybrid",
+  REMOTE: "Remote",
+} as const;
+
+export type WorkMode = keyof typeof workModes;
+
+/** Filter buckets from the Figma Filters panel; a job matches when its range overlaps the bucket. */
+export const experienceBuckets = {
+  FRESHER: { label: "Fresher", min: 0, max: 0 },
+  "1_3": { label: "1–3 yrs", min: 1, max: 3 },
+  "3_5": { label: "3–5 yrs", min: 3, max: 5 },
+  "5_PLUS": { label: "5+ yrs", min: 5, max: 99 },
+} as const;
+
+export type ExperienceBucket = keyof typeof experienceBuckets;
+
+export type JobStatus = "open" | "expired" | "closed";
+
+/** All relative dates in the sample data ("Posted 2d ago") are measured from this day. */
+export const SAMPLE_TODAY = "2026-10-14";
 
 export type City = {
   slug: string;
@@ -34,6 +59,9 @@ export type Company = {
   postalCode: string;
   position: [number, number];
   citySlug: string;
+  verified: boolean;
+  /** Number of placeholder photos in the gallery header. */
+  photoCount: number;
 };
 
 export type Job = {
@@ -41,12 +69,21 @@ export type Job = {
   title: string;
   category: Category;
   employmentType: EmploymentType;
+  workMode: WorkMode;
+  experience: { min: number; max: number };
   salary: { min: number; max: number; currency: "INR"; unit: "MONTH" };
+  salaryDisclosed: boolean;
   datePosted: string;
   validThrough: string;
+  status: JobStatus;
+  applicants: number;
   summary: string;
   responsibilities: string[];
   requirements: string[];
+  skills: string[];
+  skillNotes: string[];
+  education: string;
+  benefits: string[];
   company: Company;
   city: City;
 };
@@ -61,9 +98,19 @@ export const cities: City[] = [
   },
 ];
 
-type JobSeed = [title: string, type: EmploymentType, min: number, max: number];
+type JobOptions = {
+  experience?: [number, number];
+  mode?: WorkMode;
+  salaryHidden?: boolean;
+  status?: Exclude<JobStatus, "open">;
+};
 
-type CompanySeed = Omit<Company, "citySlug"> & { jobs: JobSeed[] };
+type JobSeed = [title: string, type: EmploymentType, min: number, max: number, options?: JobOptions];
+
+type CompanySeed = Omit<Company, "citySlug" | "verified" | "photoCount"> & {
+  verified?: boolean;
+  jobs: JobSeed[];
+};
 
 const companySeeds: CompanySeed[] = [
   {
@@ -77,7 +124,7 @@ const companySeeds: CompanySeed[] = [
     jobs: [
       ["Retail Sales Associate", "FULL_TIME", 14000, 18000],
       ["Cashier", "FULL_TIME", 13000, 16000],
-      ["Visual Merchandiser", "FULL_TIME", 18000, 24000],
+      ["Visual Merchandiser", "FULL_TIME", 18000, 24000, { experience: [1, 3], salaryHidden: true }],
       ["Store Inventory Executive", "FULL_TIME", 15000, 19000],
     ],
   },
@@ -91,7 +138,7 @@ const companySeeds: CompanySeed[] = [
     position: [21.2632, 81.6211],
     jobs: [
       ["Barista", "FULL_TIME", 12000, 16000],
-      ["Kitchen Helper", "PART_TIME", 9000, 12000],
+      ["Kitchen Helper", "PART_TIME", 9000, 12000, { experience: [0, 0] }],
     ],
   },
   {
@@ -102,7 +149,7 @@ const companySeeds: CompanySeed[] = [
     streetAddress: "Near Moti Bagh Chowk",
     postalCode: "492001",
     position: [21.2441, 81.6088],
-    jobs: [["Front Office Executive", "FULL_TIME", 18000, 24000]],
+    jobs: [["Front Office Executive", "FULL_TIME", 18000, 24000, { experience: [1, 3], salaryHidden: true }]],
   },
   {
     slug: "raipur-tech-hub",
@@ -113,12 +160,12 @@ const companySeeds: CompanySeed[] = [
     postalCode: "492007",
     position: [21.2624, 81.6629],
     jobs: [
-      ["Junior Frontend Developer", "FULL_TIME", 25000, 40000],
+      ["Junior Frontend Developer", "FULL_TIME", 25000, 40000, { experience: [0, 2], mode: "HYBRID" }],
       ["IT Support Technician", "FULL_TIME", 18000, 25000],
-      ["QA Tester", "FULL_TIME", 20000, 30000],
-      ["Android Developer", "FULL_TIME", 35000, 55000],
-      ["UI Designer", "FULL_TIME", 25000, 40000],
-      ["Technical Support Intern", "INTERN", 8000, 10000],
+      ["QA Tester", "FULL_TIME", 20000, 30000, { experience: [1, 3], mode: "REMOTE" }],
+      ["Android Developer", "FULL_TIME", 35000, 55000, { experience: [3, 5], mode: "HYBRID" }],
+      ["UI Designer", "CONTRACTOR", 25000, 40000, { experience: [1, 3], mode: "REMOTE", salaryHidden: true }],
+      ["Technical Support Intern", "INTERN", 8000, 10000, { experience: [0, 0] }],
     ],
   },
   {
@@ -157,10 +204,10 @@ const companySeeds: CompanySeed[] = [
     postalCode: "492006",
     position: [21.2292, 81.6842],
     jobs: [
-      ["Store Manager", "FULL_TIME", 28000, 35000],
+      ["Store Manager", "FULL_TIME", 28000, 35000, { experience: [5, 8] }],
       ["Billing Executive", "FULL_TIME", 13000, 16000],
       ["Stock Associate", "FULL_TIME", 12000, 15000],
-      ["Delivery Partner", "PART_TIME", 10000, 15000],
+      ["Delivery Partner", "CONTRACTOR", 10000, 15000, { experience: [0, 0] }],
       ["Customer Service Associate", "FULL_TIME", 13000, 17000],
     ],
   },
@@ -188,7 +235,7 @@ const companySeeds: CompanySeed[] = [
     jobs: [
       ["Pharmacy Assistant", "FULL_TIME", 14000, 18000],
       ["Lab Sample Collector", "FULL_TIME", 13000, 17000],
-      ["Night Shift Pharmacist", "FULL_TIME", 25000, 32000],
+      ["Night Shift Pharmacist", "FULL_TIME", 25000, 32000, { experience: [3, 5], status: "closed" }],
       ["Patient Care Attendant", "FULL_TIME", 12000, 16000],
     ],
   },
@@ -196,13 +243,14 @@ const companySeeds: CompanySeed[] = [
     slug: "swift-couriers",
     name: "Swift Couriers (Sample)",
     category: "Office admin",
+    verified: false,
     area: "Pandri",
     streetAddress: "Lodhipara Chowk",
     postalCode: "492004",
     position: [21.253, 81.6471],
     jobs: [
       ["Office Assistant", "FULL_TIME", 13000, 16000],
-      ["Dispatch Coordinator", "FULL_TIME", 16000, 21000],
+      ["Dispatch Coordinator", "CONTRACTOR", 16000, 21000],
       ["Accounts Assistant", "FULL_TIME", 18000, 24000],
     ],
   },
@@ -221,6 +269,16 @@ const companySeeds: CompanySeed[] = [
     ],
   },
   {
+    slug: "sunrise-care-clinic",
+    name: "Sunrise Care Clinic (Sample)",
+    category: "Healthcare support",
+    area: "Shankar Nagar",
+    streetAddress: "Near Shankar Nagar Chowk",
+    postalCode: "492007",
+    position: [21.2499, 81.6603],
+    jobs: [],
+  },
+  {
     slug: "pandri-textiles",
     name: "Pandri Textiles (Sample)",
     category: "Retail",
@@ -230,7 +288,7 @@ const companySeeds: CompanySeed[] = [
     position: [21.2527, 81.6451],
     jobs: [
       ["Saree Sales Associate", "FULL_TIME", 13000, 17000],
-      ["Tailoring Assistant", "PART_TIME", 9000, 12000],
+      ["Tailoring Assistant", "PART_TIME", 9000, 12000, { status: "expired" }],
     ],
   },
 ];
@@ -322,6 +380,54 @@ const categoryCopy: Record<Category, { pitch: string; responsibilities: string[]
   },
 };
 
+const categoryExtras: Record<
+  Category,
+  { skills: string[]; skillNotes: string[]; education: string; benefits: string[] }
+> = {
+  Retail: {
+    skills: ["Customer service", "Billing / POS", "Basic computer", "Hindi", "English"],
+    skillNotes: ["Good communication skills", "Comfortable standing for long shifts"],
+    education: "Class 12 pass (required) · Graduate (preferred)",
+    benefits: ["Monthly incentives", "Staff discount", "Paid weekly off"],
+  },
+  Hospitality: {
+    skills: ["Guest service", "Food safety", "Teamwork", "Hindi"],
+    skillNotes: ["Calm under pressure during rush hours", "Neat and well groomed"],
+    education: "Class 10 pass (required) · Hotel management diploma (preferred)",
+    benefits: ["Free meals on shift", "Tips shared weekly", "Paid weekly off"],
+  },
+  Sales: {
+    skills: ["Negotiation", "Product demos", "WhatsApp", "Hindi"],
+    skillNotes: ["Comfortable meeting targets", "Friendly and persuasive"],
+    education: "Class 12 pass (required)",
+    benefits: ["Sales incentives", "Travel allowance", "Paid weekly off"],
+  },
+  "Healthcare support": {
+    skills: ["Patient care", "Record keeping", "Hygiene protocols", "Hindi"],
+    skillNotes: ["Empathetic with patients", "Careful with medicines and samples"],
+    education: "Relevant certificate or diploma (required for clinical roles)",
+    benefits: ["Health cover", "Shift allowance", "Paid weekly off"],
+  },
+  "Office admin": {
+    skills: ["MS Excel", "Tally", "Data entry", "Phone etiquette"],
+    skillNotes: ["Organised and punctual", "Clear written Hindi and English"],
+    education: "Graduate in any discipline (preferred)",
+    benefits: ["Fixed day shift", "Provident fund", "Paid weekly off"],
+  },
+  Technology: {
+    skills: ["JavaScript", "Git", "Problem solving", "English"],
+    skillNotes: ["Comfortable reading documentation", "Willing to learn new tools"],
+    education: "B.Tech / BCA / MCA or an equivalent portfolio",
+    benefits: ["Laptop provided", "Learning budget", "Flexible hours"],
+  },
+};
+
+const defaultExperience: [number, number][] = [
+  [0, 2],
+  [0, 0],
+  [1, 3],
+];
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -347,24 +453,35 @@ export const companies: Company[] = companySeeds.map((seed) => ({
   postalCode: seed.postalCode,
   position: seed.position,
   citySlug: raipur.slug,
+  verified: seed.verified ?? true,
+  photoCount: 8,
 }));
 
 export const jobs: Job[] = companySeeds.flatMap((seed, companyIndex) => {
   const company = companies[companyIndex];
   const copy = categoryCopy[seed.category];
-  return seed.jobs.map(([title, employmentType, min, max], jobIndex) => {
-    const datePosted = addDays("2026-09-28", (companyIndex * 3 + jobIndex * 2) % 14);
+  const extras = categoryExtras[seed.category];
+  return seed.jobs.map(([title, employmentType, min, max, options = {}], jobIndex) => {
+    const datePosted = addDays("2026-09-30", (companyIndex * 3 + jobIndex * 2) % 14);
+    const [expMin, expMax] = options.experience ?? defaultExperience[(companyIndex + jobIndex) % defaultExperience.length];
+    const status = options.status ?? "open";
     return {
       slug: `${slugify(title)}-${company.slug}`,
       title,
       category: seed.category,
       employmentType,
+      workMode: options.mode ?? "ON_SITE",
+      experience: { min: expMin, max: expMax },
       salary: { min, max, currency: "INR" as const, unit: "MONTH" as const },
+      salaryDisclosed: !options.salaryHidden,
       datePosted,
-      validThrough: addDays(datePosted, 45),
+      validThrough: status === "expired" ? addDays(SAMPLE_TODAY, -2) : addDays(datePosted, 31),
+      status,
+      applicants: ((companyIndex * 7 + jobIndex * 5) % 28) + 3,
       summary: `${company.name} is hiring a ${title} at its ${company.area} location in ${raipur.name}. ${copy.pitch}`,
       responsibilities: copy.responsibilities,
       requirements: copy.requirements,
+      ...extras,
       company,
       city: raipur,
     };
@@ -372,6 +489,45 @@ export const jobs: Job[] = companySeeds.flatMap((seed, companyIndex) => {
 });
 
 export const jobPath = (job: Pick<Job, "slug" | "city">) => `/jobs/${job.city.slug}/${job.slug}`;
+
+export const isOpen = (job: Pick<Job, "status">) => job.status === "open";
+
+export const experienceLabel = ({ min, max }: Job["experience"]) =>
+  max === 0 ? "Fresher" : `${min}–${max} yrs`;
+
+export const matchesExperience = (job: Job, bucket: ExperienceBucket) => {
+  const range = experienceBuckets[bucket];
+  return job.experience.min <= range.max && job.experience.max >= range.min;
+};
+
+const EARTH_RADIUS_KM = 6371;
+
+export function distanceKm([lat1, lng1]: [number, number], [lat2, lng2]: [number, number]) {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(a));
+}
+
+/** "Pandri, Raipur · 2.1 km" (or "Remote · Raipur") measured from the searched location. */
+export function locationLine(job: Job, from: [number, number]) {
+  if (job.workMode === "REMOTE") return `Remote · ${job.city.name}`;
+  return `${job.company.area}, ${job.city.name} · ${distanceKm(from, job.company.position).toFixed(1)} km`;
+}
+
+const daysBetween = (fromIso: string, toIso: string) =>
+  Math.round((Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / 86_400_000);
+
+export function timeAgo(isoDate: string) {
+  const days = daysBetween(isoDate, SAMPLE_TODAY);
+  if (days <= 0) return "today";
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
+export const daysSince = (isoDate: string) => daysBetween(isoDate, SAMPLE_TODAY);
 
 export async function getJob(citySlug: string, jobSlug: string) {
   return jobs.find((job) => job.city.slug === citySlug && job.slug === jobSlug) ?? null;
@@ -385,6 +541,18 @@ const rupees = new Intl.NumberFormat("en-IN", { style: "currency", currency: "IN
 
 export const formatSalary = ({ min, max }: Job["salary"]) =>
   `${rupees.format(min)}–${rupees.format(max).replace("₹", "")} a month`;
+
+/** "₹15,000 – ₹20,000 / month", as on the Job Detail panel. */
+export const formatSalaryRange = ({ min, max }: Job["salary"]) =>
+  `${rupees.format(min)} – ${rupees.format(max)} / month`;
+
+/** "₹15k–20k/mo", as on the Job Card salary badge. */
+export const formatSalaryShort = ({ min, max }: Job["salary"]) => {
+  const k = (value: number) => `${Math.round(value / 1000)}k`;
+  return `₹${k(min)}–${k(max)}/mo`;
+};
+
+export const formatRupees = (value: number) => rupees.format(value);
 
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
