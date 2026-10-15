@@ -11,7 +11,7 @@ export function PageHeader({
   mobileSubtitle,
 }: {
   title: string;
-  subtitle: ReactNode;
+  subtitle?: ReactNode;
   mobileTitle?: string;
   mobileSubtitle?: ReactNode;
 }) {
@@ -27,16 +27,18 @@ export function PageHeader({
           title
         )}
       </h1>
-      <p className="text-body-sm-regular text-text-secondary">
-        {mobileSubtitle ? (
-          <>
-            <span className="md:hidden">{mobileSubtitle}</span>
-            <span className="max-md:hidden">{subtitle}</span>
-          </>
-        ) : (
-          subtitle
-        )}
-      </p>
+      {subtitle ? (
+        <p className="text-body-sm-regular text-text-secondary">
+          {mobileSubtitle ? (
+            <>
+              <span className="md:hidden">{mobileSubtitle}</span>
+              <span className="max-md:hidden">{subtitle}</span>
+            </>
+          ) : (
+            subtitle
+          )}
+        </p>
+      ) : null}
     </header>
   );
 }

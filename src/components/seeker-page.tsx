@@ -9,6 +9,7 @@ import { TopBar } from "@/components/jobs/top-bar";
 import { EmptyPage, PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { useHydrated } from "@/hooks/use-hydrated";
+import { cn } from "@/lib/utils";
 
 /**
  * Shell for the seeker's own pages (My applications, Saved): sidebar, top bar and the
@@ -24,6 +25,7 @@ export function SeekerPage({
   loginTitle,
   loginBody,
   skeleton,
+  canvas = "grey",
   children,
 }: {
   active: "applications" | "saved" | "profile";
@@ -35,6 +37,8 @@ export function SeekerPage({
   loginTitle: string;
   loginBody: string;
   skeleton: ReactNode;
+  /** "plain" is the white settings canvas (Profile, M20). */
+  canvas?: "grey" | "plain";
   children: ReactNode;
 }) {
   const hydrated = useHydrated();
@@ -43,7 +47,12 @@ export function SeekerPage({
   return (
     <AppShell active={active}>
       <TopBar />
-      <main className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-background-secondary px-5 py-6 md:gap-6 md:px-10 md:py-8">
+      <main
+        className={cn(
+          "flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-6 md:gap-6 md:px-10 md:py-8",
+          canvas === "plain" ? "bg-surface-default" : "bg-background-secondary",
+        )}
+      >
         {!hydrated ? (
           <>
             <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} />

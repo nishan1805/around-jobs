@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-import type { EmploymentType } from "@/lib/jobs";
+import type { Category, EmploymentType } from "@/lib/jobs";
 
 /**
  * Mock phone + OTP auth. Nothing leaves the browser: the "session" lives in
@@ -14,6 +14,7 @@ export type User = {
   name: string | null;
   city: string | null;
   preferredTypes: EmploymentType[];
+  preferredCategories: Category[];
   resumeName: string | null;
   profileSkipped: boolean;
 };
@@ -32,7 +33,10 @@ function read(): User | null {
   if (user !== undefined) return user;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    user = raw ? (JSON.parse(raw) as User) : null;
+    const parsed = raw ? (JSON.parse(raw) as Partial<User>) : null;
+    user = parsed?.phone
+      ? { name: null, city: null, preferredTypes: [], preferredCategories: [], resumeName: null, profileSkipped: false, ...parsed, phone: parsed.phone }
+      : null;
   } catch {
     user = null;
   }
@@ -87,7 +91,7 @@ export const authActions = {
     const next: User =
       existing?.phone === phone
         ? existing
-        : { phone, name: null, city: null, preferredTypes: [], resumeName: null, profileSkipped: false };
+        : { phone, name: null, city: null, preferredTypes: [], preferredCategories: [], resumeName: null, profileSkipped: false };
     write(next);
     return { ok: true as const, user: next };
   },

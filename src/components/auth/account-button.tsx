@@ -43,6 +43,9 @@ export function AccountButton() {
             <Menu.Item className={itemClass} onClick={editProfile}>
               {user.name ? "Edit profile" : "Complete profile"}
             </Menu.Item>
+            <Menu.Item className={itemClass} render={<Link href="/profile" />}>
+              Profile
+            </Menu.Item>
             <Menu.Item className={itemClass} render={<Link href="/applications" />}>
               My applications
             </Menu.Item>

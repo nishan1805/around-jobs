@@ -144,3 +144,9 @@ code does today so a designer can confirm or correct it.
 - **Withdraw.** The application stays in the list as "Withdrawn" (M18), and the job can
   be applied to again. The success banner shows once after withdrawing. The resume
   "View" opens a note, since the Sample app keeps no file.
+- **Profile (M20).** The name is whatever the person entered; Figma's "Sample ·" prefix
+  is not added to it. The resume row says "saved on this device" because no updated
+  date is stored (Figma says "updated 3w ago"). Job preferences also stores categories,
+  which M20 shows and Complete profile does not ask for. Notifications and Language are
+  sample dialogs. Help includes a mailto link. Desktop has no profile frame, so the
+  same column sits in the app shell and the account menu links to it.
