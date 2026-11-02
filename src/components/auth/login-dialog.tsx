@@ -119,16 +119,31 @@ export function LoginDialog({
   onOpenChange,
   onLoggedIn,
   reason,
+  initialStep = "phone",
+  initialPhone = "",
+  initialCode = "",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onLoggedIn: (user: User) => void;
   reason?: string;
+  /** Query-param previews for S08 (`phone`) and S09 (`otp`). */
+  initialStep?: Step;
+  initialPhone?: string;
+  initialCode?: string;
 }) {
-  const [step, setStep] = useState<Step>("phone");
-  const [phone, setPhone] = useState("");
+  const [step, setStep] = useState<Step>(initialStep);
+  const [phone, setPhone] = useState(initialPhone);
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode);
+  const previewKey = `${initialStep}:${initialPhone}:${initialCode}`;
+  const [seenPreview, setSeenPreview] = useState(previewKey);
+  if (previewKey !== seenPreview) {
+    setSeenPreview(previewKey);
+    setStep(initialStep);
+    setPhone(initialPhone);
+    setCode(initialCode);
+  }
   const [attemptsLeft, setAttemptsLeft] = useState(OTP_ATTEMPTS);
   const [otpError, setOtpError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

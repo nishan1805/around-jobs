@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import { Chip } from "@/components/jobs/chip";
 import { FiltersButton } from "@/components/jobs/filters-button";
@@ -16,8 +16,21 @@ import { JobsMap, type FitRequest, type MapCompany, type MapView } from "@/compo
 import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
+import { useSearchParam } from "@/hooks/use-search-param";
 import { activeFilters, defaultFilters, matchesFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
-import { categories, distanceKm, isOpen, type City, type Company, type Job } from "@/lib/jobs";
+import {
+  categories,
+  distanceKm,
+  employmentTypes,
+  isOpen,
+  workModes,
+  type Category,
+  type City,
+  type Company,
+  type EmploymentType,
+  type Job,
+  type WorkMode,
+} from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 import { useCoverTabBar } from "@/hooks/use-cover-tab-bar";
 
@@ -32,17 +45,6 @@ const none: Panel = { kind: "none" };
 
 /** The searched location; GPS isn't used for the list yet. */
 const LOCATION_AREA = "Shankar Nagar";
-
-const subscribeToUrl = (onChange: () => void) => {
-  window.addEventListener("popstate", onChange);
-  return () => window.removeEventListener("popstate", onChange);
-};
-const useSearchParam = (name: string) =>
-  useSyncExternalStore(
-    subscribeToUrl,
-    () => new URLSearchParams(window.location.search).get(name),
-    () => null,
-  );
 
 const inView = (view: MapView | null, [lat, lng]: [number, number]) =>
   !view || (lat >= view[0][0] && lat <= view[1][0] && lng >= view[0][1] && lng <= view[1][1]);
@@ -65,10 +67,23 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const filtersParam = useSearchParam("filters");
   const stateParam = useSearchParam("state");
   const queryParam = useSearchParam("q");
+  const categoryParam = useSearchParam("category");
+  const typeParam = useSearchParam("type");
+  const modeParam = useSearchParam("mode");
   const [seenQueryParam, setSeenQueryParam] = useState<string | null>(null);
-  if (queryParam !== seenQueryParam) {
-    setSeenQueryParam(queryParam);
-    if (queryParam) setFilters((current) => ({ ...current, query: queryParam }));
+  const previewKey = `${queryParam ?? ""}|${categoryParam ?? ""}|${typeParam ?? ""}|${modeParam ?? ""}`;
+  if (previewKey !== seenQueryParam) {
+    setSeenQueryParam(previewKey);
+    setFilters((current) => ({
+      ...current,
+      query: queryParam ?? current.query,
+      categories:
+        categoryParam && (categories as readonly string[]).includes(categoryParam)
+          ? [categoryParam as Category]
+          : current.categories,
+      types: typeParam && typeParam in employmentTypes ? [typeParam as EmploymentType] : current.types,
+      workModes: modeParam && modeParam in workModes ? [modeParam as WorkMode] : current.workModes,
+    }));
   }
   const linkedPanel = (): Panel => {
     const list: Panel = viewParam === "list" ? { kind: "list" } : none;

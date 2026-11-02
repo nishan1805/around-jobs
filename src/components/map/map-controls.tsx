@@ -54,7 +54,7 @@ export function MapControls({
   const scale = useScale(map);
 
   return (
-    <div className={cn("pointer-events-none flex flex-col items-end gap-2.5", className)}>
+    <div className={cn("pointer-events-none flex flex-col items-end gap-3", className)}>
       <button
         type="button"
         onClick={onLocate}
@@ -64,13 +64,13 @@ export function MapControls({
       >
         <Icon name="crosshair" className={cn(locating && "animate-spin")} />
       </button>
-      <div className="pointer-events-auto hidden flex-col overflow-hidden rounded-md border shadow-sm md:flex">
-        <button type="button" aria-label="Zoom in" onClick={() => map.zoomIn()} className={cn(controlButton, "h-10 w-11")}>
-          <Icon name="plus" />
+      <div className="pointer-events-auto hidden flex-col overflow-hidden rounded-xl border shadow-sm md:flex">
+        <button type="button" aria-label="Zoom in" onClick={() => map.zoomIn()} className={cn(controlButton, "size-11")}>
+          <Icon name="plus" className="size-5" />
         </button>
         <span className="h-px w-11 bg-border-default" />
-        <button type="button" aria-label="Zoom out" onClick={() => map.zoomOut()} className={cn(controlButton, "h-10 w-11")}>
-          <Icon name="minus" />
+        <button type="button" aria-label="Zoom out" onClick={() => map.zoomOut()} className={cn(controlButton, "size-11")}>
+          <Icon name="minus" className="size-5" />
         </button>
       </div>
       <div className="flex items-center gap-2 rounded-sm bg-surface-default px-2 py-1.5" aria-label={`Map scale ${scale.label}`}>

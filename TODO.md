@@ -148,5 +148,41 @@ code does today so a designer can confirm or correct it.
   is not added to it. The resume row says "saved on this device" because no updated
   date is stored (Figma says "updated 3w ago"). Job preferences also stores categories,
   which M20 shows and Complete profile does not ask for. Notifications and Language are
-  sample dialogs. Help includes a mailto link. Desktop has no profile frame, so the
-  same column sits in the app shell and the account menu links to it.
+  sample dialogs. Help includes a mailto link. Phones still use this column. Desktop
+  now follows the later P01–P05 frames instead.
+
+## Finalized job-seeker web (Nov 2026)
+
+- **Search placeholder.** The brief asked for "Search jobs, companies, or skills...".
+  S00, S04, S16 and the profile frames all say "Search places, restaurants, events, offers...".
+  The frames win.
+- **Two names on one profile.** The completion card, account menu and avatar use
+  "Nishan Kumar Mondal". The basic-info form, resume filename and LinkedIn URL use
+  "Rahul Sharma". Both are shown as drawn. They are not merged.
+- **Sidebar.** Desktop nav is Jobs, Applied, Saved, Profile. "Post a job" moved to the
+  top bar and only shows while logged out (S00). Logged-in frames omit it.
+- **Location menu (S04).** Selected row uses `primary-50`. The frame's fill is `#edf2ff`,
+  which is not a token. Dropdown rows use 10px radius; the closest token is `rounded-md` (12px)
+  except the location rows, which keep 10px so the open menu matches the frame.
+- **Filter count.** Categories are still not counted. S04/S07 "Filters 2" with Retail
+  selected is previewed with `?category=Retail&type=FULL_TIME&mode=ON_SITE`.
+- **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens
+  Job Preferences, because the frames do not include a job-alerts screen. Help & support
+  uses the existing `mailto:support@around.jobs` link.
+- **Saved jobs (S17).** The header says "2 expiring soon" while every card shows an
+  Expiring soon badge. Both are kept. The six cards are the frame's Site Supervisor /
+  Raipur Builder set, not the older café sample. Nearby is the first three cards and
+  Recently added is the first two, so the chip counts match (3 and 2).
+- **P02e second education** uses the filled Add education dialog (Diploma, Government
+  Polytechnic, Raipur), because that frame was the source for the extra card.
+- **P03c third experience** repeats the Site Engineer card so the section shows three
+  entries. The frame's third role was not in the design-context response used here.
+- **P03f / upload error / remove-photo body.** Empty experience body, the resume upload
+  error line, and the remove-photo explanation are not copied from a fetched frame.
+  Resume remove and experience delete use the fetched sentences.
+- **P03b field errors** reuse the "Fill in the required fields to save." banner from
+  education. Per-field experience sentences were not in the fetched validation frame.
+- **Photo file.** P05-02/03/04 do not include a portrait asset in the responses used
+  here, so the circle stays the "N" initial and the phase (selected, saving, success,
+  error) changes the chrome around it.
+- **Apply and applications (S11–S15)** were not restyled.

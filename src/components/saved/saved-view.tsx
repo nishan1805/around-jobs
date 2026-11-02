@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { Icon } from "@/components/icon";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
 import { Chip } from "@/components/jobs/chip";
 import { EmptyPage, PageHeader } from "@/components/page-header";
 import { SeekerPage } from "@/components/seeker-page";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
+import { useSearchParam } from "@/hooks/use-search-param";
 import { cities, daysSince, distanceKm, isExpiringSoon, jobs, type Job } from "@/lib/jobs";
+import { savedCardsSeed, type SavedCardSeed } from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
 
 const INTRO = "Keep jobs you like here and apply when you are ready.";
@@ -67,20 +71,25 @@ function SavedContent() {
   };
   const visible = saved.filter((job) => matches(job, filter));
 
-  if (saved.length === 0) {
+  const emptyPreview = useSearchParam("empty") === "1";
+
+  if (saved.length === 0 || emptyPreview) {
     return (
       <>
-        <PageHeader title="Saved jobs" subtitle={INTRO} />
-        <EmptyPage
-          icon="bookmark"
-          title="Nothing saved yet"
-          body="Tap the bookmark on any job to save it for later."
-          action={
-            <Link href="/" className={buttonVariants()}>
-              Browse jobs
-            </Link>
-          }
-        />
+        <div className={emptyPreview ? "md:hidden" : undefined}>
+          <PageHeader title="Saved jobs" subtitle={INTRO} />
+          <EmptyPage
+            icon="bookmark"
+            title="Nothing saved yet"
+            body="Tap the bookmark on any job to save it for later."
+            action={
+              <Link href="/" className={buttonVariants()}>
+                Browse jobs
+              </Link>
+            }
+          />
+        </div>
+        {emptyPreview && <DesktopSaved empty />}
       </>
     );
   }
@@ -91,6 +100,7 @@ function SavedContent() {
 
   return (
     <>
+      <div className="md:hidden">
       <PageHeader
         title="Saved jobs"
         subtitle={subtitle}
@@ -126,6 +136,118 @@ function SavedContent() {
           ))}
         </ul>
       )}
+      </div>
+      <DesktopSaved />
     </>
+  );
+}
+
+function DesktopSaved({ empty = false }: { empty?: boolean }) {
+  const [filter, setFilter] = useState<"all" | "nearby" | "recent">("all");
+  const [removed, setRemoved] = useState<string[]>([]);
+  const cards = savedCardsSeed.filter((card) => !removed.includes(card.id));
+  const visible = cards.filter((card) => {
+    if (filter === "nearby") return card.nearby;
+    if (filter === "recent") return card.recent;
+    return true;
+  });
+  const counts = {
+    all: cards.length,
+    nearby: cards.filter((card) => card.nearby).length,
+    recent: cards.filter((card) => card.recent).length,
+  };
+
+  if (empty || cards.length === 0) {
+    return (
+      <div className="hidden min-h-0 flex-1 flex-col gap-6 md:flex">
+        <header className="flex flex-col gap-1">
+          <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
+          <p className="text-body-sm-regular text-text-secondary">Keep jobs you like here and apply when you are ready.</p>
+        </header>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/illustrations/saved-empty.svg" alt="" width={280} height={200} />
+          <div className="flex max-w-[260px] flex-col gap-3 text-center">
+            <p className="text-subheading-semibold text-text-primary">No saved jobs yet</p>
+            <p className="text-body-sm-regular text-text-secondary">Tap the bookmark on any job to save it here for later.</p>
+          </div>
+          <Link href="/" className={buttonVariants({ shape: "pill" })}>
+            Browse jobs
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="hidden flex-col gap-6 md:flex">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
+        <p className="text-body-sm-regular text-text-secondary">6 saved jobs, 2 expiring soon.</p>
+      </header>
+      <div role="group" aria-label="Filter saved jobs" className="flex gap-2">
+        {(
+          [
+            ["all", "All"],
+            ["nearby", "Nearby"],
+            ["recent", "Recently added"],
+          ] as const
+        ).map(([key, label]) => (
+          <Chip key={key} selected={filter === key} onClick={() => setFilter(key)}>
+            {label} · {counts[key]}
+          </Chip>
+        ))}
+      </div>
+      <ul className="grid items-start gap-4 min-[80rem]:grid-cols-3">
+        {visible.map((card) => (
+          <li key={card.id}>
+            <SavedDesignCard card={card} onUnsave={() => setRemoved((current) => [...current, card.id])} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SavedDesignCard({ card, onUnsave }: { card: SavedCardSeed; onUnsave: () => void }) {
+  return (
+    <article className="flex flex-col gap-3 rounded-xl border bg-surface-default p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-secondary-50 text-label-semibold text-secondary-700">
+          {card.initials}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-body-semibold text-text-primary">{card.title}</h2>
+          <p className="flex items-center gap-1 text-body-sm-regular text-text-secondary">
+            {card.company}
+            {card.verified && <Icon name="checkCircle" className="size-4 text-success-700" />}
+          </p>
+        </div>
+        <button type="button" aria-label={`Remove ${card.title} from saved`} onClick={onUnsave} className="text-brand-primary">
+          <Icon name="bookmarkFilled" className="size-5" />
+        </button>
+      </div>
+      <p className="flex items-center gap-1 text-label-medium text-text-tertiary">
+        <Icon name="pin" className="size-4" />
+        {card.location} · {card.distance}
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        <Badge type="employment">{card.type}</Badge>
+        <Badge type="experience">{card.experience}</Badge>
+        {card.expiring && <Badge type="expiring">Expiring soon</Badge>}
+      </div>
+      <div className="mt-auto flex items-end justify-between gap-3">
+        <div>
+          <p className="text-body-sm-semibold text-text-primary">{card.salary}</p>
+          <p className="mt-1 flex items-center gap-1 text-label-medium text-text-tertiary">
+            <Icon name="calendar" className="size-3.5" />
+            {card.posted}
+          </p>
+        </div>
+        <Link href="/" className={buttonVariants({ shape: "rect", size: "sm" })}>
+          Apply now
+        </Link>
+      </div>
+    </article>
   );
 }

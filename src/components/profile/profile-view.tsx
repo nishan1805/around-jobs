@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { ProfileDesktop } from "@/components/profile/profile-desktop";
 import { Icon } from "@/components/icon";
 import { Chip } from "@/components/jobs/chip";
 import { PageHeader } from "@/components/page-header";
@@ -38,8 +39,21 @@ function preferencesLine(user: User) {
   return [types, chosen].filter(Boolean).join(" · ") || "Not set";
 }
 
-/** Figma mobile M20. The same page sits in the desktop shell; Figma has no desktop profile. */
+/** Mobile keeps M20. Desktop (md+) follows the finalized P01–P05 frames. */
 export function ProfileView() {
+  return (
+    <>
+      <div className="contents md:hidden">
+        <MobileProfile />
+      </div>
+      <div className="hidden md:contents">
+        <ProfileDesktop />
+      </div>
+    </>
+  );
+}
+
+function MobileProfile() {
   return (
     <SeekerPage
       active="profile"
