@@ -24,7 +24,7 @@ import { MapPanel } from "./panel-parts";
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-2.5">
-      <legend className="mb-2.5 text-body-semibold text-text-primary">{title}</legend>
+      <legend className="mb-2.5 text-body-semibold text-text-primary md:text-body-medium md:text-grey-700">{title}</legend>
       {children}
     </fieldset>
   );
@@ -97,13 +97,15 @@ export function FilterFields({ filters, onChange }: { filters: JobFilters; onCha
   const [moreOpen, setMoreOpen] = useState(true);
   return (
     <>
-      <Group title="Category">
-        <ChipOptions
-          options={categories.map((value) => ({ value, label: value }))}
-          selected={filters.categories}
-          onToggle={(value) => onChange({ ...filters, categories: toggleValue(filters.categories, value) })}
-        />
-      </Group>
+      <div className="md:hidden">
+        <Group title="Category">
+          <ChipOptions
+            options={categories.map((value) => ({ value, label: value }))}
+            selected={filters.categories}
+            onToggle={(value) => onChange({ ...filters, categories: toggleValue(filters.categories, value) })}
+          />
+        </Group>
+      </div>
       <Group title="Experience">
         <ChipOptions<ExperienceBucket>
           options={entries(experienceBuckets).map(([value, bucket]) => ({ value, label: bucket.label }))}
@@ -128,7 +130,7 @@ export function FilterFields({ filters, onChange }: { filters: JobFilters; onCha
           onToggle={(value) => onChange({ ...filters, workModes: toggleValue(filters.workModes, value) })}
         />
       </Group>
-      <p className="text-label-medium text-text-tertiary">Remote jobs are listed but not shown on the map.</p>
+      <p className="text-label-medium text-text-tertiary md:hidden">Remote jobs are listed but not shown on the map.</p>
       <div className="flex flex-col gap-2.5">
         <button
           type="button"
@@ -138,7 +140,7 @@ export function FilterFields({ filters, onChange }: { filters: JobFilters; onCha
           className="flex w-full items-center text-left text-body-semibold text-text-primary"
         >
           <span className="flex-1">More filters</span>
-          <Icon name="chevronDown" className={cn("size-4 transition-transform", !moreOpen && "-rotate-90")} />
+          <Icon name="chevronDown" className={cn("size-4 transition-transform", moreOpen && "rotate-180")} />
         </button>
         {moreOpen && (
           <div id="filter-more">
@@ -176,10 +178,7 @@ export function FiltersPanel({
     <MapPanel label="Filters" width="narrow" onDismiss={onDone}>
       <div className="flex shrink-0 items-center gap-3 px-5 pt-1 md:p-4 md:pb-0">
         <h2 className="flex-1 text-heading-semibold text-text-primary md:text-subheading-semibold">Filters</h2>
-        <button type="button" onClick={reset} className="hidden text-body-sm-semibold text-brand-primary hover:underline md:block">
-          Reset
-        </button>
-        <IconButton variant="plain" icon="close" label="Close filters" onClick={onDone} className="-mr-2 md:hidden" />
+        <IconButton variant="outline" icon="close" label="Close filters" onClick={onDone} iconClassName="size-4" />
       </div>
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-10 py-5 md:p-4">
         <FilterFields filters={filters} onChange={onChange} />

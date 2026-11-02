@@ -1,7 +1,7 @@
 "use client";
 
 import type { Map as LeafletMap } from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
@@ -45,16 +45,18 @@ export function MapControls({
   onLocate,
   locating,
   className,
+  style,
 }: {
   map: LeafletMap;
   onLocate: () => void;
   locating: boolean;
   className?: string;
+  style?: CSSProperties;
 }) {
   const scale = useScale(map);
 
   return (
-    <div className={cn("pointer-events-none flex flex-col items-end gap-3", className)}>
+    <div className={cn("pointer-events-none flex flex-col items-end gap-3", className)} style={style}>
       <button
         type="button"
         onClick={onLocate}

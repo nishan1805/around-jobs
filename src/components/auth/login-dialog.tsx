@@ -123,6 +123,7 @@ export function LoginDialog({
   initialCode = "",
   initialError = null,
   initialBusy = false,
+  resting = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -134,6 +135,8 @@ export function LoginDialog({
   initialCode?: string;
   initialError?: string | null;
   initialBusy?: boolean;
+  /** S08 shows a resting field. Skip autofocus so the frame's border stays unfocused. */
+  resting?: boolean;
 }) {
   const [step, setStep] = useState<Step>(initialStep);
   const [phone, setPhone] = useState(initialPhone);
@@ -242,7 +245,7 @@ export function LoginDialog({
                 type="tel"
                 inputMode="numeric"
                 autoComplete="tel-national"
-                autoFocus
+                autoFocus={!resting}
                 placeholder="Enter 10-digit number"
                 value={phone}
                 aria-invalid={phoneError ? true : undefined}

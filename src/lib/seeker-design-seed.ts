@@ -228,7 +228,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     expiring: true,
     nearby: true,
     recent: true,
-    salary: "₹15,000 – ₹20,000 / month",
+    salary: "₹15,000 – ₹20,000",
     posted: "Posted 2d ago",
   },
   {
@@ -244,7 +244,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     expiring: true,
     nearby: true,
     recent: true,
-    salary: "₹15,000 – ₹20,000 / month",
+    salary: "₹15,000 – ₹20,000",
     posted: "Posted 2d ago",
   },
   {
@@ -260,7 +260,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     expiring: true,
     nearby: true,
     recent: false,
-    salary: "₹15,000 – ₹20,000 / month",
+    salary: "₹15,000 – ₹20,000",
     posted: "Posted 2d ago",
   },
   {
@@ -276,7 +276,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     expiring: true,
     nearby: false,
     recent: false,
-    salary: "₹15,000 – ₹20,000 / month",
+    salary: "₹15,000 – ₹20,000",
     posted: "Posted 2d ago",
   },
   {
@@ -292,7 +292,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     expiring: true,
     nearby: false,
     recent: false,
-    salary: "₹15,000 – ₹20,000 / month",
+    salary: "₹15,000 – ₹20,000",
     posted: "Posted 2d ago",
   },
   {
@@ -308,7 +308,230 @@ export const savedCardsSeed: SavedCardSeed[] = [
     expiring: true,
     nearby: false,
     recent: false,
-    salary: "₹15,000 – ₹20,000 / month",
+    salary: "₹15,000 – ₹20,000",
     posted: "Posted 2d ago",
   },
 ];
+
+export type FrameJobCard = {
+  id: string;
+  title: string;
+  company?: string;
+  initials?: string;
+  tone?: "info" | "orange";
+  verified?: boolean;
+  location: string;
+  salary: string;
+  employment: string;
+  experience: string;
+  posted: string;
+  applied?: boolean;
+};
+
+/** S03 list. The frame prints "(Sample)" on the first employer; the visible UI omits it. */
+export const browseListSeed: FrameJobCard[] = [
+  {
+    id: "browse-1",
+    title: "Site Supervisor",
+    company: "Raipur Builder",
+    initials: "RB",
+    tone: "orange",
+    verified: true,
+    location: "Shankar Nagar, Raipur · 2.1 km",
+    salary: "₹15k–20k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 2d ago",
+    applied: true,
+  },
+  {
+    id: "browse-2",
+    title: "Front Desk Executive",
+    company: "Mayura Residency",
+    initials: "RB",
+    verified: true,
+    location: "Civil Lines, Raipur · 3.4 km",
+    salary: "Salary not disclosed",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 5 days ago",
+  },
+  {
+    id: "browse-3",
+    title: "Patient Care Assistant",
+    company: "Shree Care Clinic",
+    initials: "RB",
+    verified: true,
+    location: "Kota, Raipur · 4.8 km",
+    salary: "₹12k–18k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 1 week ago",
+  },
+  {
+    id: "browse-4",
+    title: "Junior Web Developer",
+    company: "Raipur Tech Labs",
+    initials: "RB",
+    verified: true,
+    location: "Shankar Nagar, Raipur · 3.9 km",
+    salary: "₹25k–40k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 1 week ago",
+  },
+  {
+    id: "browse-5",
+    title: "Cashier",
+    company: "Magneto Mall Store",
+    initials: "RB",
+    verified: true,
+    location: "Telibandha, Raipur · 5.2 km",
+    salary: "₹14k–18k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 1 week ago",
+  },
+];
+
+/** S06 filtered results. */
+export const filteredListSeed: FrameJobCard[] = [
+  {
+    id: "filtered-1",
+    title: "Store Sales Associate",
+    company: "Raipur Builder",
+    initials: "RB",
+    verified: true,
+    location: "Pandri, Raipur · 2.1 km",
+    salary: "₹15k–20k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 2d ago",
+    applied: true,
+  },
+  {
+    id: "filtered-2",
+    title: "Cashier",
+    company: "Magneto Mall Store",
+    initials: "RB",
+    verified: true,
+    location: "Telibandha, Raipur · 5.2 km",
+    salary: "₹14k–18k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 1 week ago",
+  },
+  {
+    id: "filtered-3",
+    title: "Retail Billing Executive",
+    company: "Shree Shyam Mart",
+    initials: "RB",
+    verified: true,
+    location: "Tatibandh, Raipur · 4.1 km",
+    salary: "₹13k–16k/mo",
+    employment: "Full Time",
+    experience: "0-1 yrs",
+    posted: "Posted 3 days ago",
+  },
+];
+
+export const BROWSE_LIST_SUBTITLE = "24 jobs near you";
+export const FILTERED_LIST_SUBTITLE = "3 jobs match your filters";
+
+export const RAIPUR_BUILDER_SLUG = "raipur-builder";
+export const CIVIL_ENGINEER_SLUG = "civil-engineer";
+
+export const employerOverviewSeed = {
+  name: "Raipur Builder Pvt. Ltd.",
+  industry: "Construction & Interior Design",
+  location: "Currency Tower, Vishal Nagar, Telibandha, Raipur",
+  website: "https://www.raipurbuilder.com/",
+  logo: "/images/raipur-builder.png",
+  about: "Raipur Builder provides residential and commercial construction, renovation, interior design and space-planning services.",
+  size: "51–200 employees",
+  founded: "Founded 2019",
+  jobs: [
+    {
+      id: "rb-civil",
+      title: "Civil Engineer",
+      location: "Telibandha, Raipur",
+      salary: "Salary not disclosed",
+      employment: "Full Time",
+      experience: "0-1 yrs",
+      posted: "Posted 2d ago",
+    },
+    {
+      id: "rb-architect",
+      title: "Architect",
+      location: "Telibandha, Raipur",
+      salary: "Salary not disclosed",
+      employment: "Full Time",
+      experience: "0-1 yrs",
+      posted: "Posted 5d ago",
+    },
+    {
+      id: "rb-interior",
+      title: "Interior Designer",
+      location: "Telibandha, Raipur",
+      salary: "Salary not disclosed",
+      employment: "Full Time",
+      experience: "0-1 yrs",
+      posted: "Posted 1w ago",
+    },
+  ] satisfies FrameJobCard[],
+};
+
+export const civilEngineerDetail = {
+  title: "Civil Engineer",
+  company: "Raipur Builder Pvt. Ltd.",
+  salary: "₹15,000 – ₹20,000 / month",
+  employment: "Full-time",
+  mode: "On-site",
+  experience: "3–5 yrs",
+  area: "Telibandha, Raipur",
+  posted: "Posted 2d ago",
+  deadline: "Apply by 31 Oct 2026",
+  applicants: "12 applicants",
+  description:
+    "Join Raipur Builder Pvt. Ltd. as a Civil Engineer. Raipur Builder provides residential and commercial construction, renovation, interior design and space-planning services.",
+  requirements: ["3–5 years of experience", "Full-time role"],
+  skills: [
+    "Residential construction",
+    "Commercial construction",
+    "Renovation",
+    "Interior & exterior design",
+    "Project management",
+    "Space planning",
+  ],
+  address: "Unit 4055, 4th Floor, Currency Tower, Vishal Nagar, Telibandha, Raipur, Chhattisgarh 492001",
+};
+
+export type JobDetailVariant = "open" | "expired" | "applied" | "remote" | "closed";
+
+export const jobDetailVariantCopy: Record<
+  JobDetailVariant,
+  { banner?: string; button: string; buttonDisabled: boolean; salary?: string; mode?: string; area?: string; hideDeadline?: boolean; hideMap?: boolean; applied?: boolean }
+> = {
+  open: { button: "Apply now", buttonDisabled: false },
+  expired: {
+    banner: "This job is no longer accepting applications.",
+    button: "Applications closed",
+    buttonDisabled: true,
+    hideDeadline: true,
+  },
+  applied: { button: "Applied", buttonDisabled: true, applied: true },
+  remote: {
+    button: "Apply now",
+    buttonDisabled: false,
+    salary: "Salary not disclosed",
+    mode: "Remote",
+    area: "Remote",
+    hideMap: true,
+  },
+  closed: {
+    banner: "This job is closed. The employer is no longer hiring for this role.",
+    button: "Applications closed",
+    buttonDisabled: true,
+    hideDeadline: true,
+  },
+};

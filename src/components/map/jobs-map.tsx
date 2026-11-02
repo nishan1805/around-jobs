@@ -56,6 +56,7 @@ export default function JobsMap({
   onViewChange,
   fitRequest,
   insetLeft = 0,
+  insetRight = 0,
 }: {
   companies: MapCompany[];
   initialBounds: [number, number][];
@@ -66,6 +67,8 @@ export default function JobsMap({
   fitRequest?: FitRequest | null;
   /** Pixels on the left covered by an overlay panel; the map keeps selections clear of it. */
   insetLeft?: number;
+  /** Pixels on the right covered by S01/S02, so zoom stays clear of the panel. */
+  insetRight?: number;
 }) {
   const generation = useMapGeneration();
   const [map, setMap] = useState<LeafletMap | null>(null);
@@ -233,6 +236,7 @@ export default function JobsMap({
           onLocate={locate}
           locating={locating}
           className="absolute right-3 bottom-[calc(var(--map-inset-bottom,0rem)+2rem)] z-1000 md:right-5 md:bottom-9"
+          style={insetRight ? { right: insetRight } : undefined}
         />
       )}
 

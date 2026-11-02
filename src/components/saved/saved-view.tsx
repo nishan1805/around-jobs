@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { Icon } from "@/components/icon";
+import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
 import { Chip } from "@/components/jobs/chip";
 import { EmptyPage, PageHeader } from "@/components/page-header";
 import { SeekerPage } from "@/components/seeker-page";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { useSearchParam } from "@/hooks/use-search-param";
@@ -210,43 +209,24 @@ function DesktopSaved({ empty = false }: { empty?: boolean }) {
 
 function SavedDesignCard({ card, onUnsave }: { card: SavedCardSeed; onUnsave: () => void }) {
   return (
-    <article className="flex flex-col gap-3 rounded-xl border bg-surface-default p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-secondary-50 text-label-semibold text-secondary-700">
-          {card.initials}
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-body-semibold text-text-primary">{card.title}</h2>
-          <p className="flex items-center gap-1 text-body-sm-regular text-text-secondary">
-            {card.company}
-            {card.verified && <Icon name="checkCircle" className="size-4 text-success-700" />}
-          </p>
-        </div>
-        <button type="button" aria-label={`Remove ${card.title} from saved`} onClick={onUnsave} className="text-brand-primary">
-          <Icon name="bookmarkFilled" className="size-5" />
-        </button>
-      </div>
-      <p className="flex items-center gap-1 text-label-medium text-text-tertiary">
-        <Icon name="pin" className="size-4" />
-        {card.location} · {card.distance}
-      </p>
-      <div className="flex flex-wrap gap-1.5">
-        <Badge type="employment">{card.type}</Badge>
-        <Badge type="experience">{card.experience}</Badge>
-        {card.expiring && <Badge type="expiring">Expiring soon</Badge>}
-      </div>
-      <div className="mt-auto flex items-end justify-between gap-3">
-        <div>
-          <p className="text-body-sm-semibold text-text-primary">{card.salary}</p>
-          <p className="mt-1 flex items-center gap-1 text-label-medium text-text-tertiary">
-            <Icon name="calendar" className="size-3.5" />
-            {card.posted}
-          </p>
-        </div>
-        <Link href="/" className={buttonVariants({ shape: "rect", size: "sm" })}>
-          Apply now
-        </Link>
-      </div>
-    </article>
+    <FrameJobCardView
+      layout="saved"
+      saved
+      expiring={card.expiring}
+      onToggleSave={onUnsave}
+      card={{
+        id: card.id,
+        title: card.title,
+        company: card.company,
+        initials: card.initials,
+        tone: "orange",
+        verified: card.verified,
+        location: `${card.location} · ${card.distance}`,
+        salary: card.salary,
+        employment: card.type,
+        experience: card.experience,
+        posted: card.posted,
+      }}
+    />
   );
 }

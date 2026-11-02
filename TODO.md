@@ -174,14 +174,29 @@ code does today so a designer can confirm or correct it.
   Recently added is the first two, so the chip counts match (3 and 2).
 - **P02e second education** uses the filled Add education dialog (Diploma, Government
   Polytechnic, Raipur), because that frame was the source for the extra card.
-- **P03c third experience** repeats the Site Engineer card so the section shows three
-  entries. The frame's third role was not in the design-context response used here.
-- **P03f / upload error / remove-photo body.** Empty experience body, the resume upload
-  error line, and the remove-photo explanation are not copied from a fetched frame.
-  Resume remove and experience delete use the fetched sentences.
-- **P03b field errors** reuse the "Fill in the required fields to save." banner from
-  education. Per-field experience sentences were not in the fetched validation frame.
-- **Photo file.** P05-02/03/04 do not include a portrait asset in the responses used
-  here, so the circle stays the "N" initial and the phase (selected, saving, success,
-  error) changes the chrome around it.
+- **P03c third experience** is Civil Engineering Intern at Public Works Department, Raipur.
+- **P03f, P02 upload error, P05 remove-photo, and P03b field errors** use the sentences
+  from the finalized frames.
+- **P05-02 to P05-04** show `/images/profile-photo.jpg`.
+- **S01 / S02** use the Raipur Builder employer panel and Civil Engineer detail
+  (`/?company=raipur-builder`, `/?job=civil-engineer`). The live October jobs stay on
+  the map and on mobile sheets.
+- **S03 / S06** desktop lists use the frame cards. "(Sample)" is stripped from
+  "Raipur Builder". The list says 24 jobs and shows the five cards in the frame.
+- **S17** cards are Site Supervisor at Raipur Builder. Layer names in Figma
+  (Barista, Sales associate, and so on) do not match the visible titles, so the
+  visible titles win. The header still says 2 expiring soon while every card shows
+  the badge.
+- **Map.** Leaflet markers and the cluster count are live data, not the static
+  frame (cluster 12, labels that still say Sample in Figma).
+- **Salary green.** The salary badge in the job detail uses `#07964e`. The nearest
+  token is `text-success-700`.
+- **Job detail variants without a fetched frame.** Applied, closed, and remote use
+  the open Civil Engineer panel plus the expired banner pattern. The expired state
+  matches node 1889:42619 ("This job is no longer accepting applications." /
+  "Applications closed"). The empty-employer sentence was not in a fetched frame.
+- **Building marker** on `/states` is still the company pin. The building variant
+  asset was not rebuilt.
+- **Resume "too large"** on `/states` uses the same file-type sentence with "too large"
+  because that variant's exact sentence was not in the fetched frame.
 - **Apply and applications (S11–S15)** were not restyled.

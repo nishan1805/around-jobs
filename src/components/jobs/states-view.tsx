@@ -5,6 +5,8 @@ import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { Chip } from "@/components/jobs/chip";
+import { FrameJobCardView } from "@/components/jobs/frame-job-card";
+import { browseListSeed } from "@/lib/seeker-design-seed";
 import { TopBar } from "@/components/jobs/top-bar";
 import { clusterMarkerHtml, companyMarkerHtml } from "@/components/map/markers";
 import { Badge } from "@/components/ui/badge";
@@ -17,14 +19,16 @@ const control =
 
 const links = [
   ["S00 Jobs home", "/"],
-  ["S01 Employer overview", "/?company=magneto-retail"],
-  ["S01 one job", "/?company=ghatarani-resort"],
-  ["S01 no vacancies", "/?company=sunrise-care-clinic"],
-  ["S01 unverified", "/?company=swift-couriers"],
-  ["S02 Job detail", "/?job=retail-sales-associate-magneto-retail"],
-  ["S02 expired", "/?job=tailoring-assistant-pandri-textiles"],
-  ["S02 closed", "/?job=night-shift-pharmacist-lakeside-pharmacy"],
-  ["S02 remote, salary hidden", "/?job=ui-designer-raipur-tech-hub"],
+  ["S01 Employer overview", "/?company=raipur-builder"],
+  ["S01 one job", "/?company=raipur-builder&employer=one"],
+  ["S01 no vacancies", "/?company=raipur-builder&employer=empty"],
+  ["S01 unverified", "/?company=raipur-builder&employer=unverified"],
+  ["S01 About", "/?company=raipur-builder&employer=about"],
+  ["S02 Job detail", "/?job=civil-engineer"],
+  ["S02 expired", "/?job=civil-engineer&detail=expired"],
+  ["S02 applied", "/?job=civil-engineer&detail=applied"],
+  ["S02 closed", "/?job=civil-engineer&detail=closed"],
+  ["S02 remote, salary hidden", "/?job=civil-engineer&detail=remote"],
   ["S03 List", "/?view=list"],
   ["List loading", "/?view=list&state=loading"],
   ["List error", "/?view=list&state=error"],
@@ -118,6 +122,39 @@ export function StatesView() {
           <div className="flex gap-2">
             <Chip>Retail</Chip>
             <Chip selected>Retail</Chip>
+          </div>
+        </section>
+
+        <section className="mt-8 flex max-w-xl flex-col gap-3">
+          <h2 className="text-heading-semibold">Job card</h2>
+          <FrameJobCardView card={browseListSeed[1]} />
+          <FrameJobCardView card={browseListSeed[0]} />
+          <FrameJobCardView card={{ ...browseListSeed[1], id: "saved-state" }} layout="saved" saved expiring />
+        </section>
+
+        <section className="mt-8 grid max-w-xl gap-3">
+          <h2 className="text-heading-semibold">Resume upload</h2>
+          <div className="rounded-md border border-dashed p-4">
+            <p className="text-body-semibold text-text-primary">Upload your resume</p>
+            <p className="text-body-sm-regular text-text-secondary">PDF or DOC, up to 5 MB</p>
+          </div>
+          <div className="rounded-md border border-dashed p-4">
+            <p className="text-body-semibold text-text-primary">Uploading…</p>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-grey-100">
+              <span className="block h-full w-1/2 bg-brand-primary" />
+            </div>
+          </div>
+          <div className="rounded-md border p-4">
+            <p className="text-body-semibold text-text-primary">Resume_Nishan_Kumar_Mondal.pdf</p>
+            <p className="text-body-sm-regular text-text-tertiary">240 KB · Uploaded 16 Oct 2026</p>
+          </div>
+          <div className="rounded-md border border-dashed border-error-default p-4">
+            <p className="text-body-sm-regular text-error-default">
+              This file isn&apos;t supported. Please upload a PDF, DOC or DOCX under 5 MB.
+            </p>
+          </div>
+          <div className="rounded-md border border-dashed border-error-default p-4">
+            <p className="text-body-sm-regular text-error-default">This file is too large. Please upload a PDF, DOC or DOCX under 5 MB.</p>
           </div>
         </section>
 
