@@ -181,8 +181,12 @@ export default function JobsMap({
           attribution={tileLayer.attribution}
           subdomains={tileLayer.subdomains}
           maxZoom={tileLayer.maxZoom}
+          maxNativeZoom={tileLayer.maxNativeZoom}
           eventHandlers={{ tileerror: () => setTilesFailed(true), tileload: () => setTilesFailed(false) }}
         />
+        {tileLayer.labelsUrl && (
+          <TileLayer url={tileLayer.labelsUrl} maxZoom={tileLayer.maxZoom} maxNativeZoom={tileLayer.maxNativeZoom} />
+        )}
         {clusters.map((cluster) => {
           if (cluster.members.length === 1) {
             const [{ company, jobCount }] = cluster.members;

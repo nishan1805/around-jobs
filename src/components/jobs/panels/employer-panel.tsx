@@ -122,8 +122,8 @@ export function EmployerPanel({
             </div>
           ) : (
             <EmptyBlock
-              title="No active vacancies"
-              body="This employer has no open jobs right now. Save them to get notified about new jobs."
+              title="No open jobs right now"
+              body="This employer has no active openings. Save them to see new jobs here."
               action={
                 <Button variant="outline" shape="rect" onClick={toggleSave} aria-pressed={saved}>
                   {saved ? "Employer saved" : "Save employer"}

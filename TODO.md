@@ -160,18 +160,18 @@ code does today so a designer can confirm or correct it.
   the basic-info form, resume filename and LinkedIn URL.
 - **Sidebar.** Desktop nav is Jobs, Applied, Saved, Profile. "Post a job" moved to the
   top bar and only shows while logged out (S00). Logged-in frames omit it.
-- **Location menu (S04).** Selected row uses `primary-50`. The frame's fill is `#edf2ff`,
-  which is not a token. Dropdown rows use 10px radius; the closest token is `rounded-md` (12px)
-  except the location rows, which keep 10px so the open menu matches the frame.
-- **Filter count.** Categories are still not counted. S04/S07 "Filters 2" with Retail
-  selected is previewed with `?category=Retail&type=FULL_TIME&mode=ON_SITE`.
-- **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens
-  Job Preferences, because the frames do not include a job-alerts screen. Help & support
-  uses the existing `mailto:support@around.jobs` link.
-- **Saved jobs (S17).** The header says "2 expiring soon" while every card shows an
-  Expiring soon badge. Both are kept. The six cards are the frame's Site Supervisor /
-  Raipur Builder set, not the older café sample. Nearby is the first three cards and
-  Recently added is the first two, so the chip counts match (3 and 2).
+- **Location menu (S04).** Selected row uses `bg-primary-50`. The frame's fill is `#edf2ff`,
+  which is not a token, so the row stays on the primary-50 token. Row radius is `rounded-md`
+  (12px). The frame uses 10px, which is not a radius token.
+- **Filter count.** Categories are included. S04/S07 with Retail, Full-time and On-site
+  shows Filters 3 (`?category=Retail&type=FULL_TIME&mode=ON_SITE`). Category chips stay
+  in their own row and are not duplicated as removable chips.
+- **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens `/alerts`.
+  The frames do not include a job-alerts screen, so that page is only the empty state
+  "You don't have any job alerts yet." Help & support uses `mailto:support@around.jobs`.
+- **Saved jobs (S17).** The header says "6 saved jobs, 2 expiring soon." The expiring badge
+  is on the first two cards only. The six cards are the frame's Site Supervisor / Raipur
+  Builder set. Nearby is the first three cards and Recently added is the first two.
 - **P02e second education** uses the filled Add education dialog (Diploma, Government
   Polytechnic, Raipur), because that frame was the source for the extra card.
 - **P03c third experience** is Civil Engineering Intern at Public Works Department, Raipur.
@@ -185,18 +185,28 @@ code does today so a designer can confirm or correct it.
   "Raipur Builder". The list says 24 jobs and shows the five cards in the frame.
 - **S17** cards are Site Supervisor at Raipur Builder. Layer names in Figma
   (Barista, Sales associate, and so on) do not match the visible titles, so the
-  visible titles win. The header still says 2 expiring soon while every card shows
-  the badge.
+  visible titles win. The frame draws an expiring badge on every card; the header
+  says two are expiring, so only the first two cards show the badge.
 - **Map.** Leaflet markers and the cluster count are live data, not the static
-  frame (cluster 12, labels that still say Sample in Figma).
-- **Salary green.** The salary badge in the job detail uses `#07964e`. The nearest
-  token is `text-success-700`.
-- **Job detail variants without a fetched frame.** Applied, closed, and remote use
-  the open Civil Engineer panel plus the expired banner pattern. The expired state
-  matches node 1889:42619 ("This job is no longer accepting applications." /
-  "Applications closed"). The empty-employer sentence was not in a fetched frame.
-- **Building marker** on `/states` is still the company pin. The building variant
-  asset was not rebuilt.
-- **Resume "too large"** on `/states` uses the same file-type sentence with "too large"
-  because that variant's exact sentence was not in the fetched frame.
+  frame (cluster 12, labels that still say Sample in Figma). The basemap is Esri
+  World Light Gray Canvas. Stadia Alidade Smooth 401s on domains that are not
+  registered, including the Vercel deploy. Keyless CARTO `light_all` answers 200
+  but stamps "API KEY REQUIRED" on the image. Set `NEXT_PUBLIC_STADIA_API_KEY`
+  or `NEXT_PUBLIC_MAP_TILE_URL` to override it.
+- **Salary green.** The salary badge uses `text-success-700` (`Badge type="salary"`).
+  Figma paints that label `#07964e`, which is not a token.
+- **Job detail variants** (fetched): applied (1889:42721) banner "You applied on 12 Oct 2026"
+  and button "View application"; closed (1896:12936) banner "This job is closed. The employer
+  is no longer hiring for this role." and button "Position closed"; remote (1896:12970)
+  salary "Salary not disclosed", mode and area "Remote", address and map placeholder kept,
+  button "Apply now". The closed symbol is a Store Sales Associate panel; the Civil Engineer
+  route keeps that banner and button on the Civil Engineer body. Expired stays
+  "This job is no longer accepting applications." / "Applications closed".
+- **Empty employer** (1889:42351): "No open jobs right now" / "This employer has no active
+  openings. Save them to see new jobs here."
+- **Building marker** (1896:13455) is the pill with the building glyph, count and orange
+  anchor, shown on `/states`. It is not the company photo pin.
+- **Resume "too large"** (2105:25466): "File is larger than 5 MB. Upload a smaller file."
+  The component on `/states` uses that sentence. The filename in Figma is
+  Resume_Rahul_Sharma.pdf; the seeker name stays Nishan Kumar Mondal.
 - **Apply and applications (S11–S15)** were not restyled.

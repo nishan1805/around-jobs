@@ -29,13 +29,17 @@ Other scripts:
 | Variable                            | Default                       | Purpose                                      |
 | ----------------------------------- | ----------------------------- | -------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`              | `http://localhost:4612`       | Absolute URLs in the sitemap, canonical tags and JSON-LD |
-| `NEXT_PUBLIC_STADIA_API_KEY`        | none                          | Key for the default Stadia Maps tiles        |
-| `NEXT_PUBLIC_MAP_TILES_URL`         | Stadia "Alidade Smooth" tiles | Leaflet tile URL template (overrides Stadia) |
-| `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | Stadia + OpenMapTiles + OSM   | Attribution shown on the map                 |
+| `NEXT_PUBLIC_MAP_TILE_URL`          | Esri World Light Gray Canvas  | Leaflet tile URL template                    |
+| `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION`  | Esri                          | Attribution shown on the map                 |
+| `NEXT_PUBLIC_STADIA_API_KEY`        | none                          | Optional. Uses Stadia Alidade Smooth when set and no tile URL is set |
 
-No keys are needed locally: Stadia serves `localhost` without one. To deploy, either register your
-domain in the Stadia dashboard or set `NEXT_PUBLIC_STADIA_API_KEY`. To use plain OpenStreetMap
-instead, set `NEXT_PUBLIC_MAP_TILES_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png`.
+The default basemap is Esri World Light Gray Canvas (base plus a transparent label layer). It needs
+no API key and works on any domain, including a Vercel deploy. It is a muted grey map in the same
+family as the Figma frame. CARTO Positron (`light_all`) is closer by name, but the keyless CARTO CDN
+now stamps "API KEY REQUIRED" across every tile. Set `NEXT_PUBLIC_MAP_TILE_URL` to another
+template (`{z}`, `{x}`, `{y}`, optional `{s}` and `{r}`) when you have a keyed source.
+The older names `NEXT_PUBLIC_MAP_TILES_URL` and `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` still work.
+If `NEXT_PUBLIC_STADIA_API_KEY` is set and no URL override is, the map uses Stadia Alidade Smooth.
 If tiles fail to load, the map shows a notice and the job pins still work.
 
 ## Design tokens

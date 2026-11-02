@@ -78,8 +78,8 @@ export function matchesFilters(job: Job, filters: JobFilters) {
 export type ActiveFilter = { key: string; label: string; remove: (filters: JobFilters) => JobFilters };
 
 /**
- * The removable chips under the Jobs List header (S05). Categories are not
- * listed here because they already show as selected chips in the row above.
+ * The removable chips under the Jobs List header. Categories stay out of this
+ * list because they already show as selected chips in the row above.
  */
 export function activeFilters(filters: JobFilters): ActiveFilter[] {
   const chips: ActiveFilter[] = [
@@ -112,6 +112,11 @@ export function activeFilters(filters: JobFilters): ActiveFilter[] {
     });
   }
   return chips;
+}
+
+/** Number on the Filters control. Categories count, even though they are not removable chips. */
+export function filterBadgeCount(filters: JobFilters) {
+  return filters.categories.length + activeFilters(filters).length;
 }
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */

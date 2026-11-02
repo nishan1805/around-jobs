@@ -117,7 +117,7 @@ export function TopBar({
               <button
                 type="button"
                 onClick={() => chooseArea(DEFAULT_LOCATION_LABEL)}
-                className="flex w-full items-center gap-2 rounded-[10px] border border-grey-200 bg-grey-100 px-3 py-2 text-body-sm-medium text-grey-700 hover:bg-grey-200"
+                className="flex w-full items-center gap-2 rounded-md border border-grey-200 bg-grey-100 px-3 py-2 text-body-sm-medium text-grey-700 hover:bg-grey-200"
               >
                 <Icon name="crosshair" className="size-5" />
                 Use my current location
@@ -135,7 +135,7 @@ export function TopBar({
                         aria-selected={selected}
                         onClick={() => chooseArea(item)}
                         className={cn(
-                          "flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-body-sm-medium text-text-primary hover:bg-grey-50",
+                          "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-body-sm-medium text-text-primary hover:bg-grey-50",
                           selected && "bg-primary-50",
                         )}
                       >

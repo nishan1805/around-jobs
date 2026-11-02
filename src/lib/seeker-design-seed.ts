@@ -257,7 +257,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     distance: "2.1 km",
     type: "Part-time",
     experience: "Fresher",
-    expiring: true,
+    expiring: false,
     nearby: true,
     recent: false,
     salary: "₹15,000 – ₹20,000",
@@ -273,7 +273,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     distance: "2.1 km",
     type: "Shift",
     experience: "Fresher",
-    expiring: true,
+    expiring: false,
     nearby: false,
     recent: false,
     salary: "₹15,000 – ₹20,000",
@@ -289,7 +289,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     distance: "2.1 km",
     type: "Shift",
     experience: "0–2 yrs",
-    expiring: true,
+    expiring: false,
     nearby: false,
     recent: false,
     salary: "₹15,000 – ₹20,000",
@@ -305,7 +305,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     distance: "2.1 km",
     type: "Full-time",
     experience: "2–4 yrs",
-    expiring: true,
+    expiring: false,
     nearby: false,
     recent: false,
     salary: "₹15,000 – ₹20,000",
@@ -510,28 +510,49 @@ export type JobDetailVariant = "open" | "expired" | "applied" | "remote" | "clos
 
 export const jobDetailVariantCopy: Record<
   JobDetailVariant,
-  { banner?: string; button: string; buttonDisabled: boolean; salary?: string; mode?: string; area?: string; hideDeadline?: boolean; hideMap?: boolean; applied?: boolean }
+  {
+    banner?: string;
+    bannerTone?: "error" | "success";
+    button: string;
+    buttonDisabled: boolean;
+    buttonVariant?: "default" | "outline";
+    salary?: string;
+    mode?: string;
+    area?: string;
+    hideDeadline?: boolean;
+    hideMap?: boolean;
+  }
 > = {
   open: { button: "Apply now", buttonDisabled: false },
+  // 1889:42619
   expired: {
     banner: "This job is no longer accepting applications.",
+    bannerTone: "error",
     button: "Applications closed",
     buttonDisabled: true,
     hideDeadline: true,
   },
-  applied: { button: "Applied", buttonDisabled: true, applied: true },
+  // 1889:42721
+  applied: {
+    banner: "You applied on 12 Oct 2026",
+    bannerTone: "success",
+    button: "View application",
+    buttonDisabled: false,
+    buttonVariant: "outline",
+  },
+  // 1896:12970 — salary, mode and area change; the address and map placeholder stay.
   remote: {
     button: "Apply now",
     buttonDisabled: false,
     salary: "Salary not disclosed",
     mode: "Remote",
     area: "Remote",
-    hideMap: true,
   },
+  // 1896:12936
   closed: {
     banner: "This job is closed. The employer is no longer hiring for this role.",
-    button: "Applications closed",
+    bannerTone: "error",
+    button: "Position closed",
     buttonDisabled: true,
-    hideDeadline: true,
   },
 };

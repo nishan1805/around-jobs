@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Icon } from "@/components/icon";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { Tag } from "@/components/jobs/chip";
+import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -116,9 +117,14 @@ export function DesignEmployerPanel({
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
         {tab === "jobs" ? (
           jobs.length === 0 ? (
-            <div className="flex flex-col items-start gap-2 py-6">
-              <p className="text-body-semibold text-text-primary">No active vacancies</p>
-              <p className="text-body-sm-regular text-text-secondary">This employer has no open jobs right now.</p>
+            <div className="flex flex-col items-center gap-2 pt-8">
+              <span className="flex rounded-full bg-primary-50 p-4 text-brand-primary">
+                <Icon name="briefcase" className="size-5" />
+              </span>
+              <p className="text-body-semibold text-text-primary">No open jobs right now</p>
+              <p className="w-80 text-center text-body-sm-regular text-text-secondary">
+                This employer has no active openings. Save them to see new jobs here.
+              </p>
             </div>
           ) : (
             jobs.map((job) => <FrameJobCardView key={job.id} card={job} layout="employer" onOpen={onOpenJob} />)
@@ -181,7 +187,7 @@ export function DesignJobDetailPanel({
         <RoundIcon icon="close" label="Close job details" onClick={onBack} />
       </div>
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-6">
-        {state.banner && <Banner tone="error">{state.banner}</Banner>}
+        {state.banner && <Banner tone={state.bannerTone ?? "error"}>{state.banner}</Banner>}
         <div className="flex flex-col gap-2">
           <h2 className="text-heading-semibold text-text-primary">{detail.title}</h2>
           <div className="flex items-center gap-2">
@@ -190,13 +196,12 @@ export function DesignJobDetailPanel({
               {detail.company}
             </a>
             <Icon name="checkCircle" className="size-5 text-success-700" />
-            {state.applied && <span className="rounded-full bg-success-50 px-2 py-0.5 text-label-medium text-success-700">Applied</span>}
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <span className="rounded-full bg-success-50 px-2 py-0.5 text-label-medium text-success-700">{salary}</span>
-            <span className="rounded-full bg-primary-50 px-2 py-0.5 text-label-medium text-brand-primary">{detail.employment}</span>
-            <span className="rounded-full bg-grey-100 px-2 py-0.5 text-label-medium text-text-secondary">{mode}</span>
-            <span className="rounded-full bg-grey-100 px-2 py-0.5 text-label-medium text-text-secondary">{detail.experience}</span>
+            <Badge type="salary">{salary}</Badge>
+            <Badge type="employment">{detail.employment}</Badge>
+            <Badge type="mode">{mode}</Badge>
+            <Badge type="experience">{detail.experience}</Badge>
           </div>
           <p className="flex items-center gap-1 text-label-medium text-text-secondary">
             <Icon name="pinSm" className="size-4" />
@@ -246,7 +251,15 @@ export function DesignJobDetailPanel({
         </section>
       </div>
       <div className="shrink-0 border-t bg-surface-default px-6 py-4">
-        <Button shape="rect" className="w-full" disabled={state.buttonDisabled}>
+        <Button
+          shape="rect"
+          variant={state.buttonVariant ?? "default"}
+          className={cn(
+            "w-full",
+            state.buttonDisabled && "bg-grey-100 text-text-disabled disabled:bg-grey-100 disabled:text-text-disabled disabled:opacity-100",
+          )}
+          disabled={state.buttonDisabled}
+        >
           {state.button}
         </Button>
       </div>

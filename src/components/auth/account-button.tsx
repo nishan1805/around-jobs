@@ -75,7 +75,7 @@ export function AccountButton() {
                 <span className="flex-1">Profile settings</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
-              <Menu.Item className={itemClass} render={<Link href="/profile?section=preferences" />}>
+              <Menu.Item className={itemClass} render={<Link href="/alerts" />}>
                 <Icon name="bell" className="size-5 text-text-secondary" />
                 <span className="flex-1">Job alerts</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />

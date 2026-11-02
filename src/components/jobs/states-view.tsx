@@ -8,7 +8,8 @@ import { Chip } from "@/components/jobs/chip";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { browseListSeed } from "@/lib/seeker-design-seed";
 import { TopBar } from "@/components/jobs/top-bar";
-import { clusterMarkerHtml, companyMarkerHtml } from "@/components/map/markers";
+import { buildingMarkerHtml, clusterMarkerHtml, companyMarkerHtml } from "@/components/map/markers";
+import { ResumeUpload } from "@/components/resume-upload";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const links = [
   ["P02 upload error", "/profile?section=skills&upload=error"],
   ["P05 photo selected", "/profile?photo=selected"],
   ["P05 remove photo", "/profile?photo=remove"],
+  ["Job alerts", "/alerts"],
 ];
 
 function Marker({ html }: { html: string }) {
@@ -134,28 +136,11 @@ export function StatesView() {
 
         <section className="mt-8 grid max-w-xl gap-3">
           <h2 className="text-heading-semibold">Resume upload</h2>
-          <div className="rounded-md border border-dashed p-4">
-            <p className="text-body-semibold text-text-primary">Upload your resume</p>
-            <p className="text-body-sm-regular text-text-secondary">PDF or DOC, up to 5 MB</p>
-          </div>
-          <div className="rounded-md border border-dashed p-4">
-            <p className="text-body-semibold text-text-primary">Uploading…</p>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-grey-100">
-              <span className="block h-full w-1/2 bg-brand-primary" />
-            </div>
-          </div>
-          <div className="rounded-md border p-4">
-            <p className="text-body-semibold text-text-primary">Resume_Nishan_Kumar_Mondal.pdf</p>
-            <p className="text-body-sm-regular text-text-tertiary">240 KB · Uploaded 16 Oct 2026</p>
-          </div>
-          <div className="rounded-md border border-dashed border-error-default p-4">
-            <p className="text-body-sm-regular text-error-default">
-              This file isn&apos;t supported. Please upload a PDF, DOC or DOCX under 5 MB.
-            </p>
-          </div>
-          <div className="rounded-md border border-dashed border-error-default p-4">
-            <p className="text-body-sm-regular text-error-default">This file is too large. Please upload a PDF, DOC or DOCX under 5 MB.</p>
-          </div>
+          <ResumeUpload state="empty" />
+          <ResumeUpload state="uploading" />
+          <ResumeUpload state="uploaded" />
+          <ResumeUpload state="unsupported" />
+          <ResumeUpload state="too-large" />
         </section>
 
         <section className="mt-8 flex flex-col gap-4">
@@ -164,7 +149,7 @@ export function StatesView() {
             <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4, selected: false })} />
             <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4, selected: true })} />
             <Marker html={clusterMarkerHtml({ count: 12 })} />
-            <span className="rounded-full bg-surface-default px-3 py-2 text-label-semibold shadow-sm">Building · 3</span>
+            <Marker html={buildingMarkerHtml({ count: 3 })} />
           </div>
         </section>
 

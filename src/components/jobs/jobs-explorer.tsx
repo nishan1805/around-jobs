@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
 import { useSearchParam } from "@/hooks/use-search-param";
-import { activeFilters, defaultFilters, matchesFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
+import { activeFilters, defaultFilters, filterBadgeCount, matchesFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
 import {
   categories,
   distanceKm,
@@ -122,6 +122,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
     [openJobs, deferredFilters, from],
   );
   const chips = activeFilters(filters);
+  const badgeCount = filterBadgeCount(filters);
   const hasAnyFilter = chips.length > 0 || filters.categories.length > 0 || filters.query.trim().length > 0;
 
   const mapCompanies = useMemo<MapCompany[]>(
@@ -337,7 +338,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <MobileSearchBar
             query={filters.query}
             onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
-            filterCount={chips.length}
+            filterCount={badgeCount}
             onOpenFilters={openFilters}
           />
           <div
@@ -388,7 +389,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
 
         {panel.kind !== "filters" && (
           <FiltersButton
-            count={chips.length}
+            count={badgeCount}
             expanded={false}
             onClick={openFilters}
             className={cn(

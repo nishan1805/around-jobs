@@ -8,7 +8,7 @@ import { ViewToggle } from "@/components/jobs/view-toggle";
 import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { IconButton } from "@/components/ui/icon-button";
-import { activeFilters, defaultFilters, describeFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
+import { activeFilters, defaultFilters, describeFilters, filterBadgeCount, toggleValue, type JobFilters } from "@/lib/job-filters";
 import { categories, type Job } from "@/lib/jobs";
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
@@ -59,6 +59,7 @@ export function JobsListPanel({
   onOpenDesignJob?: () => void;
 }) {
   const chips = activeFilters(filters);
+  const badgeCount = filterBadgeCount(filters);
   const description = describeFilters(filters);
   const clearAll = () => onFiltersChange({ ...defaultFilters, query: filters.query, categories: filters.categories });
   const resetEverything = () => onFiltersChange(defaultFilters);
@@ -70,8 +71,8 @@ export function JobsListPanel({
         ? "Something went wrong"
         : jobs.length === 0 && totalMatching > 0
           ? "0 jobs in this area"
-          : chips.length > 0
-            ? `${plural(jobs.length, "job")} · ${plural(chips.length, "filter")} applied`
+          : badgeCount > 0
+            ? `${plural(jobs.length, "job")} · ${plural(badgeCount, "filter")} applied`
             : `${plural(jobs.length, "job")} near you`;
 
   const resultsLine =
@@ -102,7 +103,7 @@ export function JobsListPanel({
               {desktopSubtitle ?? subtitle}
             </p>
           </div>
-          {!desktopCards && <FiltersButton count={chips.length} onClick={onOpenFilters} />}
+          {!desktopCards && <FiltersButton count={badgeCount} onClick={onOpenFilters} />}
           <IconButton variant="outline" icon="close" label="Close jobs list" onClick={onClose} iconClassName="size-4" />
         </div>
         <div className={cn("flex items-center gap-3", desktopCards && "md:hidden")}>
