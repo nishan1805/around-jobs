@@ -169,8 +169,8 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <JobsListPanel
             cityName={city.name}
             status={status}
-            jobs={listJobs}
-            totalMatching={matching.length}
+            jobs={stateParam === "empty" ? [] : listJobs}
+            totalMatching={stateParam === "none" ? 0 : stateParam === "empty" ? Math.max(matching.length, 1) : matching.length}
             filters={filters}
             onFiltersChange={setFilters}
             onOpenFilters={openFilters}

@@ -50,12 +50,12 @@ export type SeekerState = {
 const STORAGE_KEY = "around-jobs:seeker:v2";
 
 const sampleSubmission: Submission = {
-  name: "Sample · Aarti Sahu",
+  name: "Aarti Sahu",
   phone: "",
-  email: "aarti.sample@email.com",
+  email: "aarti.sahu@email.com",
   location: "Pandri, Raipur",
   latestTitle: "Sales Assistant",
-  latestCompany: "Sample · City Bazaar, Raipur",
+  latestCompany: "City Bazaar, Raipur",
   experience: "2 years",
   education: "Class 12",
   skills: ["Billing", "Customer service"],

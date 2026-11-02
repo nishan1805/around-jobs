@@ -156,9 +156,8 @@ code does today so a designer can confirm or correct it.
 - **Search placeholder.** The brief asked for "Search jobs, companies, or skills...".
   S00, S04, S16 and the profile frames all say "Search places, restaurants, events, offers...".
   The frames win.
-- **Two names on one profile.** The completion card, account menu and avatar use
-  "Nishan Kumar Mondal". The basic-info form, resume filename and LinkedIn URL use
-  "Rahul Sharma". Both are shown as drawn. They are not merged.
+- **Profile name.** Every job-seeker surface uses "Nishan Kumar Mondal", including
+  the basic-info form, resume filename and LinkedIn URL.
 - **Sidebar.** Desktop nav is Jobs, Applied, Saved, Profile. "Post a job" moved to the
   top bar and only shows while logged out (S00). Logged-in frames omit it.
 - **Location menu (S04).** Selected row uses `primary-50`. The frame's fill is `#edf2ff`,

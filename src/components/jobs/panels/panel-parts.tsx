@@ -138,7 +138,7 @@ export function GalleryHeader({
     <div
       role="group"
       aria-roledescription="carousel"
-      aria-label={`${name} photos (Sample placeholders)`}
+      aria-label={`${name} photos`}
       className="relative h-60 w-full shrink-0 bg-grey-100"
     >
       <IconButton icon={nav.icon} label={nav.label} onClick={nav.onClick} className="absolute top-4 left-4" iconClassName="size-4" />

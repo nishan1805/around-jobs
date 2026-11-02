@@ -95,8 +95,7 @@ function SavedContent() {
   }
 
   const expiring = saved.filter(isExpiringSoon).length;
-  const isSample = saved.some((job) => job.company.name.includes("(Sample)"));
-  const subtitle = `${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? `, ${expiring} expiring soon` : ""}.${isSample ? " (Sample)" : ""}`;
+  const subtitle = `${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? `, ${expiring} expiring soon` : ""}.`;
 
   return (
     <>

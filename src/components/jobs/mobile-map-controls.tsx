@@ -64,7 +64,7 @@ export function MapPeek({ title, onOpenList, className }: { title: string; onOpe
           <p aria-live="polite" className="text-body-semibold text-text-primary">
             {title}
           </p>
-          <p className="text-label-medium text-text-secondary">Sample listings · swipe up for list</p>
+          <p className="text-label-medium text-text-secondary">Swipe up for the list</p>
         </div>
         <button
           type="button"

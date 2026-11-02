@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, type ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
@@ -313,7 +314,7 @@ export function ExperienceDialog({
     arrangement: initial?.arrangement ?? "",
     description: initial?.description ?? "",
   });
-  const [current, setCurrent] = useState(initial?.end === "Present");
+  const [current, setCurrent] = useState(invalid ? true : initial?.end === "Present");
   const [showErrors, setShowErrors] = useState(Boolean(invalid));
   const set = (key: keyof typeof form, value: string) => setForm((currentForm) => ({ ...currentForm, [key]: value }));
 
@@ -358,6 +359,7 @@ export function ExperienceDialog({
             onChange={(event) => set("title", event.target.value)}
             className={cn(control, "placeholder:text-text-tertiary", showErrors && !form.title.trim() && "border-error-default")}
           />
+          {showErrors && !form.title.trim() && <ErrorText>Enter your job title.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>Company name</FieldLabel>
@@ -367,6 +369,7 @@ export function ExperienceDialog({
             onChange={(event) => set("company", event.target.value)}
             className={cn(control, "placeholder:text-text-tertiary", showErrors && !form.company.trim() && "border-error-default")}
           />
+          {showErrors && !form.company.trim() && <ErrorText>Enter the company name.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>Employment type</FieldLabel>
@@ -378,6 +381,7 @@ export function ExperienceDialog({
               ))}
             </select>
           </span>
+          {showErrors && !form.type && <ErrorText>Select an employment type.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>Work mode</FieldLabel>
@@ -393,6 +397,7 @@ export function ExperienceDialog({
               ))}
             </select>
           </span>
+          {showErrors && !form.arrangement && <ErrorText>Select a work mode.</ErrorText>}
         </label>
       </div>
       <label className="flex flex-col gap-2">
@@ -417,6 +422,7 @@ export function ExperienceDialog({
             onChange={(event) => set("start", event.target.value)}
             className={cn(control, "placeholder:text-text-tertiary", showErrors && !form.start && "border-error-default")}
           />
+          {showErrors && !form.start && <ErrorText>Select a start date.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>End date</FieldLabel>
@@ -504,9 +510,9 @@ export function PhotoDialog({
           </h2>
           <p className="mt-1.5 text-body-sm-regular text-text-secondary">
             {phase === "remove"
-              ? "Your photo will be removed. Employers will see your initial instead."
-              : phase === "success"
-                ? "Your profile photo was updated."
+              ? "Employers will see your initials instead. You can upload a new photo anytime."
+              : phase === "selected" || phase === "saving" || phase === "success"
+                ? "This is how your photo will appear to employers."
                 : "Add a clear photo so employers can recognise you."}
           </p>
         </div>
@@ -519,19 +525,36 @@ export function PhotoDialog({
           Unsupported format. Upload a JPG or PNG.
         </p>
       )}
-      {phase !== "remove" && (
-        <span
-          className={cn(
-            "flex size-24 items-center justify-center rounded-full bg-grey-200 text-heading-semibold text-text-primary",
-            phase === "error" && "border-[3px] border-error-default",
-            phase === "selected" && "bg-primary-100 text-primary-700",
-            phase === "success" && "bg-success-50 text-success-700",
-          )}
-        >
-          {phase === "success" ? <Icon name="checkCircle" className="size-8" /> : "N"}
-        </span>
-      )}
-      {phase !== "remove" && phase !== "success" && <p className="text-label-medium text-text-tertiary">JPG or PNG, max 5 MB</p>}
+      {phase !== "remove" &&
+        (phase === "selected" || phase === "saving" || phase === "success" ? (
+          <span className="relative">
+            <Image src="/images/profile-photo.jpg" alt="" width={96} height={96} className="size-24 rounded-full object-cover" />
+            {phase === "selected" && (
+              <button
+                type="button"
+                aria-label="Remove photo"
+                onClick={() => onPhase("remove")}
+                className="absolute -right-1 -bottom-1 flex size-8 items-center justify-center rounded-full border bg-surface-default text-error-default shadow-sm"
+              >
+                <Icon name="trash" className="size-4" />
+              </button>
+            )}
+          </span>
+        ) : (
+          <span
+            className={cn(
+              "flex size-24 items-center justify-center rounded-full bg-grey-200 text-heading-semibold text-text-primary",
+              phase === "error" && "border-[3px] border-error-default",
+            )}
+          >
+            N
+          </span>
+        ))}
+      {phase === "selected" || phase === "saving" ? (
+        <p className="text-body-sm-regular text-text-secondary">profile-photo.jpg · 1.2 MB</p>
+      ) : phase !== "remove" && phase !== "success" ? (
+        <p className="text-label-medium text-text-tertiary">JPG or PNG, max 5 MB</p>
+      ) : null}
       <div className="flex w-full justify-center gap-3">
         {phase === "remove" ? (
           <>
@@ -553,7 +576,7 @@ export function PhotoDialog({
             disabled={phase === "saving"}
             onClick={() => onPhase(phase === "selected" ? "saving" : phase === "saving" ? "success" : "selected")}
           >
-            {phase === "saving" ? "Saving…" : "Upload photo"}
+            {phase === "saving" ? "Saving…" : phase === "selected" ? "Save photo" : "Upload photo"}
           </Button>
         )}
       </div>

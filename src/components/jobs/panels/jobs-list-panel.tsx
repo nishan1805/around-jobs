@@ -143,8 +143,8 @@ export function JobsListPanel({
           />
         ) : totalMatching === 0 ? (
           <EmptyBlock
-            title="No jobs match your filters"
-            body="Try another category, widen the salary range or clear filters."
+            title="No matching jobs"
+            body="Try removing a filter or searching a wider area."
             action={
               <Button variant="outline" shape="rect" onClick={resetEverything}>
                 Clear filters
@@ -153,13 +153,17 @@ export function JobsListPanel({
           />
         ) : jobs.length === 0 ? (
           <EmptyBlock
-            icon="map"
             title="No jobs in this area yet"
-            body="Move or zoom out the map to see jobs nearby."
+            body="Look at jobs in nearby areas or change your area."
             action={
-              <Button variant="outline" shape="rect" onClick={onSearchArea}>
-                Search this area
-              </Button>
+              <div className="flex flex-col items-center gap-3">
+                <Button variant="outline" shape="rect" onClick={onSearchArea}>
+                  Explore nearby jobs
+                </Button>
+                <Button variant="outline" shape="rect" onClick={onSearchArea}>
+                  Change area
+                </Button>
+              </div>
             }
           />
         ) : (

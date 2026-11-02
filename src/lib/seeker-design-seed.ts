@@ -19,9 +19,9 @@ export const PROFILE_UPDATED_LABEL = "16 Oct 2026";
 export const PROFILE_DISPLAY_NAME = "Nishan Kumar Mondal";
 
 export const profileBasicSeed = {
-  fullName: "Rahul Sharma",
+  fullName: "Nishan Kumar Mondal",
   phone: "98765 43210",
-  email: "rahul.sharma@example.com",
+  email: "nishan.kumar.mondal@example.com",
   gender: "Male",
   location: "Raipur, Chhattisgarh",
   headline: "Civil Engineer",
@@ -112,13 +112,13 @@ export const certificationSeed: CertificationEntry[] = [
 ];
 
 export const linksSeed = {
-  linkedin: "https://linkedin.com/in/rahul-sharma-civil",
+  linkedin: "https://linkedin.com/in/nishan-kumar-mondal",
   portfolio: "https://yourportfolio.com",
   other: "",
 };
 
 export const resumeSeed = {
-  name: "Resume_Rahul_Sharma.pdf",
+  name: "Resume_Nishan_Kumar_Mondal.pdf",
   sizeLabel: "240 KB",
   uploadedLabel: "Uploaded 16 Oct 2026",
 };
@@ -165,7 +165,23 @@ export const experienceSeed: ExperienceEntry[] = [
   },
 ];
 
+/** Third card on P03c. */
+export const experienceInternSeed: ExperienceEntry = {
+  id: "exp-intern",
+  title: "Civil Engineering Intern",
+  company: "Public Works Department, Raipur",
+  initials: "PW",
+  start: "May 2022",
+  end: "Jun 2022",
+  location: "Raipur, Chhattisgarh",
+  type: "Internship",
+  arrangement: "On-site",
+  description:
+    "Summer internship on road and drain works: site visits, level surveys and measurement book entries.",
+};
+
 export const experienceTotalLabel = "Total experience: 3 yrs 3 mos";
+export const experienceTotalThreeLabel = "Total experience: 3 yrs 5 mos";
 
 export const employmentTypeOptions = ["Full-time", "Part-time", "Internship", "Contract"] as const;
 export const workArrangementOptions = ["On-site", "Hybrid", "Remote"] as const;

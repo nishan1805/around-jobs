@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Wait until the shell has hydrated. Opening a dialog sooner marks the page
     // inert while a nested boundary is still hydrating.
     const id = window.setTimeout(() => {
-      if (authPreview === "phone" || authPreview === "otp") setLoginOpen(true);
+      if (authPreview === "phone" || authPreview === "otp" || authPreview === "otp-error" || authPreview === "loading") setLoginOpen(true);
       if (authPreview === "profile") setProfileOpen(true);
     }, 50);
     return () => window.clearTimeout(id);
@@ -70,9 +70,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <LoginDialog
         open={loginOpen}
         reason={reason}
-        initialStep={authPreview === "otp" ? "otp" : "phone"}
-        initialPhone={authPreview === "otp" ? "9800000010" : ""}
-        initialCode={authPreview === "otp" ? "482" : ""}
+        initialStep={authPreview === "otp" || authPreview === "otp-error" || authPreview === "loading" ? "otp" : "phone"}
+        initialPhone={authPreview === "otp" || authPreview === "otp-error" || authPreview === "loading" ? "9800000010" : ""}
+        initialCode={authPreview === "otp" ? "482" : authPreview === "otp-error" ? "482917" : authPreview === "loading" ? "482916" : ""}
+        initialError={authPreview === "otp-error" ? "Incorrect OTP. 2 attempts left." : null}
+        initialBusy={authPreview === "loading"}
         onOpenChange={(open) => {
           setLoginOpen(open);
           if (!open) pending.current = null;
@@ -87,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         <ProfileDialog
           open
           user={user}
-          presetName={authPreview === "profile" ? "Rahul Sharma (Sample)" : ""}
+          presetName={authPreview === "profile" ? "Nishan Kumar Mondal" : ""}
           onDone={() => {
             setProfileOpen(false);
             runPending();

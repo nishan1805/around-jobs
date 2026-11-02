@@ -12,7 +12,6 @@ import {
   OTP_ATTEMPTS,
   OTP_LENGTH,
   RESEND_SECONDS,
-  SAMPLE_OTP,
   type User,
 } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -122,31 +121,37 @@ export function LoginDialog({
   initialStep = "phone",
   initialPhone = "",
   initialCode = "",
+  initialError = null,
+  initialBusy = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onLoggedIn: (user: User) => void;
   reason?: string;
-  /** Query-param previews for S08 (`phone`) and S09 (`otp`). */
+  /** Query-param previews for S08 (`phone`), S09 (`otp`), OTP error and loading. */
   initialStep?: Step;
   initialPhone?: string;
   initialCode?: string;
+  initialError?: string | null;
+  initialBusy?: boolean;
 }) {
   const [step, setStep] = useState<Step>(initialStep);
   const [phone, setPhone] = useState(initialPhone);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [code, setCode] = useState(initialCode);
-  const previewKey = `${initialStep}:${initialPhone}:${initialCode}`;
+  const [otpError, setOtpError] = useState<string | null>(initialError);
+  const [busy, setBusy] = useState(initialBusy);
+  const previewKey = `${initialStep}:${initialPhone}:${initialCode}:${initialError ?? ""}:${initialBusy}`;
   const [seenPreview, setSeenPreview] = useState(previewKey);
   if (previewKey !== seenPreview) {
     setSeenPreview(previewKey);
     setStep(initialStep);
     setPhone(initialPhone);
     setCode(initialCode);
+    setOtpError(initialError);
+    setBusy(initialBusy);
   }
   const [attemptsLeft, setAttemptsLeft] = useState(OTP_ATTEMPTS);
-  const [otpError, setOtpError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [sentCount, setSentCount] = useState(0);
   const resendIn = useCountdown(RESEND_SECONDS, sentCount);
 
@@ -269,7 +274,7 @@ export function LoginDialog({
         >
           <DialogHeader
             title="Enter OTP"
-            description={`Enter the 6-digit code sent to ${maskPhone(phone)} (Sample)`}
+            description={`Enter the 6-digit code sent to ${maskPhone(phone)}`}
             onClose={close}
           >
             {!busy && (
@@ -318,7 +323,6 @@ export function LoginDialog({
                   Resend OTP
                 </button>
               )}
-              <span className="block">Sample OTP: {SAMPLE_OTP}</span>
             </p>
           )}
           <Button type="submit" shape="rect" className="w-full" disabled={busy || code.length < OTP_LENGTH || attemptsLeft === 0}>

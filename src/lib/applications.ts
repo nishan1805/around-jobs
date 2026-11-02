@@ -53,7 +53,7 @@ export function eventText(event: ApplicationEvent, application: Application) {
 export function eventWhen(event: ApplicationEvent, application: Application) {
   const day = relativeDay(event.on);
   const when = event.time ? `${day}, ${event.time}` : day;
-  return application.sample ? `${when} (Sample)` : when;
+  return when;
 }
 
 /** "Applied 3 days ago" / "Applied today" */

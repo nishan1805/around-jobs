@@ -16,8 +16,10 @@ import {
   certificationSeed,
   educationExtraSeed,
   educationSeed,
+  experienceInternSeed,
   experienceSeed,
   experienceTotalLabel,
+  experienceTotalThreeLabel,
   genderOptions,
   linksSeed,
   locationSuggestionsSeed,
@@ -285,7 +287,11 @@ export function ProfileDesktop() {
             )}
             {section === "experience" && (
               <ExperienceSection
-                items={experienceCount === "3" && experienceList.length < 3 ? [...experienceList, experienceSeed[0]] : experienceList}
+                items={
+                  experienceCount === "3" && experienceList.length < 3
+                    ? [...experienceList, experienceInternSeed]
+                    : experienceList
+                }
                 onAdd={() => {
                   setEditingExperience(undefined);
                   setDialog("experience");
@@ -387,7 +393,7 @@ export function ProfileDesktop() {
       {activeDialog === "remove-resume" && (
         <ConfirmDialog
           title="Remove your resume?"
-          body="Resume_Rahul_Sharma.pdf will be removed from your profile. Employers won't be able to view it until you upload a new one."
+          body={`${resumeSeed.name} will be removed from your profile. Employers won't be able to view it until you upload a new one.`}
           confirmLabel="Remove"
           onClose={() => setDialog(null)}
           onConfirm={() => {
@@ -525,23 +531,38 @@ function EmptyWell({
   body,
   action,
   onAction,
+  icon = "plus",
+  error,
 }: {
   title: string;
   body: string;
   action: string;
   onAction?: () => void;
+  icon?: "plus" | "briefcase" | "upload";
+  error?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-md border border-dashed bg-background-secondary px-6 py-8 text-center">
+    <div
+      className={cn(
+        "flex flex-col items-center gap-3 rounded-md border border-dashed bg-background-secondary px-6 py-8 text-center",
+        error && "border-error-default",
+      )}
+    >
       <span className="flex size-10 items-center justify-center rounded-full bg-primary-50 text-brand-primary">
-        <Icon name="plus" className="size-5" />
+        <Icon name={icon === "plus" ? "plus" : icon === "briefcase" ? "briefcase" : "upload"} className="size-5" />
       </span>
       <div>
         <p className="text-body-sm-semibold text-text-primary">{title}</p>
-        <p className="mt-1 max-w-sm text-body-sm-regular text-text-secondary">{body}</p>
+        <p className="mt-1 max-w-md text-body-sm-regular text-text-secondary">{body}</p>
       </div>
+      {error && (
+        <p className="flex items-center gap-2 text-body-sm-regular text-error-default">
+          <Icon name="alertCircle" className="size-4" />
+          {error}
+        </p>
+      )}
       <Button type="button" variant="outline" shape="rect" size="sm" onClick={onAction}>
-        + {action}
+        {action.startsWith("Try") ? action : `+ ${action}`}
       </Button>
     </div>
   );
@@ -743,16 +764,17 @@ function SkillsSection(props: {
           </h3>
           <p className="text-label-medium text-text-tertiary">Upload your latest resume (PDF, DOC, DOCX · max 5 MB)</p>
         </div>
-        {props.upload === "error" ? (
-          <p className="rounded-sm bg-error-50 px-3 py-2 text-body-sm-regular text-error-default">
-            Couldn’t upload this file. Use PDF, DOC or DOCX under 5 MB.
-          </p>
-        ) : null}
-        {!props.showResume ? (
+        {!props.showResume || props.upload === "error" ? (
           <EmptyWell
             title="No resume uploaded yet"
             body="Upload your resume so employers can learn more about you. PDF, DOC or DOCX · max 5 MB."
-            action="Add Resume"
+            action={props.upload === "error" ? "Try again" : "Add Resume"}
+            icon="upload"
+            error={
+              props.upload === "error"
+                ? "This file isn't supported. Please upload a PDF, DOC or DOCX under 5 MB."
+                : undefined
+            }
           />
         ) : (
           <div className="flex items-center gap-3 rounded-sm border p-3">
@@ -849,13 +871,19 @@ function ExperienceSection({
         <p className="flex items-center gap-2 text-body-sm-medium text-text-secondary">
           <Icon name="briefcase" className="size-4" />
           <span>
-            <span className="text-text-primary">{experienceTotalLabel}</span>
+            <span className="text-text-primary">{items.length >= 3 ? experienceTotalThreeLabel : experienceTotalLabel}</span>
             {" · calculated from your work history"}
           </span>
         </p>
       )}
       {items.length === 0 ? (
-        <EmptyWell title="No experience added yet" body="Add your work history so employers can see what you’ve done." action="Add experience" onAction={onAdd} />
+        <EmptyWell
+          icon="briefcase"
+          title="No work experience added yet"
+          body="Add your jobs and internships so employers can see your site and project experience."
+          action="Add experience"
+          onAction={onAdd}
+        />
       ) : (
         items.map((entry, index) => (
           <article key={`${entry.id}-${index}`} className="flex gap-4 rounded-md border p-4">

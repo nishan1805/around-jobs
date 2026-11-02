@@ -49,7 +49,7 @@ export function ResumeDropzone({ fileName, onPick }: { fileName: string | null; 
       </span>
       <p className="text-body-semibold text-text-primary">{fileName ?? "Upload your resume"}</p>
       <p className="text-label-medium text-text-tertiary" aria-live="polite">
-        {picker.error ?? (fileName ? "Stays on this device in the Sample app" : "PDF or DOC, up to 5 MB")}
+        {picker.error ?? "PDF or DOC, up to 5 MB"}
       </p>
       {picker.input}
       <Button type="button" variant="outline" shape="rect" onClick={picker.open}>

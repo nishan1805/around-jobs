@@ -173,7 +173,7 @@ function ResumeDialog({ user, onClose }: { user: User; onClose: () => void }) {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogHeader
         title="Resume"
-        description="PDF or DOC, up to 5 MB. In the Sample app it stays on this device."
+        description="PDF or DOC, up to 5 MB."
         onClose={onClose}
       />
       {user.resumeName ? (
@@ -208,7 +208,7 @@ function PreferencesDialog({ user, onClose }: { user: User; onClose: () => void 
       >
         <DialogHeader
           title="Job preferences"
-          description="Used to highlight jobs that fit you. Sample setting, saved on this device."
+          description="Used to highlight jobs that fit you."
           onClose={onClose}
         />
         <ChipGroup label="Job type">
@@ -259,7 +259,7 @@ function NotificationsDialog({ onClose }: { onClose: () => void }) {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogHeader
         title="Notifications"
-        description="Sample switches. Nothing is sent from this device."
+        description="Nothing is sent from this device."
         onClose={onClose}
       />
       <div className="flex flex-col">
@@ -293,7 +293,7 @@ function Switch({ label, checked, onChange }: { label: string; checked: boolean;
 function LanguageDialog({ onClose }: { onClose: () => void }) {
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogHeader title="Language" description="More languages are coming. (Sample)" onClose={onClose} />
+      <DialogHeader title="Language" description="More languages are coming." onClose={onClose} />
       <p className="rounded-sm border bg-primary-50 px-4 py-3 text-body-sm-semibold text-brand-primary">English</p>
       <Button shape="rect" className="w-full" onClick={onClose}>
         Done
@@ -307,7 +307,7 @@ function HelpDialog({ onClose }: { onClose: () => void }) {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogHeader
         title="Help & support"
-        description="Questions about an application or your account. We reply within a day. (Sample)"
+        description="Questions about an application or your account. We reply within a day."
         onClose={onClose}
       />
       <a href="mailto:support@around.jobs" className={cn(buttonVariants({ variant: "outline", shape: "rect" }), "w-full")}>

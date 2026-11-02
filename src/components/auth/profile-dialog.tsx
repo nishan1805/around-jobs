@@ -62,7 +62,7 @@ export function ProfileDialog({
             id="profile-name"
             autoComplete="name"
             autoFocus
-            placeholder="Rahul Sharma (Sample)"
+            placeholder="Nishan Kumar Mondal"
             value={name}
             aria-invalid={nameError ? true : undefined}
             aria-describedby={nameError ? "profile-name-error" : undefined}

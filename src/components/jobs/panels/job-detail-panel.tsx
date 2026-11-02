@@ -137,7 +137,7 @@ export function JobDetailPanel({
                 </span>
               )}
             </div>
-            <p className="text-label-medium text-text-tertiary">{job.applicants} applicants · Sample job</p>
+            <p className="text-label-medium text-text-tertiary">{job.applicants} applicants</p>
             {notice && (
               <p role="status" className="text-label-medium text-text-tertiary">
                 {notice}

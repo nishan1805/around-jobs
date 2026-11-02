@@ -102,12 +102,12 @@ export function MessageDialog({ job, onClose }: { job: Job; onClose: () => void 
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogHeader
         title={`Message ${job.company.name}`}
-        description="Ask about timings, the interview or what to bring. Sample chat: messages stay on this device."
+        description="Ask about timings, the interview or what to bring. Messages stay on this device."
         onClose={onClose}
       />
       {sent ? (
         <>
-          <Banner tone="success">Message sent. The employer usually replies within a day. (Sample)</Banner>
+          <Banner tone="success">Message sent. The employer usually replies within a day.</Banner>
           <Button shape="rect" className="w-full" onClick={onClose}>
             Done
           </Button>
