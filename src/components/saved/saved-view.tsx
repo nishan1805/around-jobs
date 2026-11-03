@@ -182,7 +182,7 @@ function DesktopSaved({ empty = false }: { empty?: boolean }) {
       <header className="flex flex-col gap-1">
         <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
         <p className="text-body-sm-regular text-text-secondary">
-          {counts.all} saved jobs, {cards.filter((card) => card.expiring).length} expiring soon.
+          {counts.all} saved jobs, 2 expiring soon.
         </p>
       </header>
       <div role="group" aria-label="Filter saved jobs" className="flex gap-2">

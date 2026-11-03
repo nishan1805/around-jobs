@@ -170,10 +170,10 @@ code does today so a designer can confirm or correct it.
 - **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens `/alerts`.
   The frames do not include a job-alerts screen, so that page is only the empty state
   "You don't have any job alerts yet." Help & support uses `mailto:support@around.jobs`.
-- **Saved jobs (S17).** Four cards show "Expiring soon" (the first four). The header
-  counts those badges. The six cards are the frame's Site Supervisor / Raipur Builder
-  set. Nearby is the first three cards and Recently added is the first two. The salary
-  line stays on one line at 1280.
+- **Saved jobs (S17).** The header reads "6 saved jobs, 2 expiring soon." The frame
+  badges every card "Expiring soon", so all six cards show the badge. Nearby is the
+  first three cards and Recently added is the first two. The salary line stays on
+  one line at 1280.
 - **P02e second education** uses the filled Add education dialog (Diploma, Government
   Polytechnic, Raipur), because that frame was the source for the extra card.
 - **P03c third experience** is Civil Engineering Intern at Public Works Department, Raipur.
@@ -187,7 +187,8 @@ code does today so a designer can confirm or correct it.
   "Raipur Builder". The list says 24 jobs and shows the five cards in the frame.
 - **S17** cards are Site Supervisor at Raipur Builder. Layer names in Figma
   (Barista, Sales associate, and so on) do not match the visible titles, so the
-  visible titles win. Four of the six cards show the expiring badge.
+  visible titles win. Every card shows the expiring badge; the header still says
+  2 expiring soon, matching the frame.
 - **Map.** Leaflet markers and the cluster count are live data, not the static
   frame (cluster 12, labels that still say Sample in Figma). The basemap is Esri
   World Street Map (coloured streets, keyless, any domain). Zoom is capped at the
@@ -210,9 +211,10 @@ code does today so a designer can confirm or correct it.
 - **Resume "too large"** (2105:25466): the node text is exactly
   "File is larger than 5 MB. Upload a smaller file." The line stays. The filename in
   Figma is Resume_Rahul_Sharma.pdf; the seeker name stays Nishan Kumar Mondal.
-- **P02g** is Edit certification (`?dialog=edit-certification`). **P02d** is the
-  uploading resume with empty education and certifications (`?upload=uploading`).
-  **P02d2** is the remove-resume dialog.
+- **P02g** is Edit certification (`?dialog=edit-certification`), pinned 293px from
+  the top of the frame. **P02d** is the uploading resume with empty education and
+  certifications (`?upload=uploading`). **P02d2** is the remove-resume dialog, and
+  education and certifications behind it are empty.
 - **P02c / P02f.** Add certification (filled, including Credential URL) is
   `/profile?section=skills&dialog=add-certification`. Edit education is
   `/profile?section=skills&dialog=edit-education`.

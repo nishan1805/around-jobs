@@ -15,7 +15,8 @@ const itemClass =
   "flex w-full cursor-default items-center gap-3 rounded-sm px-3 py-2.5 text-body-sm-medium text-text-primary outline-none data-highlighted:bg-grey-100";
 
 /**
- * Logged out: grey profile glyph (S00). Logged in: initial on primary-100 (S07).
+ * Logged out: grey profile glyph (S00). Logged in: blue initial on the trigger;
+ * the open menu uses a 64px grey-200 initial (S07).
  * `?menu=open` keeps the menu open for the profile-menu frame.
  */
 export function AccountButton() {
@@ -56,7 +57,7 @@ export function AccountButton() {
           <Menu.Positioner sideOffset={8} align="end" className="z-50">
             <Menu.Popup className="w-[300px] rounded-xl border bg-surface-elevated p-3 shadow-lg outline-none">
               <div className="flex items-center gap-3 px-1 pb-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-primary-200 bg-primary-100 text-heading-semibold leading-none text-primary-700">
+                <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-grey-200 text-heading-semibold leading-none text-text-primary">
                   {initial}
                 </span>
                 <span className="min-w-0 flex-1">

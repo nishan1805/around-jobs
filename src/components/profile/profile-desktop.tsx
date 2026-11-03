@@ -122,7 +122,8 @@ export function ProfileDesktop() {
       ? null
       : ((photoParam as PhotoPhase | null) ?? photoPhase);
   const skillsPreviewEmpty =
-    section === "skills" && (empty || uploadParam === "uploading" || uploadParam === "error");
+    section === "skills" &&
+    (empty || uploadParam === "uploading" || uploadParam === "error" || activeDialog === "remove-resume");
   const educationList = useMemo(() => {
     if (skillsPreviewEmpty) return [];
     return educationCount === "2" ? [...education, educationExtraSeed] : education;
@@ -580,6 +581,7 @@ function EmptyWell({
   onAction,
   icon = "plus",
   error,
+  bodyClassName,
 }: {
   title: string;
   body: string;
@@ -587,6 +589,7 @@ function EmptyWell({
   onAction?: () => void;
   icon?: "plus" | "briefcase" | "upload" | "graduation" | "file";
   error?: string;
+  bodyClassName?: string;
 }) {
   return (
     <div
@@ -603,7 +606,7 @@ function EmptyWell({
       </span>
       <div>
         <p className="text-body-sm-semibold text-text-primary">{title}</p>
-        <p className="mt-1 max-w-md text-body-sm-regular text-text-secondary">{body}</p>
+        <p className={cn("mt-1 max-w-md text-body-sm-regular text-text-secondary", bodyClassName)}>{body}</p>
       </div>
       {error && (
         <p className="flex items-center gap-2 text-body-sm-regular text-error-default">
@@ -956,6 +959,7 @@ function ExperienceSection({
           icon="briefcase"
           title="No work experience added yet"
           body="Add your jobs and internships so employers can see your site and project experience."
+          bodyClassName="max-w-none whitespace-nowrap"
           action="Add experience"
           onAction={onAdd}
         />
