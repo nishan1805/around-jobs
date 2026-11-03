@@ -346,14 +346,20 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <div
             role="group"
             aria-label="Job categories"
-            className="pointer-events-auto flex min-w-0 flex-1 flex-nowrap gap-2 overflow-x-auto overflow-y-hidden py-1.5 [scrollbar-width:none] *:shrink-0"
+            className={cn(
+              "pointer-events-auto flex min-w-0 flex-1 flex-nowrap gap-2 overflow-x-auto overflow-y-hidden py-1.5 [scrollbar-width:none] *:shrink-0",
+              panelOpen && !dockRight && "max-[89.9375rem]:gap-1",
+            )}
           >
             {categories.map((category) => (
               <Chip
                 key={category}
                 selected={filters.categories.includes(category)}
                 onClick={() => setFilters((current) => ({ ...current, categories: toggleValue(current.categories, category) }))}
-                className={cn(!filters.categories.includes(category) && "border-transparent shadow-sm")}
+                className={cn(
+                  !filters.categories.includes(category) && "border-transparent shadow-sm",
+                  panelOpen && !dockRight && "max-[89.9375rem]:px-2",
+                )}
               >
                 {category}
               </Chip>

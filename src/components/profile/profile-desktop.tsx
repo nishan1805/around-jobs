@@ -133,7 +133,8 @@ export function ProfileDesktop() {
   const preferenceError = showErrors && section === "preferences";
   const locationList = (empty || preferenceError) && section === "preferences" ? [] : locations;
   const roleList = (empty || preferenceError) && section === "preferences" ? [] : roles;
-  const noticeValue = empty && section === "preferences" ? "" : notice;
+  const preferenceBlank = (empty || preferenceError) && section === "preferences";
+  const noticeValue = preferenceBlank ? "" : notice;
   const complete = section === "preferences" && !empty && !showErrors;
 
   const addSkill = (skill: string) => {
@@ -339,11 +340,11 @@ export function ProfileDesktop() {
                 onRemoveLocation={(value) => setLocations((current) => current.filter((item) => item !== value))}
                 onAddRole={(value) => setRoles((current) => (current.includes(value) ? current : [...current, value]))}
                 onRemoveRole={(value) => setRoles((current) => current.filter((item) => item !== value))}
-                employment={employment}
+                employment={preferenceBlank ? "" : employment}
                 onEmployment={setEmployment}
-                arrangement={empty && section === "preferences" ? "" : arrangement}
+                arrangement={preferenceBlank ? "" : arrangement}
                 onArrangement={setArrangement}
-                salary={empty && section === "preferences" ? "" : salary}
+                salary={preferenceBlank ? "" : salary}
                 onSalary={setSalary}
                 salaryPeriod={salaryPeriod}
                 onSalaryPeriod={setSalaryPeriod}
@@ -768,7 +769,7 @@ function SkillsSection(props: {
           props.certs.map((entry) => (
             <article key={entry.id} className="flex items-center gap-4 rounded-md border p-4">
               <span className="flex size-10 items-center justify-center rounded-full bg-primary-50 text-brand-primary">
-                <Icon name="checkCircle" className="size-5" />
+                <Icon name="file" className="size-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-body-semibold text-text-primary">{entry.name}</p>
@@ -894,8 +895,9 @@ function LinkField({
       <span className="text-label-medium text-text-secondary">{label}</span>
       <span className={cn(inputClass, "flex items-center gap-2")}>
         {icon === "linkedin" ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src="/icons/linkedin.svg" alt="" width={16} height={16} className="size-4" />
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-xs bg-brand-primary text-label-medium text-text-on-brand">
+            in
+          </span>
         ) : (
           <Icon name={icon} className="size-4 text-text-tertiary" />
         )}
@@ -1054,6 +1056,7 @@ function PreferencesSection(props: {
             }}
           />
         </span>
+        {locationError && <p className="text-label-medium text-error-default">Select at least one preferred location.</p>}
         <div className="flex flex-wrap gap-2">
           {props.locations.map((item) => (
             <button key={item} type="button" onClick={() => props.onRemoveLocation(item)} className="inline-flex items-center gap-1 rounded-full bg-brand-primary px-3 py-1 text-label-medium text-text-on-brand">
@@ -1068,7 +1071,6 @@ function PreferencesSection(props: {
             </button>
           ))}
         </div>
-        {locationError && <p className="text-label-medium text-error-default">Select at least one preferred location.</p>}
       </div>
       <div className="flex flex-col gap-3 rounded-md border p-4">
         <FieldLabel required>Preferred roles</FieldLabel>
@@ -1086,6 +1088,7 @@ function PreferencesSection(props: {
             }}
           />
         </span>
+        {roleError && <p className="text-label-medium text-error-default">Select at least one preferred role.</p>}
         <div className="flex flex-wrap gap-2">
           {props.roles.map((item) => (
             <button key={item} type="button" onClick={() => props.onRemoveRole(item)} className="inline-flex items-center gap-1 rounded-full bg-brand-primary px-3 py-1 text-label-medium text-text-on-brand">
@@ -1100,7 +1103,6 @@ function PreferencesSection(props: {
             </button>
           ))}
         </div>
-        {roleError && <p className="text-label-medium text-error-default">Select at least one preferred role.</p>}
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <ChipRow label="Employment type" options={["Full-time", "Part-time", "Internship", "Contract"]} value={props.employment} onChange={props.onEmployment} />
@@ -1146,10 +1148,10 @@ function PreferencesSection(props: {
           <span className="block text-label-medium text-text-tertiary">This helps us show you opportunities in other locations as well.</span>
         </span>
       </label>
-      <div className="flex max-w-xl gap-2 rounded-md bg-info-50 px-4 py-3 text-body-sm-regular text-text-secondary">
+      <div className="flex gap-2 rounded-md bg-info-50 px-4 py-3 text-body-sm-regular text-text-secondary">
         <Icon name="alertCircle" className="mt-0.5 size-4 shrink-0 text-info-700" />
         <p>
-          <span className="text-body-sm-semibold text-text-primary">This helps us show you relevant jobs.</span>{" "}
+          <span className="block text-body-sm-semibold text-text-primary">This helps us show you relevant jobs.</span>
           You can keep this information private. It will only be used to suggest opportunities.
         </p>
       </div>
