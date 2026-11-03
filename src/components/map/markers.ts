@@ -18,8 +18,8 @@ export function companyMarkerHtml({ name, count }: { name: string; count: number
 </div>`;
 }
 
-/** Figma cluster 1896:13452. The circle's centre sits on the coordinate. */
+/** Figma cluster 1896:13452. The blue disc is 56px; the 3px white border sits outside it (62px overall). The centre sits on the coordinate. */
 export function clusterMarkerHtml({ count }: { count: number }) {
   return `
-<div class="absolute top-0 left-0 flex size-14 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-3 border-surface-default bg-brand-primary text-body-sm-semibold text-text-on-brand shadow-sm">${count}</div>`;
+<div class="absolute top-0 left-0 box-content flex size-14 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-3 border-surface-default bg-brand-primary text-body-sm-semibold text-text-on-brand shadow-sm">${count}</div>`;
 }

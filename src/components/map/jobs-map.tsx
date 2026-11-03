@@ -26,6 +26,47 @@ type Cluster = { key: string; members: MapCompany[]; center: L.LatLng };
 const CLUSTER_RADIUS_PX = 72;
 const DEFAULT_ZOOM = 14;
 const MIN_INITIAL_ZOOM = 13;
+/** S00 cluster 2018:41695, centre of the 56px disc in the 1316×952 map frame. */
+const DESIGN_CLUSTER = { x: (585 + 28) / 1316, y: (341 + 28) / 952 };
+/** Blue disc plus the outside border. Company pins occupy 111×91, with the tip on the coordinate. */
+const DESIGN_CLUSTER_PX = 62;
+const MARKER_CLEARANCE = 12;
+
+function designClusterPoint(map: LeafletMap, companies: MapCompany[]) {
+  const size = map.getSize();
+  let x = size.x * DESIGN_CLUSTER.x;
+  let y = size.y * DESIGN_CLUSTER.y;
+  const half = DESIGN_CLUSTER_PX / 2;
+  const obstacles = companies.map((item) => {
+    const point = map.latLngToContainerPoint(item.company.position);
+    return {
+      left: point.x - 56 - MARKER_CLEARANCE,
+      top: point.y - 70 - MARKER_CLEARANCE,
+      right: point.x + 56 + MARKER_CLEARANCE,
+      bottom: point.y + 28 + MARKER_CLEARANCE,
+    };
+  });
+  const blocked = (cx: number, cy: number) =>
+    obstacles.some(
+      (rect) => cx - half < rect.right && cx + half > rect.left && cy - half < rect.bottom && cy + half > rect.top,
+    );
+  if (!blocked(x, y)) return map.containerPointToLatLng(L.point(x, y));
+  const startX = x;
+  const startY = y;
+  for (let next = y; next > half + 16; next -= 2) {
+    if (!blocked(startX, next)) {
+      y = next;
+      return map.containerPointToLatLng(L.point(x, y));
+    }
+  }
+  for (let next = startX; next > half + 16; next -= 2) {
+    if (!blocked(next, startY)) {
+      x = next;
+      return map.containerPointToLatLng(L.point(x, y));
+    }
+  }
+  return map.containerPointToLatLng(L.point(startX, startY));
+}
 
 function clusterCompanies(map: LeafletMap, items: MapCompany[], zoom: number): Cluster[] {
   const clusters: { point: L.Point; members: MapCompany[] }[] = [];
@@ -97,9 +138,7 @@ export default function JobsMap({
       animate: false,
     });
     if (map.getZoom() < MIN_INITIAL_ZOOM) map.setView(center, MIN_INITIAL_ZOOM, { animate: false });
-    // S00 cluster (2018:41695): centre of the 56px marker in the 1316×952 map frame.
-    const size = map.getSize();
-    const cluster = L.marker(map.containerPointToLatLng(L.point(size.x * (613 / 1316), size.y * (369 / 952))), {
+    const cluster = L.marker(designClusterPoint(map, companies), {
       title: "12 jobs. Zoom in to see them.",
       icon: L.divIcon({ className: "", iconSize: [0, 0], html: clusterMarkerHtml({ count: 12 }) }),
     }).addTo(map);
