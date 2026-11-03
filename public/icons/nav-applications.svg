@@ -1,8 +1,5 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Glyph">
-<path id="Vector" d="M12.5 1.66667H5C4.55797 1.66667 4.13405 1.84226 3.82149 2.15482C3.50893 2.46738 3.33333 2.89131 3.33333 3.33333V16.6667C3.33333 17.1087 3.50893 17.5326 3.82149 17.8452C4.13405 18.1577 4.55797 18.3333 5 18.3333H15C15.442 18.3333 15.866 18.1577 16.1785 17.8452C16.4911 17.5326 16.6667 17.1087 16.6667 16.6667V5.83333L12.5 1.66667Z" stroke="#6B7280" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_2" d="M11.6667 1.66667V5C11.6667 5.44203 11.8423 5.86595 12.1548 6.17851C12.4674 6.49107 12.8913 6.66667 13.3333 6.66667H16.6667" stroke="#6B7280" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_3" d="M8.33333 10.8333H6.66667" stroke="#6B7280" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_4" d="M13.3333 14.1667H6.66667" stroke="#6B7280" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7C3 4.23858 5.23858 2 8 2H14.584C14.8503 2 15.1056 2.1062 15.2933 2.29507L20.7093 7.74449C20.8955 7.93184 21 8.18526 21 8.44942V17C21 19.7614 18.7614 22 16 22H8C5.23858 22 3 19.7614 3 17V7Z" stroke="black" stroke-width="1.5"/>
+<path d="M10 11.7143L11.4097 13.8625C11.4551 13.9316 11.5539 13.9384 11.6083 13.8762L15 10" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M15 2.24142C15 2.15233 15.1077 2.10771 15.1707 2.17071L20.8293 7.82929C20.8923 7.89229 20.8477 8 20.7586 8H18C16.3431 8 15 6.65685 15 5V2.24142Z" stroke="black" stroke-width="1.5"/>
 </svg>

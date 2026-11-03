@@ -61,7 +61,7 @@ export function DesignEmployerPanel({
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-1">
             <h2 className="text-subheading-semibold text-text-primary">{employer.name}</h2>
-            {verified && <Icon name="checkCircle" className="size-6 text-success-700" />}
+            {verified && <Icon name="verified" className="size-6 text-success-700" />}
           </div>
           <div className="flex flex-col gap-2">
             <p className="flex items-center gap-1 text-label-medium text-text-secondary">
@@ -195,7 +195,7 @@ export function DesignJobDetailPanel({
             <a href={employerOverviewSeed.website} className="text-body-semibold text-brand-primary">
               {detail.company}
             </a>
-            <Icon name="checkCircle" className="size-5 text-success-700" />
+            <Icon name="verified" className="size-5 text-success-700" />
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Badge type="salary">{salary}</Badge>

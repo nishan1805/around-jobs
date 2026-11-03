@@ -224,7 +224,7 @@ export function ProfileDesktop() {
                 <>
                   <div className="my-4 h-px bg-border-default" />
                   <p className="flex items-center gap-2 text-body-sm-regular text-text-secondary">
-                    <Icon name="alertCircle" className="size-4 text-text-tertiary" />
+                    <Icon name="info" className="size-4 text-text-tertiary" />
                     Add your education details to get better job recommendations.
                   </p>
                 </>

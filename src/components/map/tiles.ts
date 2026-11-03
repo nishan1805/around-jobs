@@ -1,44 +1,61 @@
 /**
  * Basemap for the jobs map.
  *
- * The default is Esri World Street Map: a coloured street raster that works on
- * any domain without a key. Labels are baked into the tiles. Native detail
- * stops at zoom 17 around Raipur; higher zooms are Esri's "map data not yet
- * available" placeholder, so Leaflet upscales the last real tile.
+ * The default is Esri World Topo Map: green parks, blue water, and white or
+ * yellow roads, with no API key. It answers 200 from any site, including the
+ * deployed Vercel domain. Labels are baked into the tiles.
  *
- * CARTO Voyager and Positron answer HTTP 200 but stamp "API KEY REQUIRED" on
- * the image, so they are not used.
- *
- * `NEXT_PUBLIC_MAP_TILE_URL` (or the older `NEXT_PUBLIC_MAP_TILES_URL`) replaces
- * the URL. A Stadia key uses Alidade Smooth when no URL is set.
+ * Drop a key in later without changing the map code:
+ * - `NEXT_PUBLIC_STADIA_API_KEY` uses Stadia OSM Bright.
+ * - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` uses Google roadmap tiles.
+ * - `NEXT_PUBLIC_MAP_TILE_URL` (or `NEXT_PUBLIC_MAP_TILES_URL`) replaces the URL.
  * `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION` replaces the credit line.
  */
 
-const esri = {
-  url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-  labelsUrl: null as string | null,
-  attribution:
-    "Tiles &copy; Esri &mdash; Sources: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, &copy; OpenStreetMap contributors, and the GIS User Community",
-  maxNativeZoom: 17,
+type TileSource = {
+  url: string;
+  labelsUrl: string | null;
+  attribution: string;
+  maxNativeZoom: number;
 };
 
-const stadiaKey = process.env.NEXT_PUBLIC_STADIA_API_KEY;
+const topo: TileSource = {
+  url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+  labelsUrl: null,
+  attribution:
+    "Tiles &copy; Esri &mdash; Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), &copy; OpenStreetMap contributors, and the GIS User Community",
+  maxNativeZoom: 16,
+};
+
+const stadiaKey = process.env.NEXT_PUBLIC_STADIA_API_KEY?.trim();
+const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
 const urlOverride = process.env.NEXT_PUBLIC_MAP_TILE_URL ?? process.env.NEXT_PUBLIC_MAP_TILES_URL;
 const attributionOverride = process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION ?? process.env.NEXT_PUBLIC_MAP_TILES_ATTRIBUTION;
 
-const stadia = stadiaKey
+const stadia: TileSource | null = stadiaKey
   ? {
-      url: `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${stadiaKey}`,
-      labelsUrl: null as string | null,
+      url: `https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${stadiaKey}`,
+      labelsUrl: null,
       attribution:
         '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxNativeZoom: 20,
     }
   : null;
 
-const chosen = urlOverride
-  ? { url: urlOverride, labelsUrl: null as string | null, attribution: esri.attribution, maxNativeZoom: 20 }
-  : (stadia ?? esri);
+const google: TileSource | null = googleKey
+  ? {
+      url: `https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&key=${googleKey}`,
+      labelsUrl: null,
+      attribution: "Map data &copy; Google",
+      maxNativeZoom: 20,
+    }
+  : null;
+
+const override: TileSource | null = urlOverride
+  ? { url: urlOverride, labelsUrl: null, attribution: topo.attribution, maxNativeZoom: 20 }
+  : null;
+
+const chosen = override ?? google ?? stadia ?? topo;
 
 export const tileLayer = {
   url: chosen.url,

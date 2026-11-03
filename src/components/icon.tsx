@@ -41,6 +41,7 @@ export const icons = {
   pin: "/icons/pin.svg",
   pinSm: "/icons/pin-sm.svg",
   plus: "/icons/plus.svg",
+  plusSquare: "/icons/plus-square.svg",
   trash: "/icons/trash.svg",
   search: "/icons/search.svg",
   share: "/icons/share.svg",
@@ -49,6 +50,8 @@ export const icons = {
   upload: "/icons/upload.svg",
   user: "/icons/user.svg",
   userFilled: "/icons/user-filled.svg",
+  verified: "/icons/verified.svg",
+  info: "/icons/info.svg",
 } as const;
 
 export type IconName = keyof typeof icons;

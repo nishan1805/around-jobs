@@ -64,7 +64,7 @@ export function FrameJobCardView({
             {card.company && (
               <p className="flex items-center gap-1 text-body-sm-regular text-text-secondary">
                 {card.company}
-                {card.verified && <Icon name="checkCircle" className="size-5 text-success-700" />}
+                {card.verified && <Icon name="verified" className="size-5 text-success-700" />}
               </p>
             )}
           </div>
