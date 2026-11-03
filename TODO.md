@@ -163,15 +163,16 @@ code does today so a designer can confirm or correct it.
 - **Location menu (S04).** Selected row uses `bg-primary-50`. The frame's fill is `#edf2ff`,
   which is not a token, so the row stays on the primary-50 token. Row radius is `rounded-md`
   (12px). The frame uses 10px, which is not a radius token.
-- **Filter count.** Categories are included. S04/S07 with Retail, Full-time and On-site
-  shows Filters 3 (`?category=Retail&type=FULL_TIME&mode=ON_SITE`). Category chips stay
-  in their own row and are not duplicated as removable chips.
+- **Filter count.** Categories are not counted. S04 and S06 with Retail, Full-time and
+  On-site show Filters 2 (`?category=Retail&type=FULL_TIME&mode=ON_SITE`). Category chips
+  stay in their own row. S00 and S03 open with the Retail chip selected.
 - **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens `/alerts`.
   The frames do not include a job-alerts screen, so that page is only the empty state
   "You don't have any job alerts yet." Help & support uses `mailto:support@around.jobs`.
-- **Saved jobs (S17).** The header says "6 saved jobs, 2 expiring soon." The expiring badge
-  is on the first two cards only. The six cards are the frame's Site Supervisor / Raipur
-  Builder set. Nearby is the first three cards and Recently added is the first two.
+- **Saved jobs (S17).** Four cards show "Expiring soon" (the first four). The header
+  counts those badges. The six cards are the frame's Site Supervisor / Raipur Builder
+  set. Nearby is the first three cards and Recently added is the first two. The salary
+  line stays on one line at 1280.
 - **P02e second education** uses the filled Add education dialog (Diploma, Government
   Polytechnic, Raipur), because that frame was the source for the extra card.
 - **P03c third experience** is Civil Engineering Intern at Public Works Department, Raipur.
@@ -185,14 +186,13 @@ code does today so a designer can confirm or correct it.
   "Raipur Builder". The list says 24 jobs and shows the five cards in the frame.
 - **S17** cards are Site Supervisor at Raipur Builder. Layer names in Figma
   (Barista, Sales associate, and so on) do not match the visible titles, so the
-  visible titles win. The frame draws an expiring badge on every card; the header
-  says two are expiring, so only the first two cards show the badge.
+  visible titles win. Four of the six cards show the expiring badge.
 - **Map.** Leaflet markers and the cluster count are live data, not the static
   frame (cluster 12, labels that still say Sample in Figma). The basemap is Esri
-  World Light Gray Canvas. Stadia Alidade Smooth 401s on domains that are not
-  registered, including the Vercel deploy. Keyless CARTO `light_all` answers 200
-  but stamps "API KEY REQUIRED" on the image. Set `NEXT_PUBLIC_STADIA_API_KEY`
-  or `NEXT_PUBLIC_MAP_TILE_URL` to override it.
+  World Street Map (coloured streets, keyless, any domain). Zoom is capped at the
+  last real tile (17); 18+ is Esri's "map data not yet available" placeholder.
+  CARTO Voyager and Positron stamp "API KEY REQUIRED". Stadia Alidade Smooth is
+  used only when `NEXT_PUBLIC_STADIA_API_KEY` is set and no tile URL override is.
 - **Salary green.** The salary badge uses `text-success-700` (`Badge type="salary"`).
   Figma paints that label `#07964e`, which is not a token.
 - **Job detail variants** (fetched): applied (1889:42721) banner "You applied on 12 Oct 2026"
@@ -206,7 +206,15 @@ code does today so a designer can confirm or correct it.
   openings. Save them to see new jobs here."
 - **Building marker** (1896:13455) is the pill with the building glyph, count and orange
   anchor, shown on `/states`. It is not the company photo pin.
-- **Resume "too large"** (2105:25466): "File is larger than 5 MB. Upload a smaller file."
-  The component on `/states` uses that sentence. The filename in Figma is
-  Resume_Rahul_Sharma.pdf; the seeker name stays Nishan Kumar Mondal.
+- **Resume "too large"** (2105:25466, re-checked): the node does contain
+  "File is larger than 5 MB. Upload a smaller file." The line stays. The filename in
+  Figma is Resume_Rahul_Sharma.pdf; the seeker name stays Nishan Kumar Mondal.
+- **P02c / P02f.** Add certification (filled, including Credential URL) is
+  `/profile?section=skills&dialog=add-certification`. Edit education is
+  `/profile?section=skills&dialog=edit-education`.
+- **P05-04** closes the photo dialog, shows the uploaded avatar, and the toast
+  "Profile photo updated successfully." **P05-07** (`photo=removed`) opens
+  Change profile photo. **S05** keeps the Filters button and docks the panel above it.
+- **Map tiles.** Default is Esri World Street Map. `NEXT_PUBLIC_STADIA_API_KEY` still
+  switches the basemap to Stadia Alidade Smooth.
 - **Apply and applications (S11–S15)** were not restyled.

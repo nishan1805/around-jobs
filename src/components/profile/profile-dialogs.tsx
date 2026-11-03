@@ -41,6 +41,33 @@ function ErrorText({ children }: { children: string }) {
   return <p className="text-label-medium text-error-default">{children}</p>;
 }
 
+function DateControl({
+  value,
+  placeholder,
+  disabled,
+  invalid,
+  onChange,
+}: {
+  value: string;
+  placeholder: string;
+  disabled?: boolean;
+  invalid?: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <span className={cn(control, invalid && "border-error-default", disabled && "bg-background-secondary")}>
+      <input
+        value={value}
+        disabled={disabled}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-text-tertiary disabled:text-text-disabled"
+      />
+      <Icon name="calendar" className={cn("size-4", disabled ? "text-text-disabled" : "text-text-tertiary")} />
+    </span>
+  );
+}
+
 function ModalFrame({
   title,
   onClose,
@@ -135,7 +162,7 @@ export function EducationDialog({
             <select
               value={degree}
               onChange={(event) => setDegree(event.target.value)}
-              className="min-w-0 flex-1 bg-transparent outline-none"
+              className="min-w-0 flex-1 appearance-none bg-transparent bg-none outline-none"
             >
               <option value="">Select degree</option>
               {degreeOptions.map((option) => (
@@ -167,21 +194,21 @@ export function EducationDialog({
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>Start year</FieldLabel>
-          <input
+          <DateControl
             value={startYear}
             placeholder="Select year"
-            onChange={(event) => setStartYear(event.target.value)}
-            className={cn(control, "placeholder:text-text-tertiary", showErrors && !startYear && "border-error-default")}
+            invalid={showErrors && !startYear}
+            onChange={setStartYear}
           />
           {showErrors && !startYear && <ErrorText>Select a start year.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>End year</FieldLabel>
-          <input
+          <DateControl
             value={endYear}
             placeholder="Select year"
-            onChange={(event) => setEndYear(event.target.value)}
-            className={cn(control, "placeholder:text-text-tertiary", showErrors && !endYear && "border-error-default")}
+            invalid={showErrors && !endYear}
+            onChange={setEndYear}
           />
           {showErrors && !endYear && <ErrorText>Select an end year.</ErrorText>}
         </label>
@@ -201,10 +228,13 @@ export function EducationDialog({
 
 export function CertificationDialog({
   initial,
+  asNew = false,
   onClose,
   onSave,
 }: {
   initial?: CertificationEntry;
+  /** Filled Add certification (P02c) keeps the add title. */
+  asNew?: boolean;
   onClose: () => void;
   onSave: (entry: CertificationEntry) => void;
 }) {
@@ -212,10 +242,11 @@ export function CertificationDialog({
   const [issuer, setIssuer] = useState(initial?.issuer ?? "");
   const [issued, setIssued] = useState(initial?.issued ?? "");
   const [expiry, setExpiry] = useState(initial?.expiry ?? "");
+  const [url, setUrl] = useState(initial?.url ?? "");
   const [error, setError] = useState(false);
 
   const save = () => {
-    if (!name.trim() || !issuer.trim()) {
+    if (!name.trim() || !issuer.trim() || !issued.trim()) {
       setError(true);
       return;
     }
@@ -225,12 +256,13 @@ export function CertificationDialog({
       issuer: issuer.trim(),
       issued: issued.trim(),
       expiry: expiry.trim(),
+      url: url.trim(),
     });
   };
 
   return (
     <ModalFrame
-      title={initial ? "Edit certification" : "Add certification"}
+      title={initial && !asNew ? "Edit certification" : "Add certification"}
       onClose={onClose}
       banner={error ? "Fill in the required fields to save." : undefined}
       width="md:w-[720px]"
@@ -249,6 +281,7 @@ export function CertificationDialog({
             onChange={(event) => setName(event.target.value)}
             className={cn(control, "placeholder:text-text-tertiary", error && !name.trim() && "border-error-default")}
           />
+          {error && !name.trim() && <ErrorText>Enter the certification name.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>Issuing organization</FieldLabel>
@@ -258,24 +291,33 @@ export function CertificationDialog({
             onChange={(event) => setIssuer(event.target.value)}
             className={cn(control, "placeholder:text-text-tertiary", error && !issuer.trim() && "border-error-default")}
           />
+          {error && !issuer.trim() && <ErrorText>Enter the issuing organization.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
-          <FieldLabel>Issue date</FieldLabel>
-          <input
+          <FieldLabel required>Issue date</FieldLabel>
+          <DateControl
             value={issued}
             placeholder="Select month and year"
-            onChange={(event) => setIssued(event.target.value)}
-            className={cn(control, "placeholder:text-text-tertiary")}
+            invalid={error && !issued.trim()}
+            onChange={setIssued}
           />
+          {error && !issued.trim() && <ErrorText>Select an issue date.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel optional>Expiry date</FieldLabel>
-          <input
-            value={expiry}
-            placeholder="No expiry date"
-            onChange={(event) => setExpiry(event.target.value)}
-            className={cn(control, "placeholder:text-text-tertiary")}
-          />
+          <DateControl value={expiry} placeholder="No expiry date" onChange={setExpiry} />
+        </label>
+        <label className="flex flex-col gap-2 md:col-span-2">
+          <FieldLabel optional>Credential URL</FieldLabel>
+          <span className={control}>
+            <Icon name="link" className="size-4 text-text-tertiary" />
+            <input
+              value={url}
+              placeholder="https://nptel.ac.in/verify/..."
+              onChange={(event) => setUrl(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-text-tertiary"
+            />
+          </span>
         </label>
       </div>
     </ModalFrame>
@@ -314,7 +356,7 @@ export function ExperienceDialog({
     arrangement: initial?.arrangement ?? "",
     description: initial?.description ?? "",
   });
-  const [current, setCurrent] = useState(invalid ? true : initial?.end === "Present");
+  const [current, setCurrent] = useState(Boolean(invalid) || !initial || initial.end === "Present");
   const [showErrors, setShowErrors] = useState(Boolean(invalid));
   const set = (key: keyof typeof form, value: string) => setForm((currentForm) => ({ ...currentForm, [key]: value }));
 
@@ -416,22 +458,22 @@ export function ExperienceDialog({
       <div className="grid gap-4 md:grid-cols-2">
         <label className="flex flex-col gap-2">
           <FieldLabel required>Start date</FieldLabel>
-          <input
+          <DateControl
             value={form.start}
             placeholder="Select month and year"
-            onChange={(event) => set("start", event.target.value)}
-            className={cn(control, "placeholder:text-text-tertiary", showErrors && !form.start && "border-error-default")}
+            invalid={showErrors && !form.start}
+            onChange={(value) => set("start", value)}
           />
           {showErrors && !form.start && <ErrorText>Select a start date.</ErrorText>}
         </label>
         <label className="flex flex-col gap-2">
           <FieldLabel required>End date</FieldLabel>
-          <input
+          <DateControl
             value={current ? "" : form.end}
             disabled={current}
             placeholder="Select month and year"
-            onChange={(event) => set("end", event.target.value)}
-            className={cn(control, "placeholder:text-text-tertiary disabled:bg-background-secondary", showErrors && !current && !form.end && "border-error-default")}
+            invalid={showErrors && !current && !form.end}
+            onChange={(value) => set("end", value)}
           />
         </label>
       </div>
@@ -529,7 +571,7 @@ export function PhotoDialog({
         (phase === "selected" || phase === "saving" || phase === "success" ? (
           <span className="relative">
             <Image src="/images/profile-photo.jpg" alt="" width={96} height={96} className="size-24 rounded-full object-cover" />
-            {phase === "selected" && (
+            {(phase === "selected" || phase === "saving") && (
               <button
                 type="button"
                 aria-label="Remove photo"
@@ -555,7 +597,7 @@ export function PhotoDialog({
       ) : phase !== "remove" && phase !== "success" ? (
         <p className="text-label-medium text-text-tertiary">JPG or PNG, max 5 MB</p>
       ) : null}
-      <div className="flex w-full justify-center gap-3">
+      <div className={cn("flex w-full gap-3", phase === "selected" || phase === "saving" ? "justify-end" : "justify-center")}>
         {phase === "remove" ? (
           <>
             <Button type="button" variant="outline" shape="rect" onClick={onClose}>
@@ -573,10 +615,23 @@ export function PhotoDialog({
           <Button
             type="button"
             shape="rect"
-            disabled={phase === "saving"}
-            onClick={() => onPhase(phase === "selected" ? "saving" : phase === "saving" ? "success" : "selected")}
+            aria-busy={phase === "saving"}
+            className={phase === "saving" ? "opacity-100" : undefined}
+            onClick={() => {
+              if (phase === "saving") return;
+              onPhase(phase === "selected" ? "saving" : "selected");
+            }}
           >
-            {phase === "saving" ? "Saving…" : phase === "selected" ? "Save photo" : "Upload photo"}
+            {phase === "saving" ? (
+              <>
+                <Icon name="spinner" className="size-4 animate-spin" />
+                Saving…
+              </>
+            ) : phase === "selected" ? (
+              "Save photo"
+            ) : (
+              "Upload photo"
+            )}
           </Button>
         )}
       </div>

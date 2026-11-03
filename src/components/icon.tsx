@@ -24,13 +24,17 @@ export const icons = {
   heart: "/icons/heart.svg",
   heartFilled: "/icons/heart-filled.svg",
   help: "/icons/help.svg",
+  link: "/icons/link.svg",
   list: "/icons/list.svg",
   logout: "/icons/logout.svg",
   map: "/icons/map.svg",
   minus: "/icons/minus.svg",
   navApplications: "/icons/nav-applications.svg",
+  navApplicationsFilled: "/icons/nav-applications-filled.svg",
   navJobs: "/icons/nav-jobs.svg",
+  navJobsFilled: "/icons/nav-jobs-filled.svg",
   navSaved: "/icons/nav-saved.svg",
+  navSavedFilled: "/icons/nav-saved-filled.svg",
   pencil: "/icons/pencil.svg",
   pin: "/icons/pin.svg",
   pinSm: "/icons/pin-sm.svg",
@@ -42,6 +46,7 @@ export const icons = {
   spinner: "/icons/spinner.svg",
   upload: "/icons/upload.svg",
   user: "/icons/user.svg",
+  userFilled: "/icons/user-filled.svg",
 } as const;
 
 export type IconName = keyof typeof icons;

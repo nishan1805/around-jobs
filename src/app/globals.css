@@ -27,7 +27,7 @@
     @apply bg-grey-100 font-sans;
   }
   .leaflet-control-attribution {
-    @apply text-label-regular! text-text-tertiary;
+    @apply max-w-[min(40rem,70%)] text-label-regular! whitespace-normal! text-text-tertiary;
   }
   .leaflet-control-attribution a {
     @apply text-text-secondary;

@@ -99,6 +99,7 @@ export type CertificationEntry = {
   issuer: string;
   issued: string;
   expiry: string;
+  url: string;
 };
 
 export const certificationSeed: CertificationEntry[] = [
@@ -108,8 +109,19 @@ export const certificationSeed: CertificationEntry[] = [
     issuer: "Autodesk",
     issued: "Mar 2024",
     expiry: "",
+    url: "",
   },
 ];
+
+/** P02c Add certification, filled. Title stays "Add certification". */
+export const certificationFilledPreview: CertificationEntry = {
+  id: "cert-nptel",
+  name: "Quantity Surveying and Estimation",
+  issuer: "NPTEL",
+  issued: "Jan 2025",
+  expiry: "No expiry date",
+  url: "",
+};
 
 export const linksSeed = {
   linkedin: "https://linkedin.com/in/nishan-kumar-mondal",
@@ -257,7 +269,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     distance: "2.1 km",
     type: "Part-time",
     experience: "Fresher",
-    expiring: false,
+    expiring: true,
     nearby: true,
     recent: false,
     salary: "₹15,000 – ₹20,000",
@@ -273,7 +285,7 @@ export const savedCardsSeed: SavedCardSeed[] = [
     distance: "2.1 km",
     type: "Shift",
     experience: "Fresher",
-    expiring: false,
+    expiring: true,
     nearby: false,
     recent: false,
     salary: "₹15,000 – ₹20,000",

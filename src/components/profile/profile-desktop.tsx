@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
@@ -13,6 +14,7 @@ import {
   PROFILE_COMPLETION,
   PROFILE_DISPLAY_NAME,
   PROFILE_UPDATED_LABEL,
+  certificationFilledPreview,
   certificationSeed,
   educationExtraSeed,
   educationSeed,
@@ -109,11 +111,16 @@ export function ProfileDesktop() {
   const [editingCert, setEditingCert] = useState<CertificationEntry | undefined>();
   const [editingExperience, setEditingExperience] = useState<ExperienceEntry | undefined>();
   const [photoPhase, setPhotoPhase] = useState<PhotoPhase | null>(null);
-  const [photoRemoved, setPhotoRemoved] = useState(false);
+  const [photoSaved, setPhotoSaved] = useState(false);
 
   const activeDialog = dialog ?? dialogParam;
   const photoRemovedPreview = photoParam === "removed";
-  const photo = photoRemovedPreview ? null : ((photoParam as PhotoPhase | null) ?? photoPhase);
+  const photoSuccess = photoParam === "success" || photoSaved;
+  const photo: PhotoPhase | null = photoRemovedPreview
+    ? "initial"
+    : photoSuccess
+      ? null
+      : ((photoParam as PhotoPhase | null) ?? photoPhase);
   const educationList = useMemo(() => {
     if (empty && section === "skills") return [];
     return educationCount === "2" ? [...education, educationExtraSeed] : education;
@@ -121,8 +128,9 @@ export function ProfileDesktop() {
   const certList = empty && section === "skills" ? [] : certs;
   const showResume = !(empty && section === "skills") && resumeOn && uploadParam !== "removed";
   const experienceList = empty && section === "experience" ? [] : experience;
-  const locationList = empty && section === "preferences" ? [] : locations;
-  const roleList = empty && section === "preferences" ? [] : roles;
+  const preferenceError = showErrors && section === "preferences";
+  const locationList = (empty || preferenceError) && section === "preferences" ? [] : locations;
+  const roleList = (empty || preferenceError) && section === "preferences" ? [] : roles;
   const noticeValue = empty && section === "preferences" ? "" : notice;
   const complete = section === "preferences" && !empty && !showErrors;
 
@@ -170,14 +178,19 @@ export function ProfileDesktop() {
                   onClick={() => setPhotoPhase("initial")}
                   className="relative size-14 shrink-0"
                 >
-                  <span
-                    className={cn(
-                      "flex size-14 items-center justify-center rounded-full bg-grey-200 text-subheading-semibold text-text-primary",
-                      !photoRemoved && "bg-grey-200",
-                    )}
-                  >
-                    {PROFILE_DISPLAY_NAME.charAt(0)}
-                  </span>
+                  {photoSuccess ? (
+                    <Image
+                      src="/images/profile-photo.jpg"
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="size-14 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-14 items-center justify-center rounded-full bg-grey-200 text-subheading-semibold text-text-primary">
+                      {PROFILE_DISPLAY_NAME.charAt(0)}
+                    </span>
+                  )}
                   <span className="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border bg-surface-default text-text-secondary">
                     <Icon name="pencil" className="size-3.5" />
                   </span>
@@ -310,8 +323,20 @@ export function ProfileDesktop() {
               <PreferencesSection
                 locations={locationList}
                 roles={roleList}
-                suggestionsLeft={locationSuggestionsSeed.filter((item) => !locationList.includes(item))}
-                roleSuggestions={roleSuggestionsSeed.filter((item) => !roleList.includes(item))}
+                suggestionsLeft={
+                  preferenceError
+                    ? []
+                    : empty
+                      ? [...preferredLocationsSeed]
+                      : locationSuggestionsSeed.filter((item) => !locationList.includes(item))
+                }
+                roleSuggestions={
+                  preferenceError
+                    ? []
+                    : empty
+                      ? [...preferredRolesSeed]
+                      : roleSuggestionsSeed.filter((item) => !roleList.includes(item))
+                }
                 onAddLocation={(value) => setLocations((current) => (current.includes(value) ? current : [...current, value]))}
                 onRemoveLocation={(value) => setLocations((current) => current.filter((item) => item !== value))}
                 onAddRole={(value) => setRoles((current) => (current.includes(value) ? current : [...current, value]))}
@@ -350,9 +375,16 @@ export function ProfileDesktop() {
           }}
         />
       )}
-      {(activeDialog === "certification" || activeDialog === "edit-certification") && (
+      {(activeDialog === "certification" || activeDialog === "edit-certification" || activeDialog === "add-certification") && (
         <CertificationDialog
-          initial={activeDialog === "edit-certification" ? (editingCert ?? certificationSeed[0]) : undefined}
+          asNew={activeDialog === "add-certification"}
+          initial={
+            activeDialog === "edit-certification"
+              ? (editingCert ?? certificationSeed[0])
+              : activeDialog === "add-certification"
+                ? certificationFilledPreview
+                : undefined
+          }
           onClose={() => setDialog(null)}
           onSave={(entry) => {
             setCerts((current) => {
@@ -402,16 +434,31 @@ export function ProfileDesktop() {
           }}
         />
       )}
-      {photo && (
+      {photo && photo !== "success" && (
         <PhotoDialog
-          phase={photo === "initial" || photo === "selected" || photo === "saving" || photo === "success" || photo === "error" || photo === "remove" ? photo : "initial"}
+          phase={photo === "initial" || photo === "selected" || photo === "saving" || photo === "error" || photo === "remove" ? photo : "initial"}
           onClose={() => setPhotoPhase(null)}
-          onPhase={setPhotoPhase}
+          onPhase={(next) => {
+            if (next === "success") {
+              setPhotoSaved(true);
+              setPhotoPhase(null);
+              return;
+            }
+            setPhotoPhase(next);
+          }}
           onRemove={() => {
-            setPhotoRemoved(true);
-            setPhotoPhase(null);
+            setPhotoSaved(false);
+            setPhotoPhase("initial");
           }}
         />
+      )}
+      {photoSuccess && (
+        <p
+          role="status"
+          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-grey-900 px-4 py-3 text-body-sm-medium text-text-on-brand shadow-lg"
+        >
+          Profile photo updated successfully.
+        </p>
       )}
     </AppShell>
   );
@@ -442,7 +489,7 @@ function BasicSection({
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-label-medium text-text-secondary">
-            Phone <span className="text-error-default">*</span>
+            Phone number <span className="text-error-default">*</span>
           </span>
           <span className={cn(inputClass, "flex items-center gap-2")}>
             <span aria-hidden className="inline-block h-3.5 w-5 overflow-hidden rounded-[2px] border border-grey-200 bg-[linear-gradient(#ff9933_0_33%,#fff_33%_66%,#138808_66%)]" />
@@ -863,9 +910,11 @@ function ExperienceSection({
           <h2 className="text-heading-semibold text-text-primary">Experience</h2>
           <p className="mt-1 text-body-sm-regular text-text-secondary">Add your work history to showcase your professional journey.</p>
         </div>
-        <Button type="button" variant="outline" shape="rect" size="sm" onClick={onAdd}>
-          + Add experience
-        </Button>
+        {items.length > 0 && (
+          <Button type="button" variant="outline" shape="rect" size="sm" onClick={onAdd}>
+            + Add experience
+          </Button>
+        )}
       </div>
       {items.length > 0 && (
         <p className="flex items-center gap-2 text-body-sm-medium text-text-secondary">

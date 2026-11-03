@@ -73,12 +73,15 @@ export function FrameJobCardView({
               <Icon name="pinSm" className="size-4" />
               <span className="truncate">{card.location}</span>
             </p>
-            {layout !== "saved" && (
-              <p className="flex items-baseline gap-1">
-                <span className="text-body-semibold text-text-primary">{card.salary}</span>
-                <span className="text-body-sm-regular text-text-tertiary">/ month</span>
-              </p>
-            )}
+            {layout !== "saved" &&
+              (card.salary === "Salary not disclosed" ? (
+                <GreyChip>{card.salary}</GreyChip>
+              ) : (
+                <p className="flex items-baseline gap-1">
+                  <span className="text-body-semibold text-text-primary">{card.salary}</span>
+                  <span className="text-body-sm-regular text-text-tertiary">/ month</span>
+                </p>
+              ))}
             <div className="flex flex-wrap gap-1.5">
               <GreyChip>{card.employment}</GreyChip>
               <GreyChip>{card.experience}</GreyChip>
@@ -100,7 +103,7 @@ export function FrameJobCardView({
       {layout === "saved" ? (
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <p className="flex items-baseline gap-1">
+            <p className="flex items-baseline gap-1 whitespace-nowrap">
               <span className="text-body-semibold text-text-primary">{card.salary}</span>
               <span className="text-body-sm-regular text-text-tertiary">/ month</span>
             </p>

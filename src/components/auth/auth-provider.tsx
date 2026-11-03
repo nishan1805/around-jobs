@@ -76,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         initialError={authPreview === "otp-error" ? "Incorrect OTP. 2 attempts left." : null}
         initialBusy={authPreview === "loading"}
         resting={authPreview === "phone"}
+        verifyReady={authPreview === "otp"}
         onOpenChange={(open) => {
           setLoginOpen(open);
           if (!open) pending.current = null;

@@ -192,10 +192,11 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           filters.categories.includes("Retail") &&
           filters.types.includes("FULL_TIME") &&
           filters.workModes.includes("ON_SITE");
+        const retailOnly = filters.categories.length === 1 && filters.categories[0] === "Retail";
         const browseFrame =
           !quiet &&
           !filteredFrame &&
-          filters.categories.length === 0 &&
+          (filters.categories.length === 0 || retailOnly) &&
           filters.types.length === 0 &&
           filters.workModes.length === 0 &&
           filters.experience.length === 0 &&
@@ -333,6 +334,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
             "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col gap-2 px-5 pt-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
             panelOpen && "max-md:hidden",
             panelOpen && !dockRight && (panelWidth === "wide" ? "md:pl-124" : "md:pl-[428px]"),
+            panelOpen && dockRight && "md:pr-[496px]",
           )}
         >
           <MobileSearchBar
@@ -387,17 +389,15 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           </div>
         )}
 
-        {panel.kind !== "filters" && (
-          <FiltersButton
-            count={badgeCount}
-            expanded={false}
-            onClick={openFilters}
-            className={cn(
-              "absolute bottom-6 left-6 z-1000 max-md:hidden",
-              panelOpen && !dockRight && (panelWidth === "wide" ? "md:left-124" : "md:left-[428px]"),
-            )}
-          />
-        )}
+        <FiltersButton
+          count={badgeCount}
+          expanded={panel.kind === "filters"}
+          onClick={openFilters}
+          className={cn(
+            "absolute bottom-6 left-6 z-1000 max-md:hidden",
+            panelOpen && !dockRight && panel.kind !== "filters" && (panelWidth === "wide" ? "md:left-124" : "md:left-[428px]"),
+          )}
+        />
       </main>
     </>
   );

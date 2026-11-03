@@ -181,7 +181,9 @@ function DesktopSaved({ empty = false }: { empty?: boolean }) {
     <div className="hidden flex-col gap-6 md:flex">
       <header className="flex flex-col gap-1">
         <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
-        <p className="text-body-sm-regular text-text-secondary">6 saved jobs, 2 expiring soon.</p>
+        <p className="text-body-sm-regular text-text-secondary">
+          {counts.all} saved jobs, {cards.filter((card) => card.expiring).length} expiring soon.
+        </p>
       </header>
       <div role="group" aria-label="Filter saved jobs" className="flex gap-2">
         {(

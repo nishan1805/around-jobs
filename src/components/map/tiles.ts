@@ -1,11 +1,13 @@
 /**
  * Basemap for the jobs map.
  *
- * CARTO Positron (`light_all`) is the closest named match to the Figma frame,
- * but the keyless CDN now returns HTTP 200 tiles stamped "API KEY REQUIRED".
- * The default is Esri's World Light Gray Canvas, a muted grey raster that works
- * on any domain without a key, plus its transparent label layer. It stops at
- * zoom 16; Leaflet upscales that tile if the map zooms further.
+ * The default is Esri World Street Map: a coloured street raster that works on
+ * any domain without a key. Labels are baked into the tiles. Native detail
+ * stops at zoom 17 around Raipur; higher zooms are Esri's "map data not yet
+ * available" placeholder, so Leaflet upscales the last real tile.
+ *
+ * CARTO Voyager and Positron answer HTTP 200 but stamp "API KEY REQUIRED" on
+ * the image, so they are not used.
  *
  * `NEXT_PUBLIC_MAP_TILE_URL` (or the older `NEXT_PUBLIC_MAP_TILES_URL`) replaces
  * the URL. A Stadia key uses Alidade Smooth when no URL is set.
@@ -13,11 +15,11 @@
  */
 
 const esri = {
-  url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-  labelsUrl:
-    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
-  attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
-  maxNativeZoom: 16,
+  url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  labelsUrl: null as string | null,
+  attribution:
+    "Tiles &copy; Esri &mdash; Sources: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, &copy; OpenStreetMap contributors, and the GIS User Community",
+  maxNativeZoom: 17,
 };
 
 const stadiaKey = process.env.NEXT_PUBLIC_STADIA_API_KEY;

@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 
 export type NavKey = "jobs" | "applications" | "saved" | "profile";
 
-const navItems: { key: NavKey; label: string; href: string; icon: IconName }[] = [
-  { key: "jobs", label: "Jobs", href: "/", icon: "navJobs" },
-  { key: "applications", label: "Applied", href: "/applications", icon: "navApplications" },
-  { key: "saved", label: "Saved", href: "/saved", icon: "navSaved" },
-  { key: "profile", label: "Profile", href: "/profile", icon: "user" },
+const navItems: { key: NavKey; label: string; href: string; icon: IconName; activeIcon: IconName }[] = [
+  { key: "jobs", label: "Jobs", href: "/", icon: "navJobs", activeIcon: "navJobsFilled" },
+  { key: "applications", label: "Applied", href: "/applications", icon: "navApplications", activeIcon: "navApplicationsFilled" },
+  { key: "saved", label: "Saved", href: "/saved", icon: "navSaved", activeIcon: "navSavedFilled" },
+  { key: "profile", label: "Profile", href: "/profile", icon: "user", activeIcon: "userFilled" },
 ];
 
 const tabs: { key: NavKey; label: string; href: string; icon: TabIconName }[] = [
@@ -97,11 +97,13 @@ function SidebarLink({
   label,
   href,
   icon,
+  activeIcon,
   isActive,
 }: {
   label: string;
   href: string;
   icon: IconName;
+  activeIcon: IconName;
   isActive: boolean;
 }) {
   return (
@@ -115,7 +117,7 @@ function SidebarLink({
           : "rounded-2xl text-grey-600 hover:bg-grey-100",
       )}
     >
-      <Icon name={icon} className="size-6" />
+      <Icon name={isActive ? activeIcon : icon} className="size-6" />
       {label}
     </Link>
   );

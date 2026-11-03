@@ -105,7 +105,7 @@ export function ResumeUpload({
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <p className="truncate text-body-semibold text-text-primary">{fileName}</p>
-          <p className="text-label-medium text-error-default">{RESUME_TOO_LARGE_MESSAGE}</p>
+          <p className="text-label-medium whitespace-normal text-error-default">{RESUME_TOO_LARGE_MESSAGE}</p>
         </div>
         <button
           type="button"

@@ -124,6 +124,7 @@ export function LoginDialog({
   initialError = null,
   initialBusy = false,
   resting = false,
+  verifyReady = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -137,6 +138,8 @@ export function LoginDialog({
   initialBusy?: boolean;
   /** S08 shows a resting field. Skip autofocus so the frame's border stays unfocused. */
   resting?: boolean;
+  /** S09 shows Verify enabled after three of the six digits. Submit still requires all six. */
+  verifyReady?: boolean;
 }) {
   const [step, setStep] = useState<Step>(initialStep);
   const [phone, setPhone] = useState(initialPhone);
@@ -328,7 +331,12 @@ export function LoginDialog({
               )}
             </p>
           )}
-          <Button type="submit" shape="rect" className="w-full" disabled={busy || code.length < OTP_LENGTH || attemptsLeft === 0}>
+          <Button
+            type="submit"
+            shape="rect"
+            className="w-full"
+            disabled={busy || attemptsLeft === 0 || (!verifyReady && code.length < OTP_LENGTH)}
+          >
             {busy ? (
               <>
                 <Icon name="spinner" className="size-4 animate-spin" />

@@ -145,7 +145,7 @@ export function StatesView() {
 
         <section className="mt-8 flex flex-col gap-4">
           <h2 className="text-heading-semibold">Company marker</h2>
-          <div className="flex flex-wrap items-start gap-6 rounded-md bg-grey-100 p-6">
+          <div className="flex flex-wrap items-end gap-6 overflow-hidden rounded-md bg-grey-100 px-6 pt-24 pb-6">
             <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4, selected: false })} />
             <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4, selected: true })} />
             <Marker html={clusterMarkerHtml({ count: 12 })} />

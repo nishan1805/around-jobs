@@ -34,7 +34,7 @@ export type JobFilters = {
 
 export const defaultFilters: JobFilters = {
   query: "",
-  categories: [],
+  categories: ["Retail"],
   experience: [],
   types: [],
   workModes: [],
@@ -114,9 +114,9 @@ export function activeFilters(filters: JobFilters): ActiveFilter[] {
   return chips;
 }
 
-/** Number on the Filters control. Categories count, even though they are not removable chips. */
+/** Number on the Filters control. Category chips stay in their own row and are not counted. */
 export function filterBadgeCount(filters: JobFilters) {
-  return filters.categories.length + activeFilters(filters).length;
+  return activeFilters(filters).length;
 }
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */

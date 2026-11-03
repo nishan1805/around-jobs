@@ -175,7 +175,12 @@ export function FiltersPanel({
 }) {
   const reset = () => onChange({ ...defaultFilters, query: filters.query });
   return (
-    <MapPanel label="Filters" width="narrow" onDismiss={onDone}>
+    <MapPanel
+      label="Filters"
+      width="narrow"
+      onDismiss={onDone}
+      className="md:top-auto md:bottom-22 md:max-h-[min(720px,calc(100%-7.5rem))]"
+    >
       <div className="flex shrink-0 items-center gap-3 px-5 pt-1 md:p-4 md:pb-0">
         <h2 className="flex-1 text-heading-semibold text-text-primary md:text-subheading-semibold">Filters</h2>
         <IconButton variant="outline" icon="close" label="Close filters" onClick={onDone} iconClassName="size-4" />
