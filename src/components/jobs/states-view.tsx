@@ -8,7 +8,7 @@ import { Chip } from "@/components/jobs/chip";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { browseListSeed } from "@/lib/seeker-design-seed";
 import { TopBar } from "@/components/jobs/top-bar";
-import { buildingMarkerHtml, clusterMarkerHtml, companyMarkerHtml } from "@/components/map/markers";
+import { clusterMarkerHtml, companyMarkerHtml } from "@/components/map/markers";
 import { ResumeUpload } from "@/components/resume-upload";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
@@ -146,10 +146,8 @@ export function StatesView() {
         <section className="mt-8 flex flex-col gap-4">
           <h2 className="text-heading-semibold">Company marker</h2>
           <div className="flex flex-wrap items-end gap-6 overflow-hidden rounded-md bg-grey-100 px-6 pt-24 pb-6">
-            <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4, selected: false })} />
-            <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4, selected: true })} />
+            <Marker html={companyMarkerHtml({ name: "Magneto Retail", count: 4 })} />
             <Marker html={clusterMarkerHtml({ count: 12 })} />
-            <Marker html={buildingMarkerHtml({ count: 3 })} />
           </div>
         </section>
 

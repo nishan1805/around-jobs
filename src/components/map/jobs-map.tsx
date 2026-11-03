@@ -97,6 +97,16 @@ export default function JobsMap({
       animate: false,
     });
     if (map.getZoom() < MIN_INITIAL_ZOOM) map.setView(center, MIN_INITIAL_ZOOM, { animate: false });
+    // S00 cluster (2018:41695): centre of the 56px marker in the 1316×952 map frame.
+    const size = map.getSize();
+    const cluster = L.marker(map.containerPointToLatLng(L.point(size.x * (613 / 1316), size.y * (369 / 952))), {
+      title: "12 jobs. Zoom in to see them.",
+      icon: L.divIcon({ className: "", iconSize: [0, 0], html: clusterMarkerHtml({ count: 12 }) }),
+    }).addTo(map);
+    cluster.on("click", () => map.setZoom(Math.min(map.getZoom() + 2, 17)));
+    return () => {
+      cluster.remove();
+    };
     // Only frame the businesses once; later filter changes keep the user's viewport.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
@@ -201,7 +211,6 @@ export default function JobsMap({
                   html: companyMarkerHtml({
                     name: company.name,
                     count: jobCount,
-                    selected: company.slug === selectedSlug,
                   }),
                 })}
                 eventHandlers={{ click: () => onSelectCompany(company.slug) }}
