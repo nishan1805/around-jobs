@@ -27,7 +27,8 @@ export function LogoPlaceholder({ className }: { className?: string }) {
 }
 
 export function VerifiedBadge({ verified }: { verified: boolean }) {
-  return verified ? <Badge type="verified">Verified</Badge> : <Badge type="unverified">Unverified</Badge>;
+  if (!verified) return null;
+  return <Icon name="verified" className="size-5 text-success-700" />;
 }
 
 export function SalaryBadge({ job }: { job: Job }) {

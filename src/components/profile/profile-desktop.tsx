@@ -224,7 +224,7 @@ export function ProfileDesktop() {
                 <>
                   <div className="my-4 h-px bg-border-default" />
                   <p className="flex items-center gap-2 text-body-sm-regular text-text-secondary">
-                    <Icon name="alertCircle" className="size-4 text-text-tertiary" />
+                    <Icon name="info" className="size-4 text-text-tertiary" />
                     Add your education details to get better job recommendations.
                   </p>
                 </>
@@ -501,10 +501,8 @@ function BasicSection({
               onChange={(event) => set("phone", event.target.value)}
               className="min-w-0 flex-1 bg-transparent outline-none"
             />
-            <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-label-medium text-success-700">
-              <Icon name="checkCircle" className="size-3.5" />
-              Verified
-            </span>
+            <Icon name="checkCircleSolid" className="size-5 shrink-0 text-success-500" />
+            <span className="sr-only">Verified</span>
           </span>
         </label>
         <label className="flex flex-col gap-1.5">

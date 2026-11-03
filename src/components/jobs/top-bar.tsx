@@ -157,7 +157,7 @@ export function TopBar({
             href="/post-a-job"
             className="inline-flex items-center gap-2 rounded-sm border border-primary-600 px-3 py-2 text-body-semibold text-primary-600 transition-colors hover:bg-primary-50"
           >
-            <Icon name="plus" className="size-4" />
+            <Icon name="plusSquare" className="size-4" />
             Post a job
           </Link>
         )}

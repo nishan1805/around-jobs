@@ -29,18 +29,21 @@ Other scripts:
 | Variable                            | Default                       | Purpose                                      |
 | ----------------------------------- | ----------------------------- | -------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`              | `http://localhost:4612`       | Absolute URLs in the sitemap, canonical tags and JSON-LD |
-| `NEXT_PUBLIC_MAP_TILE_URL`          | Esri World Street Map         | Leaflet tile URL template                    |
-| `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION`  | Esri                          | Attribution shown on the map                 |
-| `NEXT_PUBLIC_STADIA_API_KEY`        | none                          | Optional. Uses Stadia Alidade Smooth when set and no tile URL is set |
+| `NEXT_PUBLIC_MAP_TILE_URL`          | OpenStreetMap standard        | Leaflet tile URL template                    |
+| `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION`  | © OpenStreetMap contributors  | Attribution shown on the map                 |
+| `NEXT_PUBLIC_STADIA_API_KEY`        | none                          | Optional. Uses Stadia OSM Bright when set and no tile URL is set |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`   | none                          | Optional. Uses Google roadmap tiles when set and no tile URL is set |
 
-The default basemap is Esri World Street Map. It needs no API key and works on any domain,
-including a Vercel deploy. Street names are in the tiles. Native zoom stops at 17; further
-zooms reuse that tile instead of Esri's "map data not yet available" placeholder.
+The default basemap is the OpenStreetMap standard style (`https://tile.openstreetmap.org/{z}/{x}/{y}.png`).
+It needs no API key. Parks are green, water is blue, and roads are white or yellow. The
+OpenStreetMap Foundation tile policy allows this on a public site while traffic stays light:
+keep the copyright line visible and let the browser send its normal Referer. A tile fetched
+with Referer `https://around-jobs.vercel.app/` returns HTTP 200. Native zoom stops at 19.
 CARTO Voyager and Positron answer HTTP 200 but stamp "API KEY REQUIRED" on the image.
 Set `NEXT_PUBLIC_MAP_TILE_URL` to another template (`{z}`, `{x}`, `{y}`, optional `{s}` and `{r}`)
 when you have a keyed source. The older names `NEXT_PUBLIC_MAP_TILES_URL` and
-`NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` still work. If `NEXT_PUBLIC_STADIA_API_KEY` is set and no
-URL override is, the map uses Stadia Alidade Smooth.
+`NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` still work. A Stadia or Google key replaces the default
+when no URL override is set.
 If tiles fail to load, the map shows a notice and the job pins still work.
 
 ## Design tokens
