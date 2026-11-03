@@ -16,7 +16,7 @@ const itemClass =
 
 /**
  * Logged out: grey profile glyph (S00). Logged in: blue initial on the trigger;
- * the open menu uses a 64px grey-200 initial (S07).
+ * the open menu uses a 64px grey-200 initial, with the progress bar on its own row (S07).
  * `?menu=open` keeps the menu open for the profile-menu frame.
  */
 export function AccountButton() {
@@ -60,14 +60,14 @@ export function AccountButton() {
                 <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-grey-200 text-heading-semibold leading-none text-text-primary">
                   {initial}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-body-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
-                  <span className="mt-1 flex items-center gap-2">
-                    <span className="text-label-medium text-text-tertiary">Profile completion</span>
-                    <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-grey-200">
-                      <span className="block h-full rounded-full bg-brand-primary" style={{ width: `${PROFILE_COMPLETION}%` }} />
-                    </span>
-                    <span className="text-label-semibold text-brand-primary">{PROFILE_COMPLETION}%</span>
+                <span className="flex min-w-0 flex-1 flex-col gap-2">
+                  <span className="truncate text-body-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="text-body-sm-regular text-text-secondary">Profile completion</span>
+                    <span className="text-body-sm-semibold text-brand-primary">{PROFILE_COMPLETION}%</span>
+                  </span>
+                  <span className="h-2 w-full overflow-hidden rounded-full bg-grey-200">
+                    <span className="block h-full rounded-full bg-brand-primary" style={{ width: `${PROFILE_COMPLETION}%` }} />
                   </span>
                 </span>
               </div>
