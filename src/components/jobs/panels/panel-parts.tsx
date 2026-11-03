@@ -55,6 +55,7 @@ export function MapPanel({
   label,
   width = "wide",
   sheet = "full",
+  dock = "left",
   onDismiss,
   className,
   children,
@@ -62,6 +63,8 @@ export function MapPanel({
   label: string;
   width?: "wide" | "narrow";
   sheet?: "half" | "full";
+  /** Desktop dock. S01 and S02 sit on the right of the map; the list stays on the left. */
+  dock?: "left" | "right";
   onDismiss?: () => void;
   className?: string;
   children: ReactNode;
@@ -79,8 +82,9 @@ export function MapPanel({
       className={cn(
         "absolute inset-x-0 bottom-0 z-1001 flex flex-col overflow-hidden rounded-t-lg bg-surface-default shadow-lg transition-[top] duration-200",
         expanded ? "top-6" : "top-1/3",
-        "md:inset-auto md:top-6 md:bottom-6 md:left-6 md:transform-none!",
-        width === "wide" ? "md:w-112 md:rounded-md" : "md:w-76 md:rounded-xl",
+        "md:inset-auto md:top-6 md:bottom-6 md:transform-none!",
+        dock === "right" ? "md:right-6 md:left-auto" : "md:left-6",
+        width === "wide" ? "md:w-112 md:rounded-lg" : "md:w-[380px] md:rounded-lg",
         className,
       )}
     >
@@ -91,7 +95,7 @@ export function MapPanel({
 }
 
 /** Pixel width a docked panel covers on md+ (panel + 24px gap on both sides). */
-export const panelInset = { wide: 448 + 48, narrow: 304 + 48 } as const;
+export const panelInset = { wide: 448 + 48, narrow: 380 + 48 } as const;
 
 /** Figma "Around / Detail Section Header" (1859:10854). */
 export function SectionHeader({ title, action }: { title: string; action?: ReactNode }) {
@@ -138,7 +142,7 @@ export function GalleryHeader({
     <div
       role="group"
       aria-roledescription="carousel"
-      aria-label={`${name} photos (Sample placeholders)`}
+      aria-label={`${name} photos`}
       className="relative h-60 w-full shrink-0 bg-grey-100"
     >
       <IconButton icon={nav.icon} label={nav.label} onClick={nav.onClick} className="absolute top-4 left-4" iconClassName="size-4" />

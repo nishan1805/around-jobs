@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
 import { Chip } from "@/components/jobs/chip";
 import { EmptyPage, PageHeader } from "@/components/page-header";
 import { SeekerPage } from "@/components/seeker-page";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
+import { useSearchParam } from "@/hooks/use-search-param";
 import { cities, daysSince, distanceKm, isExpiringSoon, jobs, type Job } from "@/lib/jobs";
+import { savedCardsSeed, type SavedCardSeed } from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
 
 const INTRO = "Keep jobs you like here and apply when you are ready.";
@@ -67,30 +70,35 @@ function SavedContent() {
   };
   const visible = saved.filter((job) => matches(job, filter));
 
-  if (saved.length === 0) {
+  const emptyPreview = useSearchParam("empty") === "1";
+
+  if (saved.length === 0 || emptyPreview) {
     return (
       <>
-        <PageHeader title="Saved jobs" subtitle={INTRO} />
-        <EmptyPage
-          icon="bookmark"
-          title="Nothing saved yet"
-          body="Tap the bookmark on any job to save it for later."
-          action={
-            <Link href="/" className={buttonVariants()}>
-              Browse jobs
-            </Link>
-          }
-        />
+        <div className={emptyPreview ? "md:hidden" : undefined}>
+          <PageHeader title="Saved jobs" subtitle={INTRO} />
+          <EmptyPage
+            icon="bookmark"
+            title="Nothing saved yet"
+            body="Tap the bookmark on any job to save it for later."
+            action={
+              <Link href="/" className={buttonVariants()}>
+                Browse jobs
+              </Link>
+            }
+          />
+        </div>
+        {emptyPreview && <DesktopSaved empty />}
       </>
     );
   }
 
   const expiring = saved.filter(isExpiringSoon).length;
-  const isSample = saved.some((job) => job.company.name.includes("(Sample)"));
-  const subtitle = `${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? `, ${expiring} expiring soon` : ""}.${isSample ? " (Sample)" : ""}`;
+  const subtitle = `${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? `, ${expiring} expiring soon` : ""}.`;
 
   return (
     <>
+      <div className="md:hidden">
       <PageHeader
         title="Saved jobs"
         subtitle={subtitle}
@@ -126,6 +134,101 @@ function SavedContent() {
           ))}
         </ul>
       )}
+      </div>
+      <DesktopSaved />
     </>
+  );
+}
+
+function DesktopSaved({ empty = false }: { empty?: boolean }) {
+  const [filter, setFilter] = useState<"all" | "nearby" | "recent">("all");
+  const [removed, setRemoved] = useState<string[]>([]);
+  const cards = savedCardsSeed.filter((card) => !removed.includes(card.id));
+  const visible = cards.filter((card) => {
+    if (filter === "nearby") return card.nearby;
+    if (filter === "recent") return card.recent;
+    return true;
+  });
+  const counts = {
+    all: cards.length,
+    nearby: cards.filter((card) => card.nearby).length,
+    recent: cards.filter((card) => card.recent).length,
+  };
+
+  if (empty || cards.length === 0) {
+    return (
+      <div className="hidden min-h-0 flex-1 flex-col gap-6 md:flex">
+        <header className="flex flex-col gap-1">
+          <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
+          <p className="text-body-sm-regular text-text-secondary">Keep jobs you like here and apply when you are ready.</p>
+        </header>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/illustrations/saved-empty.svg" alt="" width={280} height={200} />
+          <div className="flex max-w-[260px] flex-col gap-3 text-center">
+            <p className="text-subheading-semibold text-text-primary">No saved jobs yet</p>
+            <p className="text-body-sm-regular text-text-secondary">Tap the bookmark on any job to save it here for later.</p>
+          </div>
+          <Link href="/" className={buttonVariants({ shape: "pill" })}>
+            Browse jobs
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="hidden flex-col gap-6 md:flex">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
+        <p className="text-body-sm-regular text-text-secondary">
+          {counts.all} saved jobs, {cards.filter((card) => card.expiring).length} expiring soon.
+        </p>
+      </header>
+      <div role="group" aria-label="Filter saved jobs" className="flex gap-2">
+        {(
+          [
+            ["all", "All"],
+            ["nearby", "Nearby"],
+            ["recent", "Recently added"],
+          ] as const
+        ).map(([key, label]) => (
+          <Chip key={key} selected={filter === key} onClick={() => setFilter(key)}>
+            {label} · {counts[key]}
+          </Chip>
+        ))}
+      </div>
+      <ul className="grid items-start gap-4 min-[80rem]:grid-cols-3">
+        {visible.map((card) => (
+          <li key={card.id}>
+            <SavedDesignCard card={card} onUnsave={() => setRemoved((current) => [...current, card.id])} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SavedDesignCard({ card, onUnsave }: { card: SavedCardSeed; onUnsave: () => void }) {
+  return (
+    <FrameJobCardView
+      layout="saved"
+      saved
+      expiring={card.expiring}
+      onToggleSave={onUnsave}
+      card={{
+        id: card.id,
+        title: card.title,
+        company: card.company,
+        initials: card.initials,
+        tone: "orange",
+        verified: card.verified,
+        location: `${card.location} · ${card.distance}`,
+        salary: card.salary,
+        employment: card.type,
+        experience: card.experience,
+        posted: card.posted,
+      }}
+    />
   );
 }

@@ -2,13 +2,16 @@
 
 import { Chip, RemovableChip } from "@/components/jobs/chip";
 import { FiltersButton } from "@/components/jobs/filters-button";
+import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
 import { ViewToggle } from "@/components/jobs/view-toggle";
 import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { IconButton } from "@/components/ui/icon-button";
-import { activeFilters, defaultFilters, describeFilters, toggleValue, type JobFilters } from "@/lib/job-filters";
+import { activeFilters, defaultFilters, describeFilters, filterBadgeCount, toggleValue, type JobFilters } from "@/lib/job-filters";
 import { categories, type Job } from "@/lib/jobs";
+import type { FrameJobCard } from "@/lib/seeker-design-seed";
+import { cn } from "@/lib/utils";
 
 import { MapPanel } from "./panel-parts";
 
@@ -28,8 +31,12 @@ export function JobsListPanel({
   onClose,
   onSelectJob,
   onSearchArea,
+  onChangeArea,
   onRetry,
   from,
+  desktopCards,
+  desktopSubtitle,
+  onOpenDesignJob,
 }: {
   cityName: string;
   status: ListStatus;
@@ -43,10 +50,16 @@ export function JobsListPanel({
   onClose: () => void;
   onSelectJob: (job: Job) => void;
   onSearchArea: () => void;
+  onChangeArea?: () => void;
   onRetry: () => void;
   from: [number, number];
+  /** Finalized S03/S06 cards. Mobile keeps the live job list. */
+  desktopCards?: FrameJobCard[] | null;
+  desktopSubtitle?: string;
+  onOpenDesignJob?: () => void;
 }) {
   const chips = activeFilters(filters);
+  const badgeCount = filterBadgeCount(filters);
   const description = describeFilters(filters);
   const clearAll = () => onFiltersChange({ ...defaultFilters, query: filters.query, categories: filters.categories });
   const resetEverything = () => onFiltersChange(defaultFilters);
@@ -58,8 +71,8 @@ export function JobsListPanel({
         ? "Something went wrong"
         : jobs.length === 0 && totalMatching > 0
           ? "0 jobs in this area"
-          : chips.length > 0
-            ? `${plural(jobs.length, "job")} · ${plural(chips.length, "filter")} applied`
+          : badgeCount > 0
+            ? `${plural(jobs.length, "job")} · ${plural(badgeCount, "filter")} applied`
             : `${plural(jobs.length, "job")} near you`;
 
   const resultsLine =
@@ -87,19 +100,19 @@ export function JobsListPanel({
           <div className="min-w-0 flex-1">
             <h2 className="text-heading-semibold text-text-primary">Jobs in {cityName}</h2>
             <p aria-live="polite" className="text-label-medium text-text-tertiary">
-              {subtitle}
+              {desktopSubtitle ?? subtitle}
             </p>
           </div>
-          <FiltersButton count={chips.length} onClick={onOpenFilters} />
+          {!desktopCards && <FiltersButton count={badgeCount} onClick={onOpenFilters} />}
           <IconButton variant="outline" icon="close" label="Close jobs list" onClick={onClose} iconClassName="size-4" />
         </div>
-        <div className="flex items-center gap-3">
+        <div className={cn("flex items-center gap-3", desktopCards && "md:hidden")}>
           <p className="min-w-0 flex-1 truncate text-body-sm-regular text-text-secondary" title={resultsLine}>
             {resultsLine}
           </p>
           <ViewToggle view="list" size="sm" onChange={(view) => view === "map" && onClose()} />
         </div>
-        <div role="group" aria-label="Job categories" className="flex flex-wrap gap-2">
+        <div role="group" aria-label="Job categories" className={cn("flex flex-wrap gap-2", desktopCards && "md:hidden")}>
           {categories.map((category) => (
             <Chip
               key={category}
@@ -110,7 +123,7 @@ export function JobsListPanel({
             </Chip>
           ))}
         </div>
-        {chips.length > 0 && (
+        {chips.length > 0 && !desktopCards && (
           <div role="group" aria-label="Applied filters" className="flex flex-wrap items-center gap-2">
             {chips.map((chip) => (
               <RemovableChip key={chip.key} label={chip.label} onRemove={() => onFiltersChange(chip.remove(filters))} />
@@ -141,35 +154,54 @@ export function JobsListPanel({
               </Button>
             }
           />
-        ) : totalMatching === 0 ? (
-          <EmptyBlock
-            title="No jobs match your filters"
-            body="Try another category, widen the salary range or clear filters."
-            action={
-              <Button variant="outline" shape="rect" onClick={resetEverything}>
-                Clear filters
-              </Button>
-            }
-          />
-        ) : jobs.length === 0 ? (
-          <EmptyBlock
-            icon="map"
-            title="No jobs in this area yet"
-            body="Move or zoom out the map to see jobs nearby."
-            action={
-              <Button variant="outline" shape="rect" onClick={onSearchArea}>
-                Search this area
-              </Button>
-            }
-          />
         ) : (
-          <ul className="flex flex-col gap-3">
-            {jobs.map((job) => (
-              <li key={job.slug}>
-                <JobCard job={job} from={from} onSelect={onSelectJob} />
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className={desktopCards ? "md:hidden" : undefined}>
+              {totalMatching === 0 ? (
+                <EmptyBlock
+                  title="No matching jobs"
+                  body="Try removing a filter or searching a wider area."
+                  action={
+                    <Button variant="outline" shape="rect" onClick={resetEverything}>
+                      Clear filters
+                    </Button>
+                  }
+                />
+              ) : jobs.length === 0 ? (
+                <EmptyBlock
+                  title="No jobs in this area yet"
+                  body="Look at jobs in nearby areas or change your area."
+                  action={
+                    <div className="flex flex-col items-center gap-3">
+                      <Button variant="outline" shape="rect" onClick={onSearchArea}>
+                        Explore nearby jobs
+                      </Button>
+                      <Button variant="outline" shape="rect" onClick={onChangeArea ?? onSearchArea}>
+                        Change area
+                      </Button>
+                    </div>
+                  }
+                />
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {jobs.map((job) => (
+                    <li key={job.slug}>
+                      <JobCard job={job} from={from} onSelect={onSelectJob} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {desktopCards && (
+              <ul className="hidden flex-col gap-3 md:flex">
+                {desktopCards.map((card) => (
+                  <li key={card.id}>
+                    <FrameJobCardView card={card} onOpen={onOpenDesignJob} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
     </MapPanel>

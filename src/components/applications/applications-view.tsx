@@ -35,7 +35,7 @@ function summary(rows: Row[]) {
   ].filter(Boolean);
   const applied = rows.filter((row) => row.application.stage !== "withdrawn").length;
   const text = `You applied to ${applied} ${applied === 1 ? "job" : "jobs"}.${parts.length ? ` ${parts.join(" and ")}.` : ""}`;
-  return rows.some((row) => row.application.sample) ? `${text} (Sample)` : text;
+  return text;
 }
 
 /** "4 applied · 1 shortlisted · 1 interview" (M15). */

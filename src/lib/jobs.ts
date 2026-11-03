@@ -117,7 +117,7 @@ type CompanySeed = Omit<Company, "citySlug" | "verified" | "photoCount"> & {
 const companySeeds: CompanySeed[] = [
   {
     slug: "magneto-retail",
-    name: "Magneto Retail (Sample)",
+    name: "Magneto Retail",
     category: "Retail",
     area: "Sector 3, Pachpedi Naka",
     streetAddress: "GE Road, Sector 3",
@@ -132,7 +132,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "urban-bites-cafe",
-    name: "Urban Bites Café (Sample)",
+    name: "Urban Bites Café",
     category: "Hospitality",
     area: "Devendra Nagar",
     streetAddress: "Sector 2",
@@ -145,7 +145,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "ghatarani-resort",
-    name: "Ghatarani Resort (Sample)",
+    name: "Ghatarani Resort",
     category: "Hospitality",
     area: "Moti Bagh",
     streetAddress: "Near Moti Bagh Chowk",
@@ -155,7 +155,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "raipur-tech-hub",
-    name: "Raipur Tech Hub (Sample)",
+    name: "Raipur Tech Hub",
     category: "Technology",
     area: "Anupam Nagar",
     streetAddress: "Main Road",
@@ -172,7 +172,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "nds-cafe",
-    name: "NDS Café (Sample)",
+    name: "NDS Café",
     category: "Hospitality",
     area: "Gayatri Nagar",
     streetAddress: "Near Gayatri Mandir",
@@ -186,7 +186,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "amuseorama",
-    name: "AmuseoRama (Sample)",
+    name: "AmuseoRama",
     category: "Hospitality",
     area: "Shastri Market",
     streetAddress: "Jail Road, near Shastri Market",
@@ -199,7 +199,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "shree-shyam-mart",
-    name: "Shree Shyam Mart (Sample)",
+    name: "Shree Shyam Mart",
     category: "Retail",
     area: "Avanti Vihar",
     streetAddress: "Sector 1",
@@ -215,7 +215,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "patanjali-wellness",
-    name: "Patanjali Wellness (Sample)",
+    name: "Patanjali Wellness",
     category: "Healthcare support",
     area: "Bhawna Nagar",
     streetAddress: "Main Road",
@@ -228,7 +228,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "lakeside-pharmacy",
-    name: "Lakeside Pharmacy (Sample)",
+    name: "Lakeside Pharmacy",
     category: "Healthcare support",
     area: "Pandri",
     streetAddress: "Main Road",
@@ -243,7 +243,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "swift-couriers",
-    name: "Swift Couriers (Sample)",
+    name: "Swift Couriers",
     category: "Office admin",
     verified: false,
     area: "Pandri",
@@ -258,7 +258,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "cg-mobile-point",
-    name: "CG Mobile Point (Sample)",
+    name: "CG Mobile Point",
     category: "Sales",
     area: "Pandri",
     streetAddress: "Mobile Market",
@@ -272,7 +272,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "sunrise-care-clinic",
-    name: "Sunrise Care Clinic (Sample)",
+    name: "Sunrise Care Clinic",
     category: "Healthcare support",
     area: "Shankar Nagar",
     streetAddress: "Near Shankar Nagar Chowk",
@@ -282,7 +282,7 @@ const companySeeds: CompanySeed[] = [
   },
   {
     slug: "pandri-textiles",
-    name: "Pandri Textiles (Sample)",
+    name: "Pandri Textiles",
     category: "Retail",
     area: "Pandri",
     streetAddress: "Cloth Market",

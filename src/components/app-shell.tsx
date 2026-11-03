@@ -7,10 +7,11 @@ import { cn } from "@/lib/utils";
 
 export type NavKey = "jobs" | "applications" | "saved" | "profile";
 
-const navItems: { key: Exclude<NavKey, "profile">; label: string; href: string; icon: IconName }[] = [
-  { key: "jobs", label: "Jobs", href: "/", icon: "navJobs" },
-  { key: "applications", label: "My applications", href: "/applications", icon: "navApplications" },
-  { key: "saved", label: "Saved", href: "/saved", icon: "navSaved" },
+const navItems: { key: NavKey; label: string; href: string; icon: IconName; activeIcon: IconName }[] = [
+  { key: "jobs", label: "Jobs", href: "/", icon: "navJobs", activeIcon: "navJobsFilled" },
+  { key: "applications", label: "Applied", href: "/applications", icon: "navApplications", activeIcon: "navApplicationsFilled" },
+  { key: "saved", label: "Saved", href: "/saved", icon: "navSaved", activeIcon: "navSavedFilled" },
+  { key: "profile", label: "Profile", href: "/profile", icon: "user", activeIcon: "userFilled" },
 ];
 
 const tabs: { key: NavKey; label: string; href: string; icon: TabIconName }[] = [
@@ -31,21 +32,15 @@ export function Wordmark({ className }: { className?: string }) {
 export function AppShell({ active, children }: { active?: NavKey; children: ReactNode }) {
   return (
     <div className="flex h-dvh flex-col bg-background-primary md:flex-row">
-      <aside className="hidden w-26 shrink-0 flex-col items-center gap-2 border-r bg-background-primary px-3 pt-5 pb-6 md:flex lg:w-31 lg:px-4">
-        <Wordmark />
-        <div className="h-5" />
-        <nav aria-label="Primary" className="flex flex-col items-center gap-2">
-          {navItems.map(({ key, ...item }) => (
-            <SidebarLink key={key} {...item} isActive={key === active} />
-          ))}
-        </nav>
-        <div className="flex-1" />
-        <Link
-          href="/post-a-job"
-          className="flex w-full items-center justify-center rounded-sm border bg-surface-default px-1 py-3 text-center text-label-semibold text-text-primary lg:px-2 lg:text-body-sm-semibold transition-colors hover:bg-grey-100"
-        >
-          Post a job
-        </Link>
+      <aside className="hidden w-[124px] shrink-0 flex-col items-center border-r bg-background-primary px-4 pt-5 pb-6 md:flex">
+        <div className="flex flex-col items-center gap-8">
+          <Wordmark />
+          <nav aria-label="Primary" className="flex flex-col items-center gap-2">
+            {navItems.map(({ key, ...item }) => (
+              <SidebarLink key={key} {...item} isActive={key === active} />
+            ))}
+          </nav>
+        </div>
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
@@ -102,11 +97,13 @@ function SidebarLink({
   label,
   href,
   icon,
+  activeIcon,
   isActive,
 }: {
   label: string;
   href: string;
   icon: IconName;
+  activeIcon: IconName;
   isActive: boolean;
 }) {
   return (
@@ -114,13 +111,13 @@ function SidebarLink({
       href={href}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex w-20 flex-col items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-center text-label-medium transition-colors lg:w-23",
-        isActive ? "bg-primary-50 text-brand-primary" : "text-text-secondary hover:bg-grey-100",
+        "flex w-[92px] flex-col items-center justify-center gap-1.5 p-2 text-center text-label-medium transition-colors",
+        isActive
+          ? "rounded-lg bg-primary-50 text-primary-600"
+          : "rounded-2xl text-grey-600 hover:bg-grey-100",
       )}
     >
-      <span className="flex size-8 items-center justify-center">
-        <Icon name={icon} className={icon === "navApplications" ? "size-5" : undefined} />
-      </span>
+      <Icon name={isActive ? activeIcon : icon} className="size-6" />
       {label}
     </Link>
   );

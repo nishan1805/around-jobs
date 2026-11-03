@@ -148,5 +148,77 @@ code does today so a designer can confirm or correct it.
   is not added to it. The resume row says "saved on this device" because no updated
   date is stored (Figma says "updated 3w ago"). Job preferences also stores categories,
   which M20 shows and Complete profile does not ask for. Notifications and Language are
-  sample dialogs. Help includes a mailto link. Desktop has no profile frame, so the
-  same column sits in the app shell and the account menu links to it.
+  sample dialogs. Help includes a mailto link. Phones still use this column. Desktop
+  now follows the later P01–P05 frames instead.
+
+## Finalized job-seeker web (Nov 2026)
+
+- **Search placeholder.** The brief asked for "Search jobs, companies, or skills...".
+  S00, S04, S16 and the profile frames all say "Search places, restaurants, events, offers...".
+  The frames win.
+- **Profile name.** Every job-seeker surface uses "Nishan Kumar Mondal", including
+  the basic-info form, resume filename and LinkedIn URL.
+- **Sidebar.** Desktop nav is Jobs, Applied, Saved, Profile. "Post a job" moved to the
+  top bar and only shows while logged out (S00). Logged-in frames omit it.
+- **Location menu (S04).** Selected row uses `bg-primary-50`. The frame's fill is `#edf2ff`,
+  which is not a token, so the row stays on the primary-50 token. Row radius is `rounded-md`
+  (12px). The frame uses 10px, which is not a radius token.
+- **Filter count.** The Filters button counts employment type, work mode and the
+  "more" presets. Category, experience and salary are not counted. S04, S05 and S06
+  read Filters 2 even though S05 also selects Fresher and a salary range. Category
+  chips stay in their own row. S00 and S03 open with the Retail chip selected.
+- **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens `/alerts`.
+  The frames do not include a job-alerts screen, so that page is only the empty state
+  "You don't have any job alerts yet." Help & support uses `mailto:support@around.jobs`.
+- **Saved jobs (S17).** Four cards show "Expiring soon" (the first four). The header
+  counts those badges. The six cards are the frame's Site Supervisor / Raipur Builder
+  set. Nearby is the first three cards and Recently added is the first two. The salary
+  line stays on one line at 1280.
+- **P02e second education** uses the filled Add education dialog (Diploma, Government
+  Polytechnic, Raipur), because that frame was the source for the extra card.
+- **P03c third experience** is Civil Engineering Intern at Public Works Department, Raipur.
+- **P03f, P02 upload error, P05 remove-photo, and P03b field errors** use the sentences
+  from the finalized frames.
+- **P05-02 to P05-04** show `/images/profile-photo.jpg`.
+- **S01 / S02** use the Raipur Builder employer panel and Civil Engineer detail
+  (`/?company=raipur-builder`, `/?job=civil-engineer`). The live October jobs stay on
+  the map and on mobile sheets.
+- **S03 / S06** desktop lists use the frame cards. "(Sample)" is stripped from
+  "Raipur Builder". The list says 24 jobs and shows the five cards in the frame.
+- **S17** cards are Site Supervisor at Raipur Builder. Layer names in Figma
+  (Barista, Sales associate, and so on) do not match the visible titles, so the
+  visible titles win. Four of the six cards show the expiring badge.
+- **Map.** Leaflet markers and the cluster count are live data, not the static
+  frame (cluster 12, labels that still say Sample in Figma). The basemap is Esri
+  World Street Map (coloured streets, keyless, any domain). Zoom is capped at the
+  last real tile (17); 18+ is Esri's "map data not yet available" placeholder.
+  CARTO Voyager and Positron stamp "API KEY REQUIRED". Stadia Alidade Smooth is
+  used only when `NEXT_PUBLIC_STADIA_API_KEY` is set and no tile URL override is.
+- **Salary green.** The salary badge uses `text-success-700` (`Badge type="salary"`).
+  Figma paints that label `#07964e`, which is not a token.
+- **Job detail variants** (fetched): applied (1889:42721) banner "You applied on 12 Oct 2026"
+  and button "View application"; closed (1896:12936) banner "This job is closed. The employer
+  is no longer hiring for this role." and button "Position closed"; remote (1896:12970)
+  salary "Salary not disclosed", mode and area "Remote", address and map placeholder kept,
+  button "Apply now". The closed symbol is a Store Sales Associate panel; the Civil Engineer
+  route keeps that banner and button on the Civil Engineer body. Expired stays
+  "This job is no longer accepting applications." / "Applications closed".
+- **Empty employer** (1889:42351): "No open jobs right now" / "This employer has no active
+  openings. Save them to see new jobs here."
+- **Building marker** (1896:13455) is the pill with the building glyph, count and orange
+  anchor, shown on `/states`. It is not the company photo pin.
+- **Resume "too large"** (2105:25466): the node text is exactly
+  "File is larger than 5 MB. Upload a smaller file." The line stays. The filename in
+  Figma is Resume_Rahul_Sharma.pdf; the seeker name stays Nishan Kumar Mondal.
+- **P02g** is Edit certification (`?dialog=edit-certification`). **P02d** is the
+  uploading resume with empty education and certifications (`?upload=uploading`).
+  **P02d2** is the remove-resume dialog.
+- **P02c / P02f.** Add certification (filled, including Credential URL) is
+  `/profile?section=skills&dialog=add-certification`. Edit education is
+  `/profile?section=skills&dialog=edit-education`.
+- **P05-04** closes the photo dialog, shows the uploaded avatar, and the toast
+  "Profile photo updated successfully." **P05-07** (`photo=removed`) opens
+  Change profile photo. **S05** keeps the Filters button and docks the panel above it.
+- **Map tiles.** Default is Esri World Street Map. `NEXT_PUBLIC_STADIA_API_KEY` still
+  switches the basemap to Stadia Alidade Smooth.
+- **Apply and applications (S11–S15)** were not restyled.

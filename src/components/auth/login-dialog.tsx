@@ -12,7 +12,6 @@ import {
   OTP_ATTEMPTS,
   OTP_LENGTH,
   RESEND_SECONDS,
-  SAMPLE_OTP,
   type User,
 } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -119,19 +118,46 @@ export function LoginDialog({
   onOpenChange,
   onLoggedIn,
   reason,
+  initialStep = "phone",
+  initialPhone = "",
+  initialCode = "",
+  initialError = null,
+  initialBusy = false,
+  resting = false,
+  verifyReady = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onLoggedIn: (user: User) => void;
   reason?: string;
+  /** Query-param previews for S08 (`phone`), S09 (`otp`), OTP error and loading. */
+  initialStep?: Step;
+  initialPhone?: string;
+  initialCode?: string;
+  initialError?: string | null;
+  initialBusy?: boolean;
+  /** S08 shows a resting field. Skip autofocus so the frame's border stays unfocused. */
+  resting?: boolean;
+  /** S09 shows Verify enabled after three of the six digits. Submit still requires all six. */
+  verifyReady?: boolean;
 }) {
-  const [step, setStep] = useState<Step>("phone");
-  const [phone, setPhone] = useState("");
+  const [step, setStep] = useState<Step>(initialStep);
+  const [phone, setPhone] = useState(initialPhone);
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode);
+  const [otpError, setOtpError] = useState<string | null>(initialError);
+  const [busy, setBusy] = useState(initialBusy);
+  const previewKey = `${initialStep}:${initialPhone}:${initialCode}:${initialError ?? ""}:${initialBusy}`;
+  const [seenPreview, setSeenPreview] = useState(previewKey);
+  if (previewKey !== seenPreview) {
+    setSeenPreview(previewKey);
+    setStep(initialStep);
+    setPhone(initialPhone);
+    setCode(initialCode);
+    setOtpError(initialError);
+    setBusy(initialBusy);
+  }
   const [attemptsLeft, setAttemptsLeft] = useState(OTP_ATTEMPTS);
-  const [otpError, setOtpError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [sentCount, setSentCount] = useState(0);
   const resendIn = useCountdown(RESEND_SECONDS, sentCount);
 
@@ -222,7 +248,7 @@ export function LoginDialog({
                 type="tel"
                 inputMode="numeric"
                 autoComplete="tel-national"
-                autoFocus
+                autoFocus={!resting}
                 placeholder="Enter 10-digit number"
                 value={phone}
                 aria-invalid={phoneError ? true : undefined}
@@ -254,7 +280,7 @@ export function LoginDialog({
         >
           <DialogHeader
             title="Enter OTP"
-            description={`Enter the 6-digit code sent to ${maskPhone(phone)} (Sample)`}
+            description={`Enter the 6-digit code sent to ${maskPhone(phone)}`}
             onClose={close}
           >
             {!busy && (
@@ -303,10 +329,14 @@ export function LoginDialog({
                   Resend OTP
                 </button>
               )}
-              <span className="block">Sample OTP: {SAMPLE_OTP}</span>
             </p>
           )}
-          <Button type="submit" shape="rect" className="w-full" disabled={busy || code.length < OTP_LENGTH || attemptsLeft === 0}>
+          <Button
+            type="submit"
+            shape="rect"
+            className="w-full"
+            disabled={busy || attemptsLeft === 0 || (!verifyReady && code.length < OTP_LENGTH)}
+          >
             {busy ? (
               <>
                 <Icon name="spinner" className="size-4 animate-spin" />

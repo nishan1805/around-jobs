@@ -34,7 +34,7 @@ export type JobFilters = {
 
 export const defaultFilters: JobFilters = {
   query: "",
-  categories: [],
+  categories: ["Retail"],
   experience: [],
   types: [],
   workModes: [],
@@ -78,8 +78,8 @@ export function matchesFilters(job: Job, filters: JobFilters) {
 export type ActiveFilter = { key: string; label: string; remove: (filters: JobFilters) => JobFilters };
 
 /**
- * The removable chips under the Jobs List header (S05). Categories are not
- * listed here because they already show as selected chips in the row above.
+ * The removable chips under the Jobs List header. Categories stay out of this
+ * list because they already show as selected chips in the row above.
  */
 export function activeFilters(filters: JobFilters): ActiveFilter[] {
   const chips: ActiveFilter[] = [
@@ -112,6 +112,16 @@ export function activeFilters(filters: JobFilters): ActiveFilter[] {
     });
   }
   return chips;
+}
+
+/**
+ * Number on the Filters control. Figma S05 selects Retail, Fresher, Full-time,
+ * a salary range and On-site, and the button still reads Filters 2. The badge
+ * counts employment type, work mode and the "more" presets. Category, experience
+ * and salary stay out of it.
+ */
+export function filterBadgeCount(filters: JobFilters) {
+  return filters.types.length + filters.workModes.length + filters.more.length;
 }
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */

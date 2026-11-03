@@ -160,7 +160,7 @@ export function ApplicationDetail({ job }: { job: Job }) {
                   </p>
                   <p className="text-label-medium text-text-secondary">
                     {step.detail}
-                    {application.sample && step.state !== "waiting" && " (Sample)"}
+                    
                   </p>
                 </div>
               </li>
@@ -240,7 +240,7 @@ export function ApplicationDetail({ job }: { job: Job }) {
       <Dialog open={resumeOpen} onOpenChange={setResumeOpen}>
         <DialogHeader
           title={submission?.resumeName ?? "Resume"}
-          description="In the Sample app resumes stay on your device, so there's no file to preview."
+          description="Resumes stay on your device, so there's no file to preview."
           onClose={() => setResumeOpen(false)}
         />
         <Button shape="rect" className="w-full" onClick={() => setResumeOpen(false)}>

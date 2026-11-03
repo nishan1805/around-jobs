@@ -265,7 +265,7 @@ export function ApplyFlow({ job }: { job: Job }) {
               <TextInput
                 id={`${ids}-name`}
                 autoComplete="name"
-                placeholder="Rahul Sharma (Sample)"
+                placeholder="Nishan Kumar Mondal"
                 value={data.name}
                 onChange={(event) => update({ name: event.target.value })}
                 {...fieldError("name")}
@@ -381,7 +381,7 @@ export function ApplyFlow({ job }: { job: Job }) {
               rows={7}
               maxLength={COVER_MAX}
               value={data.coverNote}
-              placeholder="I have 2 years of billing experience and can work morning shifts. (Sample)"
+              placeholder="I have 2 years of billing experience and can work morning shifts."
               aria-describedby={`${ids}-cover-count`}
               onChange={(event) => update({ coverNote: event.target.value })}
               className="w-full resize-none rounded-md border bg-surface-default p-4 text-body-sm-regular text-text-primary placeholder:text-text-tertiary focus-visible:border-brand-primary focus-visible:ring-3 focus-visible:ring-brand-primary/20 focus-visible:outline-none"

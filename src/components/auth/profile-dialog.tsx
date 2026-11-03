@@ -17,12 +17,15 @@ export function ProfileDialog({
   open,
   user,
   onDone,
+  presetName = "",
 }: {
   open: boolean;
   user: User | null;
   onDone: () => void;
+  /** Filled value for the S10 preview. */
+  presetName?: string;
 }) {
-  const [name, setName] = useState(user?.name ?? "");
+  const [name, setName] = useState(user?.name ?? presetName);
   const [city, setCity] = useState(user?.city ?? "Raipur");
   const [types, setTypes] = useState<EmploymentType[]>(user?.preferredTypes.length ? user.preferredTypes : ["FULL_TIME"]);
   const [resumeName, setResumeName] = useState<string | null>(user?.resumeName ?? null);
@@ -59,7 +62,7 @@ export function ProfileDialog({
             id="profile-name"
             autoComplete="name"
             autoFocus
-            placeholder="Rahul Sharma (Sample)"
+            placeholder="Nishan Kumar Mondal"
             value={name}
             aria-invalid={nameError ? true : undefined}
             aria-describedby={nameError ? "profile-name-error" : undefined}

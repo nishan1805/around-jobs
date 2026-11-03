@@ -37,7 +37,11 @@ export default function LocationMap({
         attribution={tileLayer.attribution}
         subdomains={tileLayer.subdomains}
         maxZoom={tileLayer.maxZoom}
+        maxNativeZoom={tileLayer.maxNativeZoom}
       />
+      {tileLayer.labelsUrl && (
+        <TileLayer url={tileLayer.labelsUrl} maxZoom={tileLayer.maxZoom} maxNativeZoom={tileLayer.maxNativeZoom} />
+      )}
       {compact ? (
         <CircleMarker
           center={position}

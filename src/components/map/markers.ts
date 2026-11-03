@@ -18,6 +18,20 @@ export function companyMarkerHtml({ name, count, selected }: { name: string; cou
 </div>`;
 }
 
+/** Figma "Around / Jobs / Company Job Marker" state Building (1896:13455). */
+export function buildingMarkerHtml({ count = 3 }: { count?: number } = {}) {
+  return `
+<div class="flex w-[100px] flex-col items-center gap-0.5">
+  <div class="flex items-center gap-1.5 rounded-full border border-border-default bg-surface-default py-1 pr-2.5 pl-1 shadow-lg">
+    <span class="flex rounded-full bg-grey-100 p-0.5">
+      <img alt="" src="/icons/marker-building.svg" width="20" height="20" />
+    </span>
+    <span class="text-label-medium whitespace-nowrap text-text-primary">${count}</span>
+  </div>
+  <img alt="" src="/icons/marker-anchor.svg" width="8" height="8" />
+</div>`;
+}
+
 export function clusterMarkerHtml({ count }: { count: number }) {
   return `
 <div class="absolute top-0 left-0 flex size-14 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-3 border-surface-default bg-brand-primary text-body-sm-semibold text-text-on-brand shadow-sm transition-transform hover:scale-105">${count}</div>`;
