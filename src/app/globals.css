@@ -13,6 +13,24 @@
   --breakpoint-lg: 90rem; /* 1440px: desktop */
 }
 
+@keyframes panel-from-right {
+  from {
+    transform: translateX(calc(100% + 1.25rem));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes panel-from-left {
+  from {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @layer base {
   * {
     @apply border-border-default outline-brand-primary/50;

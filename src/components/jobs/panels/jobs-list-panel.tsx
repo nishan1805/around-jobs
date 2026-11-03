@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { IconButton } from "@/components/ui/icon-button";
 import { activeFilters, defaultFilters, describeFilters, filterBadgeCount, toggleValue, type JobFilters } from "@/lib/job-filters";
-import { categories, type Job } from "@/lib/jobs";
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { categories, experienceLabel, formatSalaryShort, locationLine, relativeDay, type EmploymentType, type Job } from "@/lib/jobs";
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
+import { useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 import { MapPanel } from "./panel-parts";
@@ -18,6 +20,30 @@ import { MapPanel } from "./panel-parts";
 export type ListStatus = "ready" | "loading" | "error";
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+const cardEmployment: Record<EmploymentType, string> = {
+  FULL_TIME: "Full Time",
+  PART_TIME: "Part Time",
+  CONTRACTOR: "Contract",
+  INTERN: "Internship",
+};
+
+function liveListCard(job: Job, from: [number, number]): FrameJobCard {
+  const words = job.company.name.split(/\s+/).filter(Boolean);
+  const when = relativeDay(job.datePosted);
+  return {
+    id: job.slug,
+    title: job.title,
+    company: job.company.name,
+    initials: words.slice(0, 2).map((word) => word[0]?.toUpperCase() ?? "").join(""),
+    verified: job.company.verified,
+    location: locationLine(job, from),
+    salary: job.salaryDisclosed ? formatSalaryShort(job.salary) : "Salary not disclosed",
+    employment: cardEmployment[job.employmentType],
+    experience: experienceLabel(job.experience).replace("–", "-"),
+    posted: `Posted ${when.charAt(0).toLowerCase()}${when.slice(1)}`,
+  };
+}
 
 /** Figma "Around / Jobs / Jobs List Panel" (1889:41885), screens S03 and S05. */
 export function JobsListPanel({
@@ -58,6 +84,8 @@ export function JobsListPanel({
   desktopSubtitle?: string;
   onOpenDesignJob?: () => void;
 }) {
+  const seeker = useSeeker();
+  const actions = useSeekerActions();
   const chips = activeFilters(filters);
   const badgeCount = filterBadgeCount(filters);
   const description = describeFilters(filters);
@@ -186,7 +214,19 @@ export function JobsListPanel({
                 <ul className="flex flex-col gap-3">
                   {jobs.map((job) => (
                     <li key={job.slug}>
-                      <JobCard job={job} from={from} onSelect={onSelectJob} />
+                      <div className={desktopCards ? undefined : "md:hidden"}>
+                        <JobCard job={job} from={from} onSelect={onSelectJob} />
+                      </div>
+                      {!desktopCards && (
+                        <div className="hidden md:block">
+                          <FrameJobCardView
+                            card={liveListCard(job, from)}
+                            saved={seeker.savedJobs.includes(job.slug)}
+                            onOpen={() => onSelectJob(job)}
+                            onToggleSave={() => actions.setSavedJob(job.slug, !seeker.savedJobs.includes(job.slug))}
+                          />
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>

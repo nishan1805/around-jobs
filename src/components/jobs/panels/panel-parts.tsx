@@ -3,7 +3,6 @@
 import { useState, type ComponentProps, type PointerEvent, type ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
-import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 
 const DRAG_THRESHOLD = 48;
@@ -46,10 +45,11 @@ export function GrabHandle({ className, ...props }: ComponentProps<"div">) {
 }
 
 /**
- * Floating overlay panel on the map (Figma S01–S05): 448px wide, docked 24px
- * from the top-left of the map on tablet and desktop. On phones it's a bottom
- * sheet (M01–M04): "half" opens at a third of the screen and drags up to full,
- * "full" leaves 24px of map visible. Dragging the handle down calls `onDismiss`.
+ * Floating overlay on the map. S01 and S02 (2018:42720, 2018:44934) are 448px
+ * wide and sit 20px from the top, right and bottom of the map, sliding in from
+ * the right. The list (S03) and filters (S05) stay on the left and slide in
+ * from the left. On phones it's a bottom sheet: "half" opens at a third of the
+ * screen and drags up to full, "full" leaves 24px of map visible.
  */
 export function MapPanel({
   label,
@@ -82,9 +82,11 @@ export function MapPanel({
       className={cn(
         "absolute inset-x-0 bottom-0 z-1001 flex flex-col overflow-hidden rounded-t-lg bg-surface-default shadow-lg transition-[top] duration-200",
         expanded ? "top-6" : "top-1/3",
-        "md:inset-auto md:top-6 md:bottom-6 md:transform-none!",
-        dock === "right" ? "md:right-6 md:left-auto" : "md:left-6",
-        width === "wide" ? "md:w-112 md:rounded-lg" : "md:w-[380px] md:rounded-lg",
+        "md:inset-auto md:bottom-6 md:rounded-lg",
+        dock === "right"
+          ? "md:top-5 md:right-5 md:bottom-5 md:left-auto md:animate-[panel-from-right_280ms_ease-out]"
+          : "md:top-6 md:left-6 md:animate-[panel-from-left_280ms_ease-out]",
+        width === "wide" ? "md:w-112" : "md:w-[380px]",
         className,
       )}
     >
@@ -94,8 +96,8 @@ export function MapPanel({
   );
 }
 
-/** Pixel width a docked panel covers on md+ (panel + 24px gap on both sides). */
-export const panelInset = { wide: 448 + 48, narrow: 380 + 48 } as const;
+/** Pixel width a docked panel covers on md+ (panel plus the gap on both sides). */
+export const panelInset = { wide: 448 + 40, narrow: 380 + 48 } as const;
 
 /** Figma "Around / Detail Section Header" (1859:10854). */
 export function SectionHeader({ title, action }: { title: string; action?: ReactNode }) {
@@ -117,46 +119,6 @@ export function SectionLink({ children, onClick }: { children: ReactNode; onClic
       {children}
       <Icon name="arrowRight" className="size-4" />
     </button>
-  );
-}
-
-/**
- * Figma "Gallery Header": 240px photo strip with a nav button, optional
- * save/share actions, prev/next and a counter. Photos are Sample placeholders.
- */
-export function GalleryHeader({
-  name,
-  photoCount,
-  nav,
-  actions,
-}: {
-  name: string;
-  photoCount: number;
-  nav: { icon: "close" | "arrowLeft"; label: string; onClick: () => void };
-  actions?: ReactNode;
-}) {
-  const [index, setIndex] = useState(0);
-  const step = (delta: number) => setIndex((current) => (current + delta + photoCount) % photoCount);
-
-  return (
-    <div
-      role="group"
-      aria-roledescription="carousel"
-      aria-label={`${name} photos`}
-      className="relative h-60 w-full shrink-0 bg-grey-100"
-    >
-      <IconButton icon={nav.icon} label={nav.label} onClick={nav.onClick} className="absolute top-4 left-4" iconClassName="size-4" />
-      {actions && <div className="absolute top-4 right-4 flex gap-2">{actions}</div>}
-      {photoCount > 1 && (
-        <>
-          <IconButton icon="chevronLeft" label="Previous photo" onClick={() => step(-1)} className="absolute top-26 left-4 p-1.5" />
-          <IconButton icon="chevronRight" label="Next photo" onClick={() => step(1)} className="absolute top-26 right-4 p-1.5" />
-        </>
-      )}
-      <span aria-live="polite" className="absolute top-50 left-4 rounded-full bg-overlay-scrim px-2.5 py-1 text-label-medium text-text-on-brand">
-        {index + 1} / {photoCount}
-      </span>
-    </div>
   );
 }
 
