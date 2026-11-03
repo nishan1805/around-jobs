@@ -12,7 +12,7 @@ import { PROFILE_COMPLETION, PROFILE_DISPLAY_NAME } from "@/lib/seeker-design-se
 import { useAuth } from "./auth-provider";
 
 const itemClass =
-  "flex w-full cursor-default items-center gap-3 rounded-sm px-3 py-2.5 text-body-sm-medium text-text-primary outline-none data-highlighted:bg-grey-100";
+  "flex h-12 w-full cursor-default items-center gap-3 rounded-sm px-3 py-3 text-body-sm-medium text-text-primary outline-none data-highlighted:bg-grey-100";
 
 /**
  * Logged out: grey profile glyph (S00). Logged in: blue initial on the trigger;
@@ -55,7 +55,7 @@ export function AccountButton() {
         </Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner sideOffset={8} align="end" className="z-50">
-            <Menu.Popup className="w-[300px] rounded-xl border bg-surface-elevated p-3 shadow-lg outline-none">
+            <Menu.Popup className="w-[360px] rounded-xl border bg-surface-elevated p-3 shadow-lg outline-none">
               <div className="flex items-center gap-3 px-1 pb-3">
                 <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-grey-200 text-heading-semibold leading-none text-text-primary">
                   {initial}
@@ -71,13 +71,14 @@ export function AccountButton() {
                   </span>
                 </span>
               </div>
+              <div className="h-px w-full bg-grey-200" />
               <Menu.Item className={itemClass} render={<Link href="/profile" />}>
                 <Icon name="user" className="size-5 text-text-secondary" />
                 <span className="flex-1">Profile settings</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
               <Menu.Item className={itemClass} render={<Link href="/alerts" />}>
-                <Icon name="bell" className="size-5 text-text-secondary" />
+                <Icon name="bellOutline" className="size-5 text-text-secondary" />
                 <span className="flex-1">Job alerts</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
@@ -88,7 +89,7 @@ export function AccountButton() {
               </Menu.Item>
               <Menu.Separator className="my-1 h-px bg-border-default" />
               <Menu.Item
-                className="flex w-full cursor-default items-center gap-3 rounded-sm px-3 py-2.5 text-body-sm-semibold text-error-default outline-none data-highlighted:bg-error-50"
+                className="flex h-12 w-full cursor-default items-center gap-3 rounded-sm px-3 py-3 text-body-sm-semibold text-error-default outline-none data-highlighted:bg-error-50"
                 onClick={() => authActions.logout()}
               >
                 <Icon name="logout" className="size-5" />

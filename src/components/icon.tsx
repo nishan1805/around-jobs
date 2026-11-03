@@ -7,6 +7,7 @@ export const icons = {
   arrowLeft: "/icons/arrow-left.svg",
   arrowRight: "/icons/arrow-right.svg",
   bell: "/icons/notifications.svg",
+  bellOutline: "/icons/bell.svg",
   bookmark: "/icons/bookmark.svg",
   bookmarkFilled: "/icons/bookmark-filled.svg",
   briefcase: "/icons/briefcase.svg",
