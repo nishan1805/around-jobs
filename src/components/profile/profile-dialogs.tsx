@@ -75,6 +75,7 @@ function ModalFrame({
   footer,
   width,
   banner,
+  pinTop = false,
 }: {
   title: string;
   onClose: () => void;
@@ -82,9 +83,15 @@ function ModalFrame({
   footer: ReactNode;
   width: string;
   banner?: string;
+  /** P02g sits 293px from the top of the 1024px frame instead of in the vertical centre. */
+  pinTop?: boolean;
 }) {
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} className={cn("md:w-[720px] md:gap-0 md:p-0", width)}>
+    <Dialog
+      open
+      onOpenChange={(next) => !next && onClose()}
+      className={cn("md:w-[720px] md:gap-0 md:p-0", pinTop && "md:top-[293px]! md:translate-y-0!", width)}
+    >
       <div className="flex items-center gap-2 px-6 pt-6 pb-4">
         <h2 className="min-w-0 flex-1 text-heading-semibold text-text-primary">{title}</h2>
         <button
@@ -266,6 +273,7 @@ export function CertificationDialog({
       onClose={onClose}
       banner={error ? "Fill in the required fields to save." : undefined}
       width="md:w-[720px]"
+      pinTop={Boolean(initial) && !asNew}
       footer={
         <Button type="button" shape="rect" onClick={save}>
           Save certification
