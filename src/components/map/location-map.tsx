@@ -18,7 +18,7 @@ export default function LocationMap({
   position: [number, number];
   name: string;
   jobCount: number;
-  /** A plain pin for short map slots where the photo marker and label would be clipped. */
+  /** A plain dot for short map slots where the company marker would be clipped. */
   compact?: boolean;
 }) {
   const generation = useMapGeneration();
@@ -56,7 +56,7 @@ export default function LocationMap({
         icon={L.divIcon({
           className: "",
           iconSize: [0, 0],
-          html: companyMarkerHtml({ name, count: jobCount, selected: true }),
+          html: companyMarkerHtml({ name, count: jobCount }),
         })}
       />
       )}
