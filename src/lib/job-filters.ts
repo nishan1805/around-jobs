@@ -114,9 +114,14 @@ export function activeFilters(filters: JobFilters): ActiveFilter[] {
   return chips;
 }
 
-/** Number on the Filters control. Category chips stay in their own row and are not counted. */
+/**
+ * Number on the Filters control. Figma S05 selects Retail, Fresher, Full-time,
+ * a salary range and On-site, and the button still reads Filters 2. The badge
+ * counts employment type, work mode and the "more" presets. Category, experience
+ * and salary stay out of it.
+ */
 export function filterBadgeCount(filters: JobFilters) {
-  return activeFilters(filters).length;
+  return filters.types.length + filters.workModes.length + filters.more.length;
 }
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */

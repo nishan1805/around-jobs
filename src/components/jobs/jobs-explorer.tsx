@@ -346,7 +346,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <div
             role="group"
             aria-label="Job categories"
-            className="pointer-events-auto -mx-1 flex flex-wrap gap-2 md:mx-0 md:w-auto md:min-w-0 md:flex-1 md:flex-nowrap md:overflow-x-auto md:py-1.5 md:[scrollbar-width:none] md:*:shrink-0"
+            className="pointer-events-auto flex min-w-0 flex-1 flex-nowrap gap-2 overflow-x-auto overflow-y-hidden py-1.5 [scrollbar-width:none] *:shrink-0"
           >
             {categories.map((category) => (
               <Chip
@@ -362,7 +362,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <ViewToggle
             view={panel.kind === "list" ? "list" : "map"}
             onChange={(view) => open(view === "list" ? { kind: "list" } : none)}
-            className="pointer-events-auto max-md:hidden"
+            className="pointer-events-auto relative z-20 shrink-0 bg-surface-default max-md:hidden"
           />
         </div>
 

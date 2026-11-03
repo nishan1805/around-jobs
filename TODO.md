@@ -163,9 +163,10 @@ code does today so a designer can confirm or correct it.
 - **Location menu (S04).** Selected row uses `bg-primary-50`. The frame's fill is `#edf2ff`,
   which is not a token, so the row stays on the primary-50 token. Row radius is `rounded-md`
   (12px). The frame uses 10px, which is not a radius token.
-- **Filter count.** Categories are not counted. S04 and S06 with Retail, Full-time and
-  On-site show Filters 2 (`?category=Retail&type=FULL_TIME&mode=ON_SITE`). Category chips
-  stay in their own row. S00 and S03 open with the Retail chip selected.
+- **Filter count.** The Filters button counts employment type, work mode and the
+  "more" presets. Category, experience and salary are not counted. S04, S05 and S06
+  read Filters 2 even though S05 also selects Fresher and a salary range. Category
+  chips stay in their own row. S00 and S03 open with the Retail chip selected.
 - **Account menu destinations.** Profile settings opens `/profile`. Job alerts opens `/alerts`.
   The frames do not include a job-alerts screen, so that page is only the empty state
   "You don't have any job alerts yet." Help & support uses `mailto:support@around.jobs`.
@@ -206,9 +207,12 @@ code does today so a designer can confirm or correct it.
   openings. Save them to see new jobs here."
 - **Building marker** (1896:13455) is the pill with the building glyph, count and orange
   anchor, shown on `/states`. It is not the company photo pin.
-- **Resume "too large"** (2105:25466, re-checked): the node does contain
+- **Resume "too large"** (2105:25466): the node text is exactly
   "File is larger than 5 MB. Upload a smaller file." The line stays. The filename in
   Figma is Resume_Rahul_Sharma.pdf; the seeker name stays Nishan Kumar Mondal.
+- **P02g** is Edit certification (`?dialog=edit-certification`). **P02d** is the
+  uploading resume with empty education and certifications (`?upload=uploading`).
+  **P02d2** is the remove-resume dialog.
 - **P02c / P02f.** Add certification (filled, including Credential URL) is
   `/profile?section=skills&dialog=add-certification`. Edit education is
   `/profile?section=skills&dialog=edit-education`.

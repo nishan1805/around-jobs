@@ -19,6 +19,7 @@ export const icons = {
   crosshair: "/icons/crosshair.svg",
   directions: "/icons/directions.svg",
   file: "/icons/file.svg",
+  graduationCap: "/icons/graduation-cap.svg",
   filters: "/icons/filters.svg",
   globe: "/icons/globe.svg",
   heart: "/icons/heart.svg",

@@ -125,7 +125,7 @@ export const certificationFilledPreview: CertificationEntry = {
 
 export const linksSeed = {
   linkedin: "https://linkedin.com/in/nishan-kumar-mondal",
-  portfolio: "https://yourportfolio.com",
+  portfolio: "",
   other: "",
 };
 
@@ -199,7 +199,7 @@ export const employmentTypeOptions = ["Full-time", "Part-time", "Internship", "C
 export const workArrangementOptions = ["On-site", "Hybrid", "Remote"] as const;
 
 export const preferredLocationsSeed = ["Pandri", "Shankar Nagar", "Telibandha"] as const;
-export const locationSuggestionsSeed = ["Civil Lines", "VIP Road", "Tetibandh"] as const;
+export const locationSuggestionsSeed = ["Civil Lines", "VIP Road", "Telibandh"] as const;
 export const preferredRolesSeed = ["Site Engineer", "Civil Engineer", "Project Engineer"] as const;
 export const roleSuggestionsSeed = ["Quantity Surveyor"] as const;
 

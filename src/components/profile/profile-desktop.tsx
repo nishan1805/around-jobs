@@ -121,11 +121,13 @@ export function ProfileDesktop() {
     : photoSuccess
       ? null
       : ((photoParam as PhotoPhase | null) ?? photoPhase);
+  const skillsPreviewEmpty =
+    section === "skills" && (empty || uploadParam === "uploading" || uploadParam === "error");
   const educationList = useMemo(() => {
-    if (empty && section === "skills") return [];
+    if (skillsPreviewEmpty) return [];
     return educationCount === "2" ? [...education, educationExtraSeed] : education;
-  }, [education, educationCount, empty, section]);
-  const certList = empty && section === "skills" ? [] : certs;
+  }, [education, educationCount, skillsPreviewEmpty]);
+  const certList = skillsPreviewEmpty ? [] : certs;
   const showResume = !(empty && section === "skills") && resumeOn && uploadParam !== "removed";
   const experienceList = empty && section === "experience" ? [] : experience;
   const preferenceError = showErrors && section === "preferences";
@@ -324,18 +326,14 @@ export function ProfileDesktop() {
                 locations={locationList}
                 roles={roleList}
                 suggestionsLeft={
-                  preferenceError
-                    ? []
-                    : empty
-                      ? [...preferredLocationsSeed]
-                      : locationSuggestionsSeed.filter((item) => !locationList.includes(item))
+                  empty || preferenceError
+                    ? [...preferredLocationsSeed, ...locationSuggestionsSeed]
+                    : locationSuggestionsSeed.filter((item) => !locationList.includes(item))
                 }
                 roleSuggestions={
-                  preferenceError
-                    ? []
-                    : empty
-                      ? [...preferredRolesSeed]
-                      : roleSuggestionsSeed.filter((item) => !roleList.includes(item))
+                  empty || preferenceError
+                    ? [...preferredRolesSeed, ...roleSuggestionsSeed]
+                    : roleSuggestionsSeed.filter((item) => !roleList.includes(item))
                 }
                 onAddLocation={(value) => setLocations((current) => (current.includes(value) ? current : [...current, value]))}
                 onRemoveLocation={(value) => setLocations((current) => current.filter((item) => item !== value))}
@@ -343,7 +341,7 @@ export function ProfileDesktop() {
                 onRemoveRole={(value) => setRoles((current) => current.filter((item) => item !== value))}
                 employment={employment}
                 onEmployment={setEmployment}
-                arrangement={arrangement}
+                arrangement={empty && section === "preferences" ? "" : arrangement}
                 onArrangement={setArrangement}
                 salary={empty && section === "preferences" ? "" : salary}
                 onSalary={setSalary}
@@ -455,8 +453,9 @@ export function ProfileDesktop() {
       {photoSuccess && (
         <p
           role="status"
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-grey-900 px-4 py-3 text-body-sm-medium text-text-on-brand shadow-lg"
+          className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-md bg-success-50 px-4 py-3 text-body-sm-medium text-success-700 shadow-lg"
         >
+          <Icon name="checkCircle" className="size-5" />
           Profile photo updated successfully.
         </p>
       )}
@@ -585,7 +584,7 @@ function EmptyWell({
   body: string;
   action: string;
   onAction?: () => void;
-  icon?: "plus" | "briefcase" | "upload";
+  icon?: "plus" | "briefcase" | "upload" | "graduation" | "file";
   error?: string;
 }) {
   return (
@@ -596,7 +595,10 @@ function EmptyWell({
       )}
     >
       <span className="flex size-10 items-center justify-center rounded-full bg-primary-50 text-brand-primary">
-        <Icon name={icon === "plus" ? "plus" : icon === "briefcase" ? "briefcase" : "upload"} className="size-5" />
+        <Icon
+          name={icon === "graduation" ? "graduationCap" : icon === "file" ? "file" : icon === "briefcase" ? "briefcase" : icon === "upload" ? "upload" : "plus"}
+          className="size-5"
+        />
       </span>
       <div>
         <p className="text-body-sm-semibold text-text-primary">{title}</p>
@@ -710,6 +712,7 @@ function SkillsSection(props: {
         </div>
         {props.education.length === 0 ? (
           <EmptyWell
+            icon="graduation"
             title="No education added yet"
             body="Add your highest qualification so employers can see your background."
             action="Add education"
@@ -745,7 +748,7 @@ function SkillsSection(props: {
             <h2 className="text-heading-semibold text-text-primary">
               Certifications <span className="text-body-sm-regular text-text-tertiary">(Optional)</span>
             </h2>
-            <p className="mt-1 text-body-sm-regular text-text-secondary">Add certifications to showcase your additional skills.</p>
+            <p className="mt-1 text-body-sm-regular text-text-secondary">Add certifications to show your additional skills.</p>
           </div>
           {props.certs.length > 0 && (
             <Button type="button" variant="outline" shape="rect" size="sm" onClick={props.onAddCert}>
@@ -755,8 +758,9 @@ function SkillsSection(props: {
         </div>
         {props.certs.length === 0 ? (
           <EmptyWell
+            icon="file"
             title="No certifications added yet"
-            body="Add certifications to showcase your additional skills."
+            body="Add certifications to show your additional skills."
             action="Add certification"
             onAction={props.onAddCert}
           />
@@ -794,12 +798,18 @@ function SkillsSection(props: {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <LinkField label="LinkedIn profile" value={props.links.linkedin} icon="user" onChange={(linkedin) => props.onLinks({ ...props.links, linkedin })} />
-          <LinkField label="Portfolio / Website" value={props.links.portfolio} icon="globe" onChange={(portfolio) => props.onLinks({ ...props.links, portfolio })} />
+          <LinkField label="LinkedIn profile" value={props.links.linkedin} icon="linkedin" onChange={(linkedin) => props.onLinks({ ...props.links, linkedin })} />
+          <LinkField
+            label="Portfolio / Website"
+            value={props.links.portfolio}
+            icon="link"
+            placeholder="https://yourportfolio.com"
+            onChange={(portfolio) => props.onLinks({ ...props.links, portfolio })}
+          />
           <LinkField
             label="Other professional link"
             value={props.links.other}
-            icon="file"
+            icon="globe"
             placeholder="e.g. project photos or drawings link"
             onChange={(other) => props.onLinks({ ...props.links, other })}
           />
@@ -829,30 +839,39 @@ function SkillsSection(props: {
               <Icon name="file" className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-body-sm-semibold text-text-primary">{resumeSeed.name}</p>
-              <p className="text-label-medium text-success-700">
-                {props.upload === "uploading" ? "Uploading…" : `${resumeSeed.sizeLabel} · ${resumeSeed.uploadedLabel}`}
-              </p>
-              {props.upload === "uploading" && (
-                <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-grey-200">
-                  <span className="block h-full w-2/3 rounded-full bg-brand-primary" />
-                </span>
+              <a href={resumeSeed.name} className="text-body-sm-semibold text-brand-primary underline" onClick={(event) => event.preventDefault()}>
+                {resumeSeed.name}
+              </a>
+              {props.upload === "uploading" ? (
+                <>
+                  <p className="text-label-medium text-text-secondary">Uploading... 80%</p>
+                  <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-grey-200">
+                    <span className="block h-full w-4/5 rounded-full bg-brand-primary" />
+                  </span>
+                </>
+              ) : (
+                <p className="text-label-medium text-success-700">
+                  {resumeSeed.sizeLabel} · {resumeSeed.uploadedLabel}
+                </p>
               )}
             </div>
-            <button type="button" className="text-body-sm-semibold text-brand-primary">
-              Replace
-            </button>
-            <button type="button" className="text-body-sm-semibold text-error-default" onClick={props.onRemoveResume}>
-              Remove
-            </button>
+            {props.upload === "uploading" ? (
+              <button type="button" className="text-body-sm-semibold text-brand-primary">
+                Cancel
+              </button>
+            ) : (
+              <button type="button" className="text-body-sm-semibold text-brand-primary">
+                Replace
+              </button>
+            )}
           </div>
         )}
-        <div className="flex justify-end">
-          <Button type="button" shape="rect">
-            Save Changes
-          </Button>
-        </div>
       </section>
+      <div className="flex justify-end">
+        <Button type="button" shape="rect">
+          Save Changes
+        </Button>
+      </div>
     </div>
   );
 }
@@ -866,7 +885,7 @@ function LinkField({
 }: {
   label: string;
   value: string;
-  icon: "user" | "globe" | "file";
+  icon: "linkedin" | "link" | "globe";
   placeholder?: string;
   onChange: (value: string) => void;
 }) {
@@ -874,7 +893,12 @@ function LinkField({
     <label className="flex flex-col gap-1.5">
       <span className="text-label-medium text-text-secondary">{label}</span>
       <span className={cn(inputClass, "flex items-center gap-2")}>
-        <Icon name={icon} className="size-4 text-text-tertiary" />
+        {icon === "linkedin" ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/icons/linkedin.svg" alt="" width={16} height={16} className="size-4" />
+        ) : (
+          <Icon name={icon} className="size-4 text-text-tertiary" />
+        )}
         <span className="h-6 w-px bg-border-default" />
         <input
           value={value}
@@ -1014,9 +1038,9 @@ function PreferencesSection(props: {
         <h2 className="text-heading-semibold text-text-primary">Job Preferences</h2>
         <p className="mt-1 text-body-sm-regular text-text-secondary">Help us show you the most relevant job opportunities.</p>
       </div>
-      <div className={cn("flex flex-col gap-3 rounded-md border p-4", locationError && "border-error-default")}>
+      <div className="flex flex-col gap-3 rounded-md border p-4">
         <FieldLabel required>Preferred locations</FieldLabel>
-        <span className={cn(inputClass, "flex items-center gap-2")}>
+        <span className={cn(inputClass, "flex items-center gap-2", locationError && "border-error-default")}>
           <Icon name="pin" className="size-4 text-text-tertiary" />
           <input
             placeholder="Search and add locations (e.g. Pandri, Shankar Nagar)"
@@ -1046,9 +1070,9 @@ function PreferencesSection(props: {
         </div>
         {locationError && <p className="text-label-medium text-error-default">Select at least one preferred location.</p>}
       </div>
-      <div className={cn("flex flex-col gap-3 rounded-md border p-4", roleError && "border-error-default")}>
+      <div className="flex flex-col gap-3 rounded-md border p-4">
         <FieldLabel required>Preferred roles</FieldLabel>
-        <span className={cn(inputClass, "flex items-center gap-2")}>
+        <span className={cn(inputClass, "flex items-center gap-2", roleError && "border-error-default")}>
           <Icon name="search" className="size-4 text-text-tertiary" />
           <input
             placeholder="Search job titles or roles (e.g. Site Engineer, Civil Engineer)"
@@ -1086,7 +1110,12 @@ function PreferencesSection(props: {
           <span className="flex gap-2">
             <span className={cn(inputClass, "flex items-center gap-2")}>
               <span className="text-text-tertiary">₹</span>
-              <input value={props.salary} onChange={(event) => props.onSalary(event.target.value)} className="min-w-0 flex-1 bg-transparent outline-none" />
+              <input
+                value={props.salary}
+                placeholder="e.g. 35,000"
+                onChange={(event) => props.onSalary(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-text-tertiary"
+              />
             </span>
             <select value={props.salaryPeriod} onChange={(event) => props.onSalaryPeriod(event.target.value)} className={cn(inputClass, "w-36")}>
               {salaryPeriodOptions.map((option) => (
@@ -1117,10 +1146,11 @@ function PreferencesSection(props: {
           <span className="block text-label-medium text-text-tertiary">This helps us show you opportunities in other locations as well.</span>
         </span>
       </label>
-      <div className="flex gap-2 rounded-md bg-info-50 px-4 py-3 text-body-sm-regular text-text-secondary">
+      <div className="flex max-w-xl gap-2 rounded-md bg-info-50 px-4 py-3 text-body-sm-regular text-text-secondary">
         <Icon name="alertCircle" className="mt-0.5 size-4 shrink-0 text-info-700" />
         <p>
-          <span className="text-body-sm-semibold text-text-primary">This helps us show you relevant jobs.</span> You can keep this information private. It will only be used to suggest opportunities.
+          <span className="text-body-sm-semibold text-text-primary">This helps us show you relevant jobs.</span>{" "}
+          You can keep this information private. It will only be used to suggest opportunities.
         </p>
       </div>
       <div className="flex justify-end">

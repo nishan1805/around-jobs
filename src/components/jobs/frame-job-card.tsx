@@ -47,7 +47,7 @@ export function FrameJobCardView({
     <article
       className={cn(
         "flex w-full flex-col gap-3 rounded-md border bg-surface-default shadow-sm",
-        layout === "saved" ? "p-5" : layout === "employer" ? "p-3" : "p-4",
+        layout === "saved" ? "px-4 py-5" : layout === "employer" ? "p-3" : "p-4",
       )}
     >
       <div className="flex items-start gap-3">
@@ -69,19 +69,22 @@ export function FrameJobCardView({
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <p className="flex items-center gap-1 text-body-sm-regular text-text-tertiary">
-              <Icon name="pinSm" className="size-4" />
-              <span className="truncate">{card.location}</span>
+            <p className="flex items-start gap-1 text-body-sm-regular text-text-tertiary">
+              <Icon name="pinSm" className="mt-0.5 size-4 shrink-0" />
+              <span className={layout === "saved" ? "whitespace-nowrap" : "truncate"}>{card.location}</span>
             </p>
-            {layout !== "saved" &&
-              (card.salary === "Salary not disclosed" ? (
+            {layout === "employer" ? (
+              <p className="text-body-semibold text-text-primary">{card.salary}</p>
+            ) : layout !== "saved" ? (
+              card.salary === "Salary not disclosed" ? (
                 <GreyChip>{card.salary}</GreyChip>
               ) : (
                 <p className="flex items-baseline gap-1">
                   <span className="text-body-semibold text-text-primary">{card.salary}</span>
                   <span className="text-body-sm-regular text-text-tertiary">/ month</span>
                 </p>
-              ))}
+              )
+            ) : null}
             <div className="flex flex-wrap gap-1.5">
               <GreyChip>{card.employment}</GreyChip>
               <GreyChip>{card.experience}</GreyChip>
@@ -101,7 +104,7 @@ export function FrameJobCardView({
       </div>
       <div className="h-px w-full bg-border-default" />
       {layout === "saved" ? (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="flex flex-col gap-1">
             <p className="flex items-baseline gap-1 whitespace-nowrap">
               <span className="text-body-semibold text-text-primary">{card.salary}</span>
