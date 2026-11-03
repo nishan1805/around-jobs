@@ -190,11 +190,11 @@ code does today so a designer can confirm or correct it.
   visible titles win. Every card shows the expiring badge; the header still says
   2 expiring soon, matching the frame.
 - **Map.** Leaflet markers and the cluster count are live data, not the static
-  frame (cluster 12, labels that still say Sample in Figma). The basemap is Esri
-  World Street Map (coloured streets, keyless, any domain). Zoom is capped at the
-  last real tile (17); 18+ is Esri's "map data not yet available" placeholder.
-  CARTO Voyager and Positron stamp "API KEY REQUIRED". Stadia Alidade Smooth is
-  used only when `NEXT_PUBLIC_STADIA_API_KEY` is set and no tile URL override is.
+  frame (cluster 12, labels that still say Sample in Figma). The basemap is the
+  OpenStreetMap standard style (green parks, keyless). The OSMF tile policy allows
+  it while traffic stays light. Native zoom stops at 19. CARTO Voyager and Positron
+  stamp "API KEY REQUIRED". Stadia OSM Bright or Google roadmap is used only when
+  that key is set and no tile URL override is.
 - **Salary green.** The salary badge uses `text-success-700` (`Badge type="salary"`).
   Figma paints that label `#07964e`, which is not a token.
 - **Job detail variants** (fetched): applied (1889:42721) banner "You applied on 12 Oct 2026"
@@ -221,6 +221,6 @@ code does today so a designer can confirm or correct it.
 - **P05-04** closes the photo dialog, shows the uploaded avatar, and the toast
   "Profile photo updated successfully." **P05-07** (`photo=removed`) opens
   Change profile photo. **S05** keeps the Filters button and docks the panel above it.
-- **Map tiles.** Default is Esri World Street Map. `NEXT_PUBLIC_STADIA_API_KEY` still
-  switches the basemap to Stadia Alidade Smooth.
+- **Map tiles.** Default is OpenStreetMap standard. `NEXT_PUBLIC_STADIA_API_KEY`
+  switches the basemap to Stadia OSM Bright when no tile URL override is set.
 - **Apply and applications (S11–S15)** were not restyled.

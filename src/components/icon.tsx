@@ -13,6 +13,7 @@ export const icons = {
   briefcase: "/icons/briefcase.svg",
   calendar: "/icons/calendar.svg",
   checkCircle: "/icons/check-circle.svg",
+  checkCircleSolid: "/icons/check-circle-solid.svg",
   chevronDown: "/icons/chevron-down.svg",
   chevronLeft: "/icons/chevron-left.svg",
   chevronRight: "/icons/chevron-right.svg",

@@ -1,9 +1,12 @@
 /**
  * Basemap for the jobs map.
  *
- * The default is Esri World Topo Map: green parks, blue water, and white or
- * yellow roads, with no API key. It answers 200 from any site, including the
- * deployed Vercel domain. Labels are baked into the tiles.
+ * The default is the OpenStreetMap standard style: green parks, blue water,
+ * and white or yellow roads, with no API key. Labels are baked into the tiles.
+ * The OSMF tile policy allows this on a public site when traffic stays light,
+ * the tile URL is exactly `tile.openstreetmap.org/{z}/{x}/{y}.png`, the
+ * copyright line stays visible, and the browser sends its usual Referer.
+ * A tile requested with Referer `https://around-jobs.vercel.app/` returns 200.
  *
  * Drop a key in later without changing the map code:
  * - `NEXT_PUBLIC_STADIA_API_KEY` uses Stadia OSM Bright.
@@ -19,12 +22,11 @@ type TileSource = {
   maxNativeZoom: number;
 };
 
-const topo: TileSource = {
-  url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+const osm: TileSource = {
+  url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   labelsUrl: null,
-  attribution:
-    "Tiles &copy; Esri &mdash; Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), &copy; OpenStreetMap contributors, and the GIS User Community",
-  maxNativeZoom: 16,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxNativeZoom: 19,
 };
 
 const stadiaKey = process.env.NEXT_PUBLIC_STADIA_API_KEY?.trim();
@@ -52,10 +54,10 @@ const google: TileSource | null = googleKey
   : null;
 
 const override: TileSource | null = urlOverride
-  ? { url: urlOverride, labelsUrl: null, attribution: topo.attribution, maxNativeZoom: 20 }
+  ? { url: urlOverride, labelsUrl: null, attribution: osm.attribution, maxNativeZoom: 20 }
   : null;
 
-const chosen = override ?? google ?? stadia ?? topo;
+const chosen = override ?? google ?? stadia ?? osm;
 
 export const tileLayer = {
   url: chosen.url,
