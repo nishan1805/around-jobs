@@ -123,12 +123,15 @@ export function activeFilters(filters: JobFilters): ActiveFilter[] {
 }
 
 /**
- * Number on the Filters control. Counts every selected chip inside the Filters
- * panel: experience, employment type, work mode, and More filters. Category chips
- * on the map are not part of this count, and the salary slider is not a chip.
+ * Number on the Filters control, matching S05 (2018:46140).
+ *
+ * Fresher + Full-time + On-site, with the salary slider at ₹10,000–₹50,000,
+ * shows badge 2. The badge is one point per active group, not one per chip:
+ * Employment type, Work mode, and More filters. Experience, the salary slider,
+ * and the category chips on the map do not add to it.
  */
 export function filterBadgeCount(filters: JobFilters) {
-  return filters.experience.length + filters.types.length + filters.workModes.length + filters.more.length;
+  return (filters.types.length > 0 ? 1 : 0) + (filters.workModes.length > 0 ? 1 : 0) + (filters.more.length > 0 ? 1 : 0);
 }
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */
