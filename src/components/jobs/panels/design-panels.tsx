@@ -45,13 +45,9 @@ export function DesignEmployerPanel({
     <MapPanel label={`${employer.name} overview`} dock="right" onDismiss={onClose}>
       <div className="flex shrink-0 flex-col gap-5 py-4 pr-4 pl-6">
         <div className="flex items-start gap-3">
-          <Image
-            src={employer.logo}
-            alt=""
-            width={64}
-            height={64}
-            className="size-16 rounded-md border border-grey-300 object-cover"
-          />
+          <span className="block size-16 shrink-0 overflow-hidden rounded-[12px] border border-grey-300 bg-surface-default">
+            <Image src={employer.logo} alt="" width={64} height={64} className="size-full object-cover" />
+          </span>
           <span className="flex-1" />
           <div className="flex gap-1">
             <RoundIcon icon="share" label="Share employer" />
@@ -204,8 +200,12 @@ export function DesignJobDetailPanel({
             <Badge type="employment" className="bg-primary-50 text-brand-primary">
               {detail.employment}
             </Badge>
-            <Badge type="mode">{mode}</Badge>
-            <Badge type="experience">{detail.experience}</Badge>
+            <Badge type="mode" className="border border-grey-300 bg-surface-default">
+              {mode}
+            </Badge>
+            <Badge type="experience" className="border border-grey-300 bg-surface-default">
+              {detail.experience}
+            </Badge>
           </div>
           <p className="flex items-center gap-1 text-label-medium text-text-secondary">
             <Icon name="pinSm" className="size-4" />
