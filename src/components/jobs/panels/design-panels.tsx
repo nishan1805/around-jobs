@@ -114,7 +114,7 @@ export function DesignEmployerPanel({
           </button>
         ))}
       </div>
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
         {tab === "jobs" ? (
           jobs.length === 0 ? (
             <div className="flex flex-col items-center gap-2 pt-8">
@@ -186,7 +186,7 @@ export function DesignJobDetailPanel({
         <RoundIcon icon="share" label="Share job" />
         <RoundIcon icon="close" label="Close job details" onClick={onBack} />
       </div>
-      <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6">
         {state.banner && <Banner tone={state.bannerTone ?? "error"}>{state.banner}</Banner>}
         <div className="flex flex-col gap-2">
           <h2 className="text-heading-semibold text-text-primary">{detail.title}</h2>
@@ -198,8 +198,12 @@ export function DesignJobDetailPanel({
             <Icon name="verified" className="size-5 text-success-700" />
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <Badge type="salary">{salary}</Badge>
-            <Badge type="employment">{detail.employment}</Badge>
+            <Badge type="salary" className="bg-success-50 text-[#07964e]">
+              {salary}
+            </Badge>
+            <Badge type="employment" className="bg-primary-50 text-brand-primary">
+              {detail.employment}
+            </Badge>
             <Badge type="mode">{mode}</Badge>
             <Badge type="experience">{detail.experience}</Badge>
           </div>
@@ -247,7 +251,7 @@ export function DesignJobDetailPanel({
             <Icon name="pinSm" className="mt-0.5 size-4" />
             {state.hideMap ? "Remote" : detail.address}
           </p>
-          {!state.hideMap && <div className="h-30 w-full rounded-sm bg-grey-100" />}
+          {!state.hideMap && <div className="h-[120px] w-full shrink-0 rounded-sm bg-grey-100" />}
         </section>
       </div>
       <div className="shrink-0 border-t bg-surface-default px-6 py-4">
