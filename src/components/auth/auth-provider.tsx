@@ -82,9 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!open) pending.current = null;
         }}
         onLoggedIn={(next) => {
+          const action = pending.current;
+          pending.current = null;
           setLoginOpen(false);
+          action?.();
           if (needsProfile(next)) setProfileOpen(true);
-          else runPending();
         }}
       />
       {profileOpen && (

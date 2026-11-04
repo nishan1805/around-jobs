@@ -20,7 +20,7 @@ const RESUME_TYPES =
 export type PickedResume = { name: string; kb: number };
 
 /** Hidden file input plus size check; `open()` shows the picker. */
-function useResumePicker(onPick: (file: PickedResume) => void) {
+export function useResumePicker(onPick: (file: PickedResume) => void) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [rejectedName, setRejectedName] = useState<string | null>(null);
@@ -36,6 +36,12 @@ function useResumePicker(onPick: (file: PickedResume) => void) {
         const file = event.target.files?.[0];
         event.target.value = "";
         if (!file) return;
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+        if (!["pdf", "doc", "docx"].includes(ext)) {
+          setRejectedName(null);
+          setError(RESUME_UNSUPPORTED_MESSAGE);
+          return;
+        }
         if (file.size > MAX_RESUME_BYTES) {
           setRejectedName(file.name);
           setError(RESUME_TOO_LARGE_MESSAGE);

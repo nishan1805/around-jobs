@@ -11,7 +11,7 @@ import { JobsListPanel, type ListStatus } from "@/components/jobs/panels/jobs-li
 import { panelInset } from "@/components/jobs/panels/panel-parts";
 import { TopBar } from "@/components/jobs/top-bar";
 import { ViewToggle } from "@/components/jobs/view-toggle";
-import { JobsMap, type FitRequest, type MapCompany, type MapView } from "@/components/map";
+import { JobsMap, type FitRequest, type MapCompany, type MapFocus, type MapView } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
@@ -31,6 +31,7 @@ import {
   type WorkMode,
 } from "@/lib/jobs";
 import {
+  AREA_CENTERS,
   BROWSE_LIST_SUBTITLE,
   browseListSeed,
   CIVIL_ENGINEER_SLUG,
@@ -63,6 +64,9 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const [panelState, setPanel] = useState<Panel | null>(null);
   const [mapView, setMapView] = useState<MapView | null>(null);
   const [fitRequest, setFitRequest] = useState<FitRequest | null>(null);
+  const [focus, setFocus] = useState<MapFocus | null>(null);
+  const [locateSignal, setLocateSignal] = useState(0);
+  const [areaLabel, setAreaLabel] = useState(`${LOCATION_AREA}, ${city.name}`);
   const [retried, setRetried] = useState(false);
   const isTablet = useMediaQuery(breakpoints.md);
 
@@ -272,9 +276,19 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   return (
     <>
       <TopBar
+        showFinder
         query={filters.query}
         onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
-        locationLabel={`${LOCATION_AREA}, ${city.name}`}
+        locationLabel={areaLabel}
+        onLocationChange={(label) => {
+          setAreaLabel(label);
+          const center = AREA_CENTERS[label as keyof typeof AREA_CENTERS];
+          if (center) setFocus({ key: Date.now(), center, zoom: 15 });
+        }}
+        onUseCurrentLocation={() => {
+          setAreaLabel("Current location");
+          setLocateSignal((current) => current + 1);
+        }}
       />
 
       <main
@@ -294,6 +308,8 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
             onSelectCompany={(slug) => open({ kind: "company", slug, back: panel.kind === "list" ? panel : none })}
             onViewChange={setMapView}
             fitRequest={fitRequest}
+            focus={focus}
+            locateSignal={locateSignal}
             insetLeft={insetLeft}
             insetRight={insetRight}
           />
@@ -303,7 +319,6 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           className={cn(
             "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col gap-2 px-5 pt-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
             panelOpen && "max-md:hidden",
-            panelOpen && !dockRight && (panelWidth === "wide" ? "md:pl-124" : "md:pl-[428px]"),
             panelOpen && dockRight && "md:pr-[496px]",
           )}
         >
@@ -318,7 +333,6 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
             aria-label="Job categories"
             className={cn(
               "pointer-events-auto flex min-w-0 flex-1 flex-nowrap gap-2 overflow-x-auto overflow-y-hidden py-1.5 [scrollbar-width:none] *:shrink-0",
-              panelOpen && !dockRight && "max-[89.9375rem]:gap-1",
             )}
           >
             {categories.map((category) => (
@@ -328,7 +342,6 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
                 onClick={() => setFilters((current) => ({ ...current, categories: toggleValue(current.categories, category) }))}
                 className={cn(
                   !filters.categories.includes(category) && "border-transparent shadow-sm",
-                  panelOpen && !dockRight && "max-[89.9375rem]:px-2",
                 )}
               >
                 {category}
@@ -369,10 +382,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           count={badgeCount}
           expanded={panel.kind === "filters"}
           onClick={openFilters}
-          className={cn(
-            "absolute bottom-6 left-6 z-1000 max-md:hidden",
-            panelOpen && !dockRight && panel.kind !== "filters" && (panelWidth === "wide" ? "md:left-124" : "md:left-[428px]"),
-          )}
+          className="absolute bottom-6 left-6 z-1000 max-md:hidden"
         />
       </main>
     </>

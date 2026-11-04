@@ -59,7 +59,7 @@ function SalaryRange({ value, onChange }: { value: [number, number]; onChange: (
   return (
     <>
       <p className="text-body-sm-regular text-text-secondary" aria-live="polite">
-        {formatRupees(value[0])} – {formatRupees(value[1])} / month
+        {formatRupees(value[0])} – {value[1] >= max ? "₹1,00,000+" : formatRupees(value[1])} / month
       </p>
       <div className="range-dual relative h-5 w-full" style={style}>
         <span aria-hidden className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-grey-100" />
@@ -179,7 +179,7 @@ export function FiltersPanel({
       label="Filters"
       width="narrow"
       onDismiss={onDone}
-      className="md:top-auto md:bottom-22 md:max-h-[min(720px,calc(100%-7.5rem))]"
+      className="md:max-h-[min(720px,calc(100%-7.5rem))]"
     >
       <div className="flex shrink-0 items-center gap-3 px-5 pt-1 md:p-4 md:pb-0">
         <h2 className="flex-1 text-heading-semibold text-text-primary md:text-subheading-semibold">Filters</h2>

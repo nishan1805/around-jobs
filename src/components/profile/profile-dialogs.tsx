@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
@@ -540,17 +540,37 @@ export function ConfirmDialog({
 
 export type PhotoPhase = "initial" | "selected" | "saving" | "success" | "error" | "remove";
 
+export type ProfilePhoto = { name: string; sizeLabel: string; url: string };
+
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+
 export function PhotoDialog({
   phase,
+  photo,
   onClose,
   onPhase,
+  onSelect,
   onRemove,
 }: {
   phase: PhotoPhase;
+  photo: ProfilePhoto | null;
   onClose: () => void;
   onPhase: (phase: PhotoPhase) => void;
+  onSelect: (photo: ProfilePhoto) => void;
   onRemove: () => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pick = () => inputRef.current?.click();
+  const onFile = (file: File | undefined) => {
+    if (!file) return;
+    const okType = file.type === "image/jpeg" || file.type === "image/png" || /\.(jpe?g|png)$/i.test(file.name);
+    if (!okType || file.size > PHOTO_MAX_BYTES) {
+      onPhase("error");
+      return;
+    }
+    const sizeLabel = file.size >= 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+    onSelect({ name: file.name, sizeLabel, url: URL.createObjectURL(file) });
+  };
   return (
     <Dialog open onOpenChange={(next) => !next && onClose()} className="items-center md:w-[440px]">
       <div className="flex w-full items-start gap-2">
@@ -575,10 +595,27 @@ export function PhotoDialog({
           Unsupported format. Upload a JPG or PNG.
         </p>
       )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+        className="sr-only"
+        tabIndex={-1}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          onFile(file);
+        }}
+      />
       {phase !== "remove" &&
         (phase === "selected" || phase === "saving" || phase === "success" ? (
           <span className="relative">
-            <Image src="/images/profile-photo.jpg" alt="" width={96} height={96} className="size-24 rounded-full object-cover" />
+            {photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photo.url} alt="" width={96} height={96} className="size-24 rounded-full object-cover" />
+            ) : (
+              <Image src="/images/profile-photo.jpg" alt="" width={96} height={96} className="size-24 rounded-full object-cover" />
+            )}
             {(phase === "selected" || phase === "saving") && (
               <button
                 type="button"
@@ -601,7 +638,9 @@ export function PhotoDialog({
           </span>
         ))}
       {phase === "selected" || phase === "saving" ? (
-        <p className="text-body-sm-regular text-text-secondary">profile-photo.jpg · 1.2 MB</p>
+        <p className="text-body-sm-regular text-text-secondary">
+          {photo ? `${photo.name} · ${photo.sizeLabel}` : "profile-photo.jpg · 1.2 MB"}
+        </p>
       ) : phase !== "remove" && phase !== "success" ? (
         <p className="text-label-medium text-text-tertiary">JPG or PNG, max 5 MB</p>
       ) : null}
@@ -627,7 +666,12 @@ export function PhotoDialog({
             className={phase === "saving" ? "opacity-100" : undefined}
             onClick={() => {
               if (phase === "saving") return;
-              onPhase(phase === "selected" ? "saving" : "selected");
+              if (phase === "selected") {
+                onPhase("saving");
+                window.setTimeout(() => onPhase("success"), 400);
+                return;
+              }
+              pick();
             }}
           >
             {phase === "saving" ? (

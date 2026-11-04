@@ -13,6 +13,32 @@ export const applicationGroups: { key: ApplicationGroup; label: string }[] = [
 
 export const isEnded = (application: Application) => application.stage === "rejected" || application.stage === "withdrawn";
 
+/** S12 chips: open applications are in progress; rejected, withdrawn and closed jobs are Closed. */
+export const isClosedApplication = (application: Application, job: Job) =>
+  application.stage === "rejected" || application.stage === "withdrawn" || !isOpen(job);
+
+export type ApplicationListFilter = "all" | "progress" | "closed";
+
+export type ApplicationBadgeTone = "review" | "shortlisted" | "interview" | "rejected" | "withdrawn" | "closed";
+
+/** Status badge on MyApplicationCard and S13. Applied and viewed both read as Under review. */
+export function applicationBadge(application: Application, job: Job): { label: string; tone: ApplicationBadgeTone } {
+  if (application.stage === "rejected") return { label: "Not selected", tone: "rejected" };
+  if (application.stage === "withdrawn") return { label: "Withdrawn", tone: "withdrawn" };
+  if (!isOpen(job)) return { label: "Closed", tone: "closed" };
+  if (application.stage === "shortlisted") return { label: "Shortlisted", tone: "shortlisted" };
+  if (application.stage === "interview") return { label: "Interviewing", tone: "interview" };
+  return { label: "Under review", tone: "review" };
+}
+
+/** Stable display id in the APP-2026-0487 shape. */
+export function applicationDisplayId(application: Application) {
+  const year = application.appliedOn.slice(0, 4) || "2026";
+  let hash = 0;
+  for (const char of application.jobSlug) hash = (hash * 33 + char.charCodeAt(0)) % 9000;
+  return `APP-${year}-${1000 + hash}`;
+}
+
 /** Rejected and withdrawn applications, and jobs that stopped hiring, are "Closed". */
 export const groupOf = (application: Application, job: Job): ApplicationGroup =>
   application.stage === "rejected" || application.stage === "withdrawn" || !isOpen(job) ? "closed" : application.stage;

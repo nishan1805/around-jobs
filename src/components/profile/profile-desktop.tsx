@@ -7,6 +7,7 @@ import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Icon } from "@/components/icon";
 import { TopBar } from "@/components/jobs/top-bar";
+import { useResumePicker } from "@/components/resume-upload";
 import { Button } from "@/components/ui/button";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useSearchParam } from "@/hooks/use-search-param";
@@ -48,6 +49,7 @@ import {
   FieldLabel,
   PhotoDialog,
   type PhotoPhase,
+  type ProfilePhoto,
 } from "./profile-dialogs";
 
 type Section = "basic" | "skills" | "experience" | "preferences";
@@ -101,10 +103,14 @@ export function ProfileDesktop() {
   const [roles, setRoles] = useState<string[]>([...preferredRolesSeed]);
   const [employment, setEmployment] = useState("Full-time");
   const [arrangement, setArrangement] = useState("On-site");
-  const [salary, setSalary] = useState("35,000");
+  const [salary, setSalary] = useState("");
   const [salaryPeriod, setSalaryPeriod] = useState<string>(salaryPeriodOptions[0]);
-  const [notice, setNotice] = useState<string>("30 days");
+  const [notice, setNotice] = useState("");
   const [relocate, setRelocate] = useState(false);
+  const [savedPreferences, setSavedPreferences] = useState<{ locations: string[]; roles: string[]; notice: string } | null>(null);
+  const [preferenceAttempted, setPreferenceAttempted] = useState(false);
+  const [photoFile, setPhotoFile] = useState<ProfilePhoto | null>(null);
+  const [resumeFile, setResumeFile] = useState<{ name: string; kb: number } | null>(null);
   const [basic, setBasic] = useState({ ...profileBasicSeed });
   const [dialog, setDialog] = useState<string | null>(null);
   const [editingEducation, setEditingEducation] = useState<EducationEntry | undefined>();
@@ -136,7 +142,17 @@ export function ProfileDesktop() {
   const roleList = (empty || preferenceError) && section === "preferences" ? [] : roles;
   const preferenceBlank = (empty || preferenceError) && section === "preferences";
   const noticeValue = preferenceBlank ? "" : notice;
-  const complete = section === "preferences" && !empty && !showErrors;
+  const complete =
+    !empty &&
+    !showErrors &&
+    savedPreferences !== null &&
+    savedPreferences.locations.length > 0 &&
+    savedPreferences.roles.length > 0 &&
+    savedPreferences.notice.trim().length > 0;
+  const resumePicker = useResumePicker((file) => {
+    setResumeFile(file);
+    setResumeOn(true);
+  });
 
   const addSkill = (skill: string) => {
     const next = skill.trim();
@@ -182,7 +198,10 @@ export function ProfileDesktop() {
                   onClick={() => setPhotoPhase("initial")}
                   className="relative size-14 shrink-0"
                 >
-                  {photoSuccess ? (
+                  {photoFile ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoFile.url} alt="" width={56} height={56} className="size-14 rounded-full object-cover" />
+                  ) : photoSuccess ? (
                     <Image
                       src="/images/profile-photo.jpg"
                       alt=""
@@ -280,7 +299,11 @@ export function ProfileDesktop() {
                 links={links}
                 onLinks={setLinks}
                 showResume={showResume}
-                upload={uploadParam}
+                upload={resumePicker.error ? "error" : uploadParam}
+                resumeError={resumePicker.error}
+                resumeName={resumeFile?.name}
+                resumeDetail={resumeFile ? `${resumeFile.kb} KB · Uploaded` : undefined}
+                onChooseResume={resumePicker.open}
                 onAddEducation={() => {
                   setEditingEducation(undefined);
                   setDialog("education");
@@ -354,7 +377,16 @@ export function ProfileDesktop() {
                 relocate={relocate}
                 onRelocate={setRelocate}
                 showErrors={showErrors || (empty && false)}
-                forceErrors={showErrors}
+                forceErrors={showErrors || preferenceAttempted}
+                onSave={() => {
+                  if (empty) return;
+                  if (locationList.length === 0 || roleList.length === 0 || !noticeValue.trim()) {
+                    setPreferenceAttempted(true);
+                    return;
+                  }
+                  setPreferenceAttempted(false);
+                  setSavedPreferences({ locations: [...locationList], roles: [...roleList], notice: noticeValue });
+                }}
               />
             )}
           </>
@@ -425,19 +457,27 @@ export function ProfileDesktop() {
       {activeDialog === "remove-resume" && (
         <ConfirmDialog
           title="Remove your resume?"
-          body={`${resumeSeed.name} will be removed from your profile. Employers won't be able to view it until you upload a new one.`}
+          body={`${resumeFile?.name ?? resumeSeed.name} will be removed from your profile. Employers won't be able to view it until you upload a new one.`}
           confirmLabel="Remove"
           onClose={() => setDialog(null)}
           onConfirm={() => {
+            setResumeFile(null);
             setResumeOn(false);
             setDialog(null);
           }}
         />
       )}
+      {resumePicker.input}
       {photo && photo !== "success" && (
         <PhotoDialog
           phase={photo === "initial" || photo === "selected" || photo === "saving" || photo === "error" || photo === "remove" ? photo : "initial"}
+          photo={photoFile}
           onClose={() => setPhotoPhase(null)}
+          onSelect={(next) => {
+            if (photoFile?.url.startsWith("blob:")) URL.revokeObjectURL(photoFile.url);
+            setPhotoFile(next);
+            setPhotoPhase("selected");
+          }}
           onPhase={(next) => {
             if (next === "success") {
               setPhotoSaved(true);
@@ -447,6 +487,8 @@ export function ProfileDesktop() {
             setPhotoPhase(next);
           }}
           onRemove={() => {
+            if (photoFile?.url.startsWith("blob:")) URL.revokeObjectURL(photoFile.url);
+            setPhotoFile(null);
             setPhotoSaved(false);
             setPhotoPhase("initial");
           }}
@@ -632,6 +674,10 @@ function SkillsSection(props: {
   onLinks: (links: typeof linksSeed) => void;
   showResume: boolean;
   upload: string | null;
+  resumeError?: string | null;
+  resumeName?: string;
+  resumeDetail?: string;
+  onChooseResume: () => void;
   onAddEducation: () => void;
   onEditEducation: (entry: EducationEntry) => void;
   onDeleteEducation: (id: string) => void;
@@ -829,9 +875,10 @@ function SkillsSection(props: {
             body="Upload your resume so employers can learn more about you. PDF, DOC or DOCX · max 5 MB."
             action={props.upload === "error" ? "Try again" : "Add Resume"}
             icon="upload"
+            onAction={props.onChooseResume}
             error={
               props.upload === "error"
-                ? "This file isn't supported. Please upload a PDF, DOC or DOCX under 5 MB."
+                ? (props.resumeError ?? "This file isn't supported. Please upload a PDF, DOC or DOCX under 5 MB.")
                 : undefined
             }
           />
@@ -841,9 +888,7 @@ function SkillsSection(props: {
               <Icon name="file" className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <a href={resumeSeed.name} className="text-body-sm-semibold text-brand-primary underline" onClick={(event) => event.preventDefault()}>
-                {resumeSeed.name}
-              </a>
+              <p className="truncate text-body-sm-semibold text-brand-primary underline">{props.resumeName ?? resumeSeed.name}</p>
               {props.upload === "uploading" ? (
                 <>
                   <p className="text-label-medium text-text-secondary">Uploading... 80%</p>
@@ -853,7 +898,7 @@ function SkillsSection(props: {
                 </>
               ) : (
                 <p className="text-label-medium text-success-700">
-                  {resumeSeed.sizeLabel} · {resumeSeed.uploadedLabel}
+                  {props.resumeDetail ?? `${resumeSeed.sizeLabel} · ${resumeSeed.uploadedLabel}`}
                 </p>
               )}
             </div>
@@ -862,7 +907,7 @@ function SkillsSection(props: {
                 Cancel
               </button>
             ) : (
-              <button type="button" className="text-body-sm-semibold text-brand-primary">
+              <button type="button" className="text-body-sm-semibold text-brand-primary" onClick={props.onChooseResume}>
                 Replace
               </button>
             )}
@@ -1032,6 +1077,7 @@ function PreferencesSection(props: {
   onRelocate: (value: boolean) => void;
   showErrors: boolean;
   forceErrors: boolean;
+  onSave: () => void;
 }) {
   const locationError = props.forceErrors && props.locations.length === 0;
   const roleError = props.forceErrors && props.roles.length === 0;
@@ -1158,7 +1204,7 @@ function PreferencesSection(props: {
         </p>
       </div>
       <div className="flex justify-end">
-        <Button type="button" shape="rect">
+        <Button type="button" shape="rect" onClick={props.onSave}>
           Save Changes
         </Button>
       </div>

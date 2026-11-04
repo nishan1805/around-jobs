@@ -24,11 +24,16 @@ export function TopBar({
   onQueryChange,
   locationLabel = DEFAULT_LOCATION_LABEL,
   onLocationChange,
+  onUseCurrentLocation,
+  showFinder = false,
 }: {
   query?: string;
   onQueryChange?: (value: string) => void;
   locationLabel?: string;
   onLocationChange?: (label: string) => void;
+  onUseCurrentLocation?: () => void;
+  /** Search and area picker stay on the jobs map. Other menus keep the account cluster only. */
+  showFinder?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
@@ -71,9 +76,9 @@ export function TopBar({
   };
 
   return (
-    <header className="hidden shrink-0 items-center justify-between gap-6 border-b bg-background-primary px-6 py-3 md:flex">
+    <header className="hidden shrink-0 items-center justify-end gap-6 border-b bg-background-primary px-6 py-3 md:flex">
       <Wordmark className="md:hidden" />
-      <div className="flex min-w-0 max-w-[894px] flex-1 items-center justify-between gap-4">
+      {showFinder && <div className="flex min-w-0 max-w-[894px] flex-1 items-center justify-between gap-4">
         <label className="flex shrink-0 items-center gap-2 rounded-full border border-grey-200 bg-grey-50 p-3 transition-colors focus-within:border-brand-primary focus-within:bg-surface-default">
           <Icon name="search" className="size-6 text-text-tertiary" />
           <span className="sr-only">Search</span>
@@ -116,10 +121,14 @@ export function TopBar({
             >
               <button
                 type="button"
-                onClick={() => chooseArea(DEFAULT_LOCATION_LABEL)}
+                onClick={() => {
+                  setLocationOpen(false);
+                  if (onUseCurrentLocation) onUseCurrentLocation();
+                  else chooseArea(DEFAULT_LOCATION_LABEL);
+                }}
                 className="flex w-full items-center gap-2 rounded-md border border-grey-200 bg-grey-100 px-3 py-2 text-body-sm-medium text-grey-700 hover:bg-grey-200"
               >
-                <Icon name="crosshair" className="size-5" />
+                <Icon name="gpsFix" className="size-5" />
                 Use my current location
               </button>
               <div className="flex flex-col gap-2">
@@ -149,7 +158,7 @@ export function TopBar({
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       <div className="flex shrink-0 items-center gap-6">
         {!user && (
