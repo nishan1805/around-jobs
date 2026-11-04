@@ -76,16 +76,13 @@ export function FrameJobCardView({
             {layout === "employer" ? (
               <p className="flex items-baseline gap-1">
                 <span className="text-body-semibold text-text-primary">{card.salary}</span>
-                {card.salary === "Salary not disclosed" && <span className="text-body-sm-regular text-text-tertiary">/ month</span>}
+                <span className="text-body-sm-regular text-text-tertiary">/ month</span>
               </p>
             ) : layout !== "saved" ? (
               card.salary === "Salary not disclosed" ? (
                 <GreyChip>{card.salary}</GreyChip>
               ) : (
-                <p className="flex items-baseline gap-1">
-                  <span className="text-body-semibold text-text-primary">{card.salary}</span>
-                  <span className="text-body-sm-regular text-text-tertiary">/ month</span>
-                </p>
+                <p className="text-body-semibold text-text-primary">{card.salary}</p>
               )
             ) : null}
             <div className="flex flex-wrap gap-1.5">

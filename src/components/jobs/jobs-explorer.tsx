@@ -6,9 +6,7 @@ import { Chip } from "@/components/jobs/chip";
 import { FiltersButton } from "@/components/jobs/filters-button";
 import { MapPeek, MobileSearchBar } from "@/components/jobs/mobile-map-controls";
 import { DesignEmployerPanel, DesignJobDetailPanel, type EmployerVariant } from "@/components/jobs/panels/design-panels";
-import { EmployerPanel } from "@/components/jobs/panels/employer-panel";
 import { FiltersPanel } from "@/components/jobs/panels/filters-panel";
-import { JobDetailPanel } from "@/components/jobs/panels/job-detail-panel";
 import { JobsListPanel, type ListStatus } from "@/components/jobs/panels/jobs-list-panel";
 import { panelInset } from "@/components/jobs/panels/panel-parts";
 import { TopBar } from "@/components/jobs/top-bar";
@@ -229,52 +227,24 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
         );
       }
       case "company": {
-        if (panel.slug === RAIPUR_BUILDER_SLUG) {
-          const variant: EmployerVariant =
-            employerVariant === "about" || employerVariant === "one" || employerVariant === "empty" || employerVariant === "unverified"
-              ? employerVariant
-              : "jobs";
-          return (
-            <DesignEmployerPanel
-              variant={variant}
-              onClose={() => open(back(panel))}
-              onOpenJob={() => open({ kind: "job", slug: CIVIL_ENGINEER_SLUG, back: panel })}
-            />
-          );
-        }
-        const company = companies.find((item) => item.slug === panel.slug);
-        if (!company) return null;
+        const variant: EmployerVariant =
+          employerVariant === "about" || employerVariant === "one" || employerVariant === "empty" || employerVariant === "unverified"
+            ? employerVariant
+            : "jobs";
         return (
-          <EmployerPanel
-            key={company.slug}
-            company={company}
-            jobs={openJobs.filter((job) => job.company.slug === company.slug)}
-            from={from}
-            cityName={city.name}
+          <DesignEmployerPanel
+            variant={variant}
             onClose={() => open(back(panel))}
-            onSelectJob={openJob}
+            onOpenJob={() => open({ kind: "job", slug: CIVIL_ENGINEER_SLUG, back: panel })}
           />
         );
       }
       case "job": {
-        if (panel.slug === CIVIL_ENGINEER_SLUG) {
-          const variant: JobDetailVariant =
-            detailVariant === "expired" || detailVariant === "applied" || detailVariant === "remote" || detailVariant === "closed"
-              ? detailVariant
-              : "open";
-          return <DesignJobDetailPanel variant={variant} onBack={() => open(back(panel))} />;
-        }
-        const job = jobs.find((item) => item.slug === panel.slug);
-        if (!job) return null;
-        const previous = back(panel);
-        return (
-          <JobDetailPanel
-            key={job.slug}
-            job={job}
-            onBack={() => open(previous)}
-            backLabel={previous.kind === "list" ? "Back to jobs list" : previous.kind === "company" ? "Back to employer" : "Close job details"}
-          />
-        );
+        const variant: JobDetailVariant =
+          detailVariant === "expired" || detailVariant === "applied" || detailVariant === "remote" || detailVariant === "closed"
+            ? detailVariant
+            : "open";
+        return <DesignJobDetailPanel variant={variant} onBack={() => open(back(panel))} />;
       }
       case "filters":
         const showFrameCount =

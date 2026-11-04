@@ -1,46 +1,40 @@
 "use client";
 
-import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import Image from "next/image";
 
 import { Icon } from "@/components/icon";
 import { Tag } from "@/components/jobs/chip";
-import { LogoPlaceholder, VerifiedBadge } from "@/components/jobs/job-card";
+import { ApplyButton } from "@/components/jobs/apply-button";
+import { LogoPlaceholder } from "@/components/jobs/job-card";
 import { LocationMap } from "@/components/map";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
-import { ApplyButton } from "@/components/jobs/apply-button";
 import { IconButton } from "@/components/ui/icon-button";
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import {
   employmentTypes,
   experienceLabel,
   formatDate,
   formatSalaryRange,
-  jobPath,
   timeAgo,
   workModes,
   type Job,
 } from "@/lib/jobs";
-import { useSeekerActions } from "@/components/auth/use-seeker-actions";
+import { employerOverviewSeed } from "@/lib/seeker-design-seed";
 import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
-import { BulletList, GalleryHeader, MapPanel, SectionHeader, shareLink } from "./panel-parts";
+import { BulletList, MapPanel, SectionHeader, shareLink } from "./panel-parts";
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex w-full flex-col gap-2">
-      <SectionHeader title={title} />
-      {children}
-    </section>
-  );
-}
-
-/** Figma "Around / Jobs / Job Detail Panel" (1889:42525), screen S02. */
+/**
+ * Job pin / card panel. Matches Around / Jobs / Job Detail Panel on S02
+ * (2018:44934): right-hand sheet, back / save / share / close, then the
+ * detail stack and a full-width apply bar. No photo carousel.
+ */
 export function JobDetailPanel({
   job,
   onBack,
-  backLabel,
 }: {
   job: Job;
   onBack: () => void;
@@ -50,153 +44,118 @@ export function JobDetailPanel({
   const actions = useSeekerActions();
   const application = activeApplicationFor(seeker, job.slug);
   const saved = seeker.savedJobs.includes(job.slug);
-  const [expanded, setExpanded] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const isRemote = job.workMode === "REMOTE";
+  const address = isRemote
+    ? "Remote"
+    : `${job.company.streetAddress}, ${job.company.area}, ${job.city.name}, ${job.city.region} ${job.company.postalCode}`;
+  const sampleLogo = job.slug === "civil-engineer" ? employerOverviewSeed.logo : null;
 
   return (
-    <MapPanel label={`${job.title} details`} onDismiss={onBack}>
-      <div className="flex-1 overflow-y-auto overscroll-contain">
-        <GalleryHeader
-          name={job.company.name}
-          photoCount={job.company.photoCount}
-          nav={{ icon: "arrowLeft", label: backLabel, onClick: onBack }}
+    <MapPanel label={`${job.title} details`} dock="right" onDismiss={onBack}>
+      <div className="flex shrink-0 items-center gap-1 px-4 pt-3 pb-2">
+        <IconButton variant="outline" icon="arrowLeft" label="Back" onClick={onBack} iconClassName="size-5" />
+        <span className="flex-1" />
+        <IconButton
+          variant="outline"
+          icon={saved ? "bookmarkFilled" : "bookmark"}
+          label={saved ? "Remove job from saved" : "Save job"}
+          aria-pressed={saved}
+          onClick={() => actions.setSavedJob(job.slug, !saved)}
+          className={cn(saved && "text-brand-primary")}
+          iconClassName="size-5"
         />
-
-        <div className="flex flex-col gap-5 p-6">
-          {job.status === "expired" && (
-            <Banner tone="error">This job has expired and is no longer accepting applications.</Banner>
-          )}
-          {job.status === "closed" && (
-            <Banner tone="error">This job is closed. The employer is no longer hiring for this role.</Banner>
-          )}
-          {application && job.status === "open" && (
-            <Banner tone="success">You applied for this job on {formatDate(application.appliedOn)}.</Banner>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-2">
-              <h2 className="min-w-0 flex-1 text-heading-semibold text-text-primary">
-                <Link href={jobPath(job)} className="hover:underline">
-                  {job.title}
-                </Link>
-              </h2>
-              <IconButton
-                variant="outline"
-                icon={saved ? "bookmarkFilled" : "bookmark"}
-                label={saved ? "Remove job from saved" : "Save job"}
-                aria-pressed={saved}
-                onClick={() => actions.setSavedJob(job.slug, !saved)}
-                className={cn(saved && "text-brand-primary")}
-              />
-              <IconButton
-                variant="outline"
-                icon="share"
-                label="Share job"
-                onClick={async () => {
-                  const result = await shareLink(job.title, jobPath(job));
-                  if (result === "copied") setNotice("Link copied");
-                }}
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <LogoPlaceholder className="size-8" />
-              <span className="text-body-semibold text-text-primary">{job.company.name}</span>
-              <VerifiedBadge verified={job.company.verified} />
-              {application && <Badge type="applied">Applied</Badge>}
-            </div>
-            <p className="text-body-semibold text-text-primary">
-              {job.salaryDisclosed ? formatSalaryRange(job.salary) : "Salary not disclosed"}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
-              <Badge type="mode">{workModes[job.workMode]}</Badge>
-              <Badge type="experience">{experienceLabel(job.experience)}</Badge>
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-label-medium text-text-tertiary">
-              <span className="flex items-center gap-1">
-                <Icon name="calendar" className="size-4" />
-                Posted {formatDate(job.datePosted)} ({timeAgo(job.datePosted)})
-              </span>
-              {job.status === "open" && (
-                <span className="flex items-center gap-1">
-                  <Icon name="calendar" className="size-4" />
-                  Apply by {formatDate(job.validThrough)}
-                </span>
-              )}
-              {job.status === "expired" && (
-                <span className="flex items-center gap-1 text-error-500">
-                  <Icon name="calendar" className="size-4" />
-                  Deadline expired {formatDate(job.validThrough)}
-                </span>
-              )}
-              {job.status === "closed" && (
-                <span className="flex items-center gap-1">
-                  <Icon name="calendar" className="size-4" />
-                  Closed by employer
-                </span>
-              )}
-            </div>
-            <p className="text-label-medium text-text-tertiary">{job.applicants} applicants</p>
-            {notice && (
-              <p role="status" className="text-label-medium text-text-tertiary">
-                {notice}
-              </p>
-            )}
-          </div>
-
-          <Section title="Description">
-            <p id={`${job.slug}-description`} className={cn("text-body-sm-regular text-text-secondary", !expanded && "line-clamp-3")}>
-              {job.summary}
-            </p>
-            <button
-              type="button"
-              aria-expanded={expanded}
-              aria-controls={`${job.slug}-description`}
-              onClick={() => setExpanded((value) => !value)}
-              className="flex items-center gap-1 self-start text-body-sm-semibold text-brand-primary"
-            >
-              {expanded ? "Read less" : "Read more"}
-              <Icon name="chevronDown" className={cn("size-4 transition-transform", expanded && "rotate-180")} />
-            </button>
-          </Section>
-
-          <Section title="Responsibilities">
-            <BulletList items={job.responsibilities} />
-          </Section>
-          <Section title="Requirements">
-            <BulletList items={job.requirements} />
-          </Section>
-          <Section title="Skills & qualifications">
-            <ul className="flex flex-wrap gap-2">
-              {job.skills.map((skill) => (
-                <Tag key={skill}>{skill}</Tag>
-              ))}
-            </ul>
-            <BulletList items={job.skillNotes} />
-          </Section>
-          <Section title="Education">
-            <p className="text-body-sm-regular text-text-secondary">{job.education}</p>
-          </Section>
-          <Section title="Benefits">
-            <BulletList items={job.benefits} />
-          </Section>
-          <Section title="Location">
-            <p className="flex items-center gap-1.5 text-body-sm-regular text-text-secondary">
-              <Icon name="pin" className="size-5" />
-              {isRemote
-                ? `Remote · Work from home within ${job.city.region}`
-                : `${job.company.streetAddress}, ${job.company.area}, ${job.city.name}, ${job.city.region}`}
-            </p>
-            {!isRemote && (
-              <div className="isolate h-30 w-full overflow-hidden rounded-sm">
-                <LocationMap position={job.company.position} name={job.company.name} jobCount={0} compact />
-              </div>
-            )}
-          </Section>
-        </div>
+        <IconButton
+          variant="outline"
+          icon="share"
+          label="Share job"
+          iconClassName="size-5"
+          onClick={async () => {
+            const result = await shareLink(job.title, `/?job=${job.slug}`);
+            if (result === "copied") setNotice("Link copied");
+          }}
+        />
+        <IconButton variant="outline" icon="close" label="Close job details" onClick={onBack} iconClassName="size-5" />
       </div>
-
+      <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-6">
+        {job.status === "expired" && (
+          <Banner tone="error">This job is no longer accepting applications.</Banner>
+        )}
+        {job.status === "closed" && (
+          <Banner tone="error">This job is closed. The employer is no longer hiring for this role.</Banner>
+        )}
+        {application && job.status === "open" && (
+          <Banner tone="success">You applied on {formatDate(application.appliedOn)}</Banner>
+        )}
+        <div className="flex flex-col gap-2">
+          <h2 className="text-heading-semibold text-text-primary">{job.title}</h2>
+          <div className="flex items-center gap-2">
+            {sampleLogo ? (
+              <Image src={sampleLogo} alt="" width={32} height={32} className="size-8 rounded-sm object-cover" />
+            ) : (
+              <LogoPlaceholder className="size-8 rounded-sm" />
+            )}
+            <span className="text-body-semibold text-brand-primary">{job.company.name}</span>
+            {job.company.verified && <Icon name="verified" className="size-5 text-success-700" />}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Badge type="salary">{job.salaryDisclosed ? formatSalaryRange(job.salary) : "Salary not disclosed"}</Badge>
+            <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
+            <Badge type="mode">{workModes[job.workMode]}</Badge>
+            <Badge type="experience">{experienceLabel(job.experience)}</Badge>
+          </div>
+          <p className="flex items-center gap-1 text-label-medium text-text-secondary">
+            <Icon name="pinSm" className="size-4" />
+            {isRemote ? "Remote" : `${job.company.area}, ${job.city.name}`}
+          </p>
+          <p className="flex flex-wrap gap-x-3 text-label-medium text-text-tertiary">
+            <span className="inline-flex items-center gap-1">
+              <Icon name="calendar" className="size-4" />
+              Posted {timeAgo(job.datePosted)}
+            </span>
+            {job.status === "open" && (
+              <span className="inline-flex items-center gap-1">
+                <Icon name="calendar" className="size-4" />
+                Apply by {formatDate(job.validThrough)}
+              </span>
+            )}
+          </p>
+          <p className="text-label-medium text-text-tertiary">{job.applicants} applicants</p>
+          {notice && (
+            <p role="status" className="text-label-medium text-text-tertiary">
+              {notice}
+            </p>
+          )}
+        </div>
+        <section className="flex flex-col gap-2">
+          <SectionHeader title="Description" />
+          <p className="text-body-sm-regular text-text-secondary">{job.summary}</p>
+        </section>
+        <section className="flex flex-col gap-2">
+          <SectionHeader title="Requirements" />
+          <BulletList items={job.requirements} />
+        </section>
+        <section className="flex flex-col gap-2">
+          <SectionHeader title="Skills & qualifications" />
+          <ul className="flex flex-wrap gap-2">
+            {job.skills.map((skill) => (
+              <Tag key={skill}>{skill}</Tag>
+            ))}
+          </ul>
+        </section>
+        <section className="flex flex-col gap-2">
+          <SectionHeader title="Location details" />
+          <p className="flex items-start gap-1.5 text-body-sm-regular text-text-secondary">
+            <Icon name="pinSm" className="mt-0.5 size-4" />
+            {address}
+          </p>
+          {!isRemote && (
+            <div className="isolate h-30 w-full overflow-hidden rounded-sm">
+              <LocationMap position={job.company.position} name={job.company.name} jobCount={0} compact />
+            </div>
+          )}
+        </section>
+      </div>
       <div className="shrink-0 border-t bg-surface-default px-6 py-4">
         <ApplyButton jobSlug={job.slug} status={job.status} className="w-full" />
       </div>
