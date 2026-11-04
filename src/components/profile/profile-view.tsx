@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 
+import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ProfileDesktop } from "@/components/profile/profile-desktop";
 import { Icon } from "@/components/icon";
@@ -12,6 +13,8 @@ import { ResumeDropzone, ResumeFileCard } from "@/components/resume-upload";
 import { SeekerPage } from "@/components/seeker-page";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogHeader } from "@/components/ui/dialog";
+import { useHydrated } from "@/hooks/use-hydrated";
+import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
 import { authActions, maskPhone, type User } from "@/lib/auth-store";
 import { toggleValue } from "@/lib/job-filters";
 import { categories, employmentTypes, type Category, type EmploymentType } from "@/lib/jobs";
@@ -39,18 +42,18 @@ function preferencesLine(user: User) {
   return [types, chosen].filter(Boolean).join(" · ") || "Not set";
 }
 
-/** Mobile keeps M20. Desktop (md+) follows the finalized P01–P05 frames. */
+/** Mobile keeps M20. Desktop (md+) follows the finalized P01–P05 frames. Only one shell mounts. */
 export function ProfileView() {
-  return (
-    <>
-      <div className="contents md:hidden">
-        <MobileProfile />
-      </div>
-      <div className="hidden md:contents">
-        <ProfileDesktop />
-      </div>
-    </>
-  );
+  const hydrated = useHydrated();
+  const desktop = useMediaQuery(breakpoints.md);
+  if (!hydrated) {
+    return (
+      <AppShell active="profile">
+        <div aria-busy className="m-8 h-40 animate-pulse rounded-md bg-grey-100" />
+      </AppShell>
+    );
+  }
+  return desktop ? <ProfileDesktop /> : <MobileProfile />;
 }
 
 function MobileProfile() {

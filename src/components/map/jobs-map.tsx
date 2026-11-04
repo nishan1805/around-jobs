@@ -29,47 +29,6 @@ type Cluster = { key: string; members: MapCompany[]; center: L.LatLng };
 const CLUSTER_RADIUS_PX = 72;
 const DEFAULT_ZOOM = 14;
 const MIN_INITIAL_ZOOM = 13;
-/** S00 cluster 2018:41695, centre of the 56px disc in the 1316×952 map frame. */
-const DESIGN_CLUSTER = { x: (585 + 28) / 1316, y: (341 + 28) / 952 };
-/** Blue disc plus the outside border. Company pins occupy 111×91, with the tip on the coordinate. */
-const DESIGN_CLUSTER_PX = 62;
-const MARKER_CLEARANCE = 12;
-
-function designClusterPoint(map: LeafletMap, companies: MapCompany[]) {
-  const size = map.getSize();
-  let x = size.x * DESIGN_CLUSTER.x;
-  let y = size.y * DESIGN_CLUSTER.y;
-  const half = DESIGN_CLUSTER_PX / 2;
-  const obstacles = companies.map((item) => {
-    const point = map.latLngToContainerPoint(item.company.position);
-    return {
-      left: point.x - 56 - MARKER_CLEARANCE,
-      top: point.y - 70 - MARKER_CLEARANCE,
-      right: point.x + 56 + MARKER_CLEARANCE,
-      bottom: point.y + 28 + MARKER_CLEARANCE,
-    };
-  });
-  const blocked = (cx: number, cy: number) =>
-    obstacles.some(
-      (rect) => cx - half < rect.right && cx + half > rect.left && cy - half < rect.bottom && cy + half > rect.top,
-    );
-  if (!blocked(x, y)) return map.containerPointToLatLng(L.point(x, y));
-  const startX = x;
-  const startY = y;
-  for (let next = y; next > half + 16; next -= 2) {
-    if (!blocked(startX, next)) {
-      y = next;
-      return map.containerPointToLatLng(L.point(x, y));
-    }
-  }
-  for (let next = startX; next > half + 16; next -= 2) {
-    if (!blocked(next, startY)) {
-      x = next;
-      return map.containerPointToLatLng(L.point(x, y));
-    }
-  }
-  return map.containerPointToLatLng(L.point(startX, startY));
-}
 
 function clusterCompanies(map: LeafletMap, items: MapCompany[], zoom: number): Cluster[] {
   const clusters: { point: L.Point; members: MapCompany[] }[] = [];
@@ -146,14 +105,6 @@ export default function JobsMap({
       animate: false,
     });
     if (map.getZoom() < MIN_INITIAL_ZOOM) map.setView(center, MIN_INITIAL_ZOOM, { animate: false });
-    const cluster = L.marker(designClusterPoint(map, companies), {
-      title: "12 jobs. Zoom in to see them.",
-      icon: L.divIcon({ className: "", iconSize: [0, 0], html: clusterMarkerHtml({ count: 12 }) }),
-    }).addTo(map);
-    cluster.on("click", () => map.setZoom(Math.min(map.getZoom() + 2, 17)));
-    return () => {
-      cluster.remove();
-    };
     // Only frame the businesses once; later filter changes keep the user's viewport.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
@@ -218,8 +169,12 @@ export default function JobsMap({
         map.flyTo(position, 15);
         setLocating(false);
       },
-      () => {
-        setNotice("We couldn't get your location, so we're showing Shankar Nagar.");
+      (error) => {
+        setNotice(
+          error.code === 1
+            ? "Location permission denied. Allow location access and try again."
+            : "We couldn't get your location, so we're showing Shankar Nagar.",
+        );
         map.flyTo(center, DEFAULT_ZOOM);
         setLocating(false);
       },
@@ -229,7 +184,8 @@ export default function JobsMap({
 
   useEffect(() => {
     if (!map || locateSignal === 0) return;
-    locate();
+    const id = window.setTimeout(() => locate(), 0);
+    return () => window.clearTimeout(id);
     // The signal is the trigger; locate reads the current map.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, locateSignal]);
@@ -261,7 +217,7 @@ export default function JobsMap({
             const [{ company, jobCount }] = cluster.members;
             return (
               <Marker
-                key={cluster.key}
+                key={`${cluster.key}-${jobCount}`}
                 position={company.position}
                 title={`${company.name}: ${jobCount} ${jobCount === 1 ? "job" : "jobs"}`}
                 icon={L.divIcon({
@@ -279,7 +235,7 @@ export default function JobsMap({
           const total = cluster.members.reduce((sum, member) => sum + member.jobCount, 0);
           return (
             <Marker
-              key={cluster.key}
+              key={`${cluster.key}-${total}`}
               position={cluster.center}
               title={`${total} jobs at ${cluster.members.length} places. Zoom in to see them.`}
               icon={L.divIcon({ className: "", iconSize: [0, 0], html: clusterMarkerHtml({ count: total }) })}
@@ -312,12 +268,12 @@ export default function JobsMap({
         />
       )}
 
-      {(tilesFailed || notice) && (
+      {(tilesFailed || notice || locating) && (
         <p
           role="status"
           className="absolute bottom-[calc(var(--map-inset-bottom,0rem)+6rem)] left-1/2 z-1000 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-grey-900 px-4 py-2 text-center text-body-sm-medium text-text-on-brand shadow-md md:bottom-9"
         >
-          {notice ?? "Map tiles couldn't load. Job pins are still accurate."}
+          {locating ? "Finding your location…" : (notice ?? "Map tiles couldn't load. Job pins are still accurate.")}
         </p>
       )}
     </div>

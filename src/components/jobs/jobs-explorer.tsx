@@ -1,17 +1,18 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Chip } from "@/components/jobs/chip";
 import { FiltersButton } from "@/components/jobs/filters-button";
 import { MapPeek, MobileSearchBar } from "@/components/jobs/mobile-map-controls";
-import { DesignEmployerPanel, DesignJobDetailPanel, type EmployerVariant } from "@/components/jobs/panels/design-panels";
+import { EmployerPanel } from "@/components/jobs/panels/employer-panel";
 import { FiltersPanel } from "@/components/jobs/panels/filters-panel";
+import { JobDetailPanel } from "@/components/jobs/panels/job-detail-panel";
 import { JobsListPanel, type ListStatus } from "@/components/jobs/panels/jobs-list-panel";
 import { panelInset } from "@/components/jobs/panels/panel-parts";
 import { TopBar } from "@/components/jobs/top-bar";
 import { ViewToggle } from "@/components/jobs/view-toggle";
-import { JobsMap, type FitRequest, type MapCompany, type MapFocus, type MapView } from "@/components/map";
+import { JobsMap, type FitRequest, type MapCompany, type MapFocus } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
@@ -30,16 +31,7 @@ import {
   type Job,
   type WorkMode,
 } from "@/lib/jobs";
-import {
-  AREA_CENTERS,
-  BROWSE_LIST_SUBTITLE,
-  browseListSeed,
-  CIVIL_ENGINEER_SLUG,
-  FILTERED_LIST_SUBTITLE,
-  filteredListSeed,
-  RAIPUR_BUILDER_SLUG,
-  type JobDetailVariant,
-} from "@/lib/seeker-design-seed";
+import { AREA_CENTERS } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
 import { useCoverTabBar } from "@/hooks/use-cover-tab-bar";
 
@@ -52,21 +44,26 @@ type Panel =
 
 const none: Panel = { kind: "none" };
 
-/** The searched location; GPS isn't used for the list yet. */
+/** The searched location until the seeker picks another area. */
 const LOCATION_AREA = "Shankar Nagar";
 
-const inView = (view: MapView | null, [lat, lng]: [number, number]) =>
-  !view || (lat >= view[0][0] && lat <= view[1][0] && lng >= view[0][1] && lng <= view[1][1]);
+function setQueryParam(key: string, value: string | null) {
+  const url = new URL(window.location.href);
+  if (value) url.searchParams.set(key, value);
+  else url.searchParams.delete(key);
+  window.history.replaceState(null, "", url);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
 
 export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies: Company[]; city: City }) {
   const [filters, setFilters] = useState<JobFilters>(defaultFilters);
-  const deferredFilters = useDeferredValue(filters);
   const [panelState, setPanel] = useState<Panel | null>(null);
-  const [mapView, setMapView] = useState<MapView | null>(null);
   const [fitRequest, setFitRequest] = useState<FitRequest | null>(null);
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const [locateSignal, setLocateSignal] = useState(0);
   const [areaLabel, setAreaLabel] = useState(`${LOCATION_AREA}, ${city.name}`);
+  const [areaName, setAreaName] = useState(LOCATION_AREA);
+  const [origin, setOrigin] = useState<[number, number]>(city.center);
   const [retried, setRetried] = useState(false);
   const isTablet = useMediaQuery(breakpoints.md);
 
@@ -82,8 +79,6 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const categoryParam = useSearchParam("category");
   const typeParam = useSearchParam("type");
   const modeParam = useSearchParam("mode");
-  const employerVariant = useSearchParam("employer");
-  const detailVariant = useSearchParam("detail");
   const [seenQueryParam, setSeenQueryParam] = useState<string | null>(null);
   const previewKey = `${queryParam ?? ""}|${categoryParam ?? ""}|${typeParam ?? ""}|${modeParam ?? ""}|${filtersParam ?? ""}`;
   const frameFilters =
@@ -105,23 +100,21 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   }
   const linkedPanel = (): Panel => {
     const list: Panel = viewParam === "list" ? { kind: "list" } : none;
-    if (jobParam === CIVIL_ENGINEER_SLUG || (jobParam && jobs.some((item) => item.slug === jobParam)))
-      return { kind: "job", slug: jobParam, back: list };
-    if (companyParam === RAIPUR_BUILDER_SLUG || (companyParam && companies.some((item) => item.slug === companyParam)))
+    if (jobParam && jobs.some((item) => item.slug === jobParam)) return { kind: "job", slug: jobParam, back: list };
+    if (companyParam && companies.some((item) => item.slug === companyParam))
       return { kind: "company", slug: companyParam, back: list };
     if (filtersParam === "open") return { kind: "filters", back: list };
     return list;
   };
   const panel: Panel = panelState ?? linkedPanel();
 
-  const from = city.center;
   const openJobs = useMemo(() => jobs.filter(isOpen), [jobs]);
   const matching = useMemo(
     () =>
       openJobs
-        .filter((job) => matchesFilters(job, deferredFilters))
-        .sort((a, b) => distanceKm(from, a.company.position) - distanceKm(from, b.company.position)),
-    [openJobs, deferredFilters, from],
+        .filter((job) => matchesFilters(job, filters))
+        .sort((a, b) => distanceKm(origin, a.company.position) - distanceKm(origin, b.company.position)),
+    [openJobs, filters, origin],
   );
   const chips = activeFilters(filters);
   const badgeCount = filterBadgeCount(filters);
@@ -138,17 +131,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
     [companies, matching, hasAnyFilter, openJobs],
   );
   const initialBounds = useMemo(() => companies.map((item) => item.position), [companies]);
-  const listJobs = useMemo(
-    () => matching.filter((job) => job.workMode === "REMOTE" || inView(mapView, job.company.position)),
-    [matching, mapView],
-  );
-
-  const status: ListStatus =
-    !retried && (stateParam === "loading" || stateParam === "error")
-      ? stateParam
-      : filters !== deferredFilters
-        ? "loading"
-        : "ready";
+  const status: ListStatus = !retried && (stateParam === "loading" || stateParam === "error") ? stateParam : "ready";
 
   const open = useCallback((next: Panel) => setPanel(next), []);
   const close = useCallback(() => setPanel(none), []);
@@ -179,36 +162,24 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const insetLeft = isTablet && panelOpen && !dockRight ? panelInset[panelWidth] : 0;
   const insetRight = isTablet && panelOpen && dockRight ? panelInset.wide : 0;
 
-  const openJob = (job: Job) => open({ kind: "job", slug: job.slug, back: panel });
+  const openJob = (job: Job) => {
+    setQueryParam("company", null);
+    setQueryParam("job", job.slug);
+    open({ kind: "job", slug: job.slug, back: panel });
+  };
   const openFilters = () => open(panel.kind === "filters" ? back(panel) : { kind: "filters", back: panel });
 
   const renderPanel = () => {
     switch (panel.kind) {
       case "none":
         return null;
-      case "list": {
-        const quiet =
-          stateParam === "loading" || stateParam === "error" || stateParam === "none" || stateParam === "empty";
-        const filteredFrame =
-          !quiet &&
-          filters.categories.includes("Retail") &&
-          filters.types.includes("FULL_TIME") &&
-          filters.workModes.includes("ON_SITE");
-        const retailOnly = filters.categories.length === 1 && filters.categories[0] === "Retail";
-        const browseFrame =
-          !quiet &&
-          !filteredFrame &&
-          (filters.categories.length === 0 || retailOnly) &&
-          filters.types.length === 0 &&
-          filters.workModes.length === 0 &&
-          filters.experience.length === 0 &&
-          filters.more.length === 0 &&
-          !filters.query.trim();
+      case "list":
         return (
           <JobsListPanel
             cityName={city.name}
+            areaName={areaName}
             status={status}
-            jobs={stateParam === "empty" ? [] : listJobs}
+            jobs={stateParam === "empty" ? [] : matching}
             totalMatching={stateParam === "none" ? 0 : stateParam === "empty" ? Math.max(matching.length, 1) : matching.length}
             filters={filters}
             onFiltersChange={setFilters}
@@ -223,50 +194,35 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
               window.dispatchEvent(new PopStateEvent("popstate"));
             }}
             onRetry={() => setRetried(true)}
-            from={from}
-            desktopCards={filteredFrame ? filteredListSeed : browseFrame ? browseListSeed : null}
-            desktopSubtitle={filteredFrame ? FILTERED_LIST_SUBTITLE : browseFrame ? BROWSE_LIST_SUBTITLE : undefined}
-            onOpenDesignJob={() => open({ kind: "job", slug: CIVIL_ENGINEER_SLUG, back: panel })}
+            from={origin}
           />
         );
-      }
       case "company": {
-        const variant: EmployerVariant =
-          employerVariant === "about" || employerVariant === "one" || employerVariant === "empty" || employerVariant === "unverified"
-            ? employerVariant
-            : "jobs";
+        const company = companies.find((item) => item.slug === panel.slug);
+        if (!company) return null;
+        const companyJobs = openJobs.filter((job) => job.company.slug === company.slug);
         return (
-          <DesignEmployerPanel
-            variant={variant}
+          <EmployerPanel
+            company={company}
+            jobs={companyJobs}
+            from={origin}
+            cityName={city.name}
             onClose={() => open(back(panel))}
-            onOpenJob={() => open({ kind: "job", slug: CIVIL_ENGINEER_SLUG, back: panel })}
+            onSelectJob={openJob}
           />
         );
       }
       case "job": {
-        const variant: JobDetailVariant =
-          detailVariant === "expired" || detailVariant === "applied" || detailVariant === "remote" || detailVariant === "closed"
-            ? detailVariant
-            : "open";
-        return <DesignJobDetailPanel variant={variant} onBack={() => open(back(panel))} />;
+        const job = jobs.find((item) => item.slug === panel.slug);
+        if (!job) return null;
+        return <JobDetailPanel job={job} onBack={() => open(back(panel))} backLabel="Back" />;
       }
       case "filters":
-        const showFrameCount =
-          filters.categories.length === 1 &&
-          filters.categories[0] === "Retail" &&
-          filters.types.length === 1 &&
-          filters.types[0] === "FULL_TIME" &&
-          filters.workModes.length === 1 &&
-          filters.workModes[0] === "ON_SITE" &&
-          filters.experience.length === 1 &&
-          filters.experience[0] === "FRESHER" &&
-          filters.salary[0] === 10_000 &&
-          filters.salary[1] === 50_000;
         return (
           <FiltersPanel
             filters={filters}
             onChange={setFilters}
-            resultCount={showFrameCount ? 3 : matching.length}
+            resultCount={matching.length}
             onDone={() => open(back(panel))}
           />
         );
@@ -283,10 +239,14 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
         onLocationChange={(label) => {
           setAreaLabel(label);
           const center = AREA_CENTERS[label as keyof typeof AREA_CENTERS];
-          if (center) setFocus({ key: Date.now(), center, zoom: 15 });
+          if (!center) return;
+          setOrigin(center);
+          setAreaName(label.split(",")[0]?.trim() || label);
+          setFocus({ key: Date.now(), center, zoom: 15 });
         }}
         onUseCurrentLocation={() => {
           setAreaLabel("Current location");
+          setAreaName("you");
           setLocateSignal((current) => current + 1);
         }}
       />
@@ -306,7 +266,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
             center={city.center}
             selectedSlug={selectedCompanySlug}
             onSelectCompany={(slug) => open({ kind: "company", slug, back: panel.kind === "list" ? panel : none })}
-            onViewChange={setMapView}
+            onViewChange={() => {}}
             fitRequest={fitRequest}
             focus={focus}
             locateSignal={locateSignal}
@@ -357,7 +317,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
 
         {!panelOpen && (
           <MapPeek
-            title={`${matching.length} ${matching.length === 1 ? "job" : "jobs"} near ${LOCATION_AREA}`}
+            title={`${matching.length} ${matching.length === 1 ? "job" : "jobs"} near ${areaName}`}
             onOpenList={() => open({ kind: "list" })}
           />
         )}
@@ -384,6 +344,14 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           onClick={openFilters}
           className="absolute bottom-6 left-6 z-1000 max-md:hidden"
         />
+        {panel.kind !== "list" && panel.kind !== "filters" && (
+          <p
+            data-job-count={matching.length}
+            className="pointer-events-none absolute bottom-6 left-44 z-1000 hidden h-11 items-center rounded-full bg-surface-default px-4 text-body-sm-semibold text-text-primary shadow-md md:flex"
+          >
+            {matching.length} {matching.length === 1 ? "job" : "jobs"} near {areaName}
+          </p>
+        )}
       </main>
     </>
   );

@@ -36,7 +36,7 @@ export type JobFilters = {
 
 export const defaultFilters: JobFilters = {
   query: "",
-  categories: ["Retail"],
+  categories: [],
   experience: [],
   types: [],
   workModes: [],
@@ -91,6 +91,11 @@ export type ActiveFilter = { key: string; label: string; remove: (filters: JobFi
  */
 export function activeFilters(filters: JobFilters): ActiveFilter[] {
   const chips: ActiveFilter[] = [
+    ...filters.categories.map((value) => ({
+      key: `cat-${value}`,
+      label: value,
+      remove: (f: JobFilters) => ({ ...f, categories: f.categories.filter((item) => item !== value) }),
+    })),
     ...filters.experience.map((value) => ({
       key: `exp-${value}`,
       label: experienceBuckets[value].label,
@@ -136,10 +141,6 @@ export function filterBadgeCount(filters: JobFilters) {
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */
 export function describeFilters(filters: JobFilters) {
-  const parts = [
-    filters.query.trim(),
-    ...filters.categories,
-    ...activeFilters(filters).map((chip) => chip.label),
-  ].filter(Boolean);
+  const parts = [filters.query.trim(), ...activeFilters(filters).map((chip) => chip.label)].filter(Boolean);
   return parts.join(" · ");
 }

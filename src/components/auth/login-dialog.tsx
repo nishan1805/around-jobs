@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 
 import { Icon } from "@/components/icon";
@@ -191,10 +192,13 @@ export function LoginDialog({
     setStep("otp");
   };
 
-  const verify = async () => {
-    if (code.length < OTP_LENGTH || attemptsLeft === 0) return;
+  const verifying = useRef(false);
+  const verify = async (submitted = code) => {
+    if (verifying.current || submitted.length < OTP_LENGTH || attemptsLeft === 0) return;
+    verifying.current = true;
     setBusy(true);
-    const result = await authActions.verifyOtp(phone, code);
+    const result = await authActions.verifyOtp(phone, submitted);
+    verifying.current = false;
     setBusy(false);
     if (result.ok) {
       reset();
@@ -268,7 +272,17 @@ export function LoginDialog({
               "Send OTP"
             )}
           </Button>
-          <p className="text-label-medium text-text-tertiary">By continuing you agree to the Terms and Privacy Policy.</p>
+          <p className="text-label-medium text-text-tertiary">
+            By continuing you agree to the{" "}
+            <Link href="/terms" className="text-brand-primary underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-brand-primary underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
       ) : (
         <form
@@ -301,6 +315,7 @@ export function LoginDialog({
             onChange={(next) => {
               setCode(next);
               if (otpError && attemptsLeft > 0) setOtpError(null);
+              if (next.length === OTP_LENGTH) void verify(next);
             }}
             invalid={Boolean(otpError)}
             disabled={busy || attemptsLeft === 0}

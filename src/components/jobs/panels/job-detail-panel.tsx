@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 import { Icon } from "@/components/icon";
 import { Tag } from "@/components/jobs/chip";
 import { ApplyButton } from "@/components/jobs/apply-button";
-import { LogoPlaceholder } from "@/components/jobs/job-card";
+import { CompanyMark } from "@/components/jobs/job-card";
 import { LocationMap } from "@/components/map";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
@@ -17,11 +16,11 @@ import {
   experienceLabel,
   formatDate,
   formatSalaryRange,
+  listingStatus,
   timeAgo,
   workModes,
   type Job,
 } from "@/lib/jobs";
-import { employerOverviewSeed } from "@/lib/seeker-design-seed";
 import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
@@ -45,26 +44,28 @@ export function JobDetailPanel({
   const application = activeApplicationFor(seeker, job.slug);
   const saved = seeker.savedJobs.includes(job.slug);
   const [notice, setNotice] = useState<string | null>(null);
+  const status = listingStatus(job);
   const isRemote = job.workMode === "REMOTE";
   const address = isRemote
     ? "Remote"
     : `${job.company.streetAddress}, ${job.company.area}, ${job.city.name}, ${job.city.region} ${job.company.postalCode}`;
-  const sampleLogo = job.slug === "civil-engineer" ? employerOverviewSeed.logo : null;
-
   return (
     <MapPanel label={`${job.title} details`} dock="right" onDismiss={onBack}>
       <div className="flex shrink-0 items-center gap-1 px-4 pt-3 pb-2">
         <IconButton variant="outline" icon="arrowLeft" label="Back" onClick={onBack} iconClassName="size-5" />
         <span className="flex-1" />
-        <IconButton
-          variant="outline"
-          icon={saved ? "bookmarkFilled" : "bookmark"}
-          label={saved ? "Remove job from saved" : "Save job"}
+        <button
+          type="button"
           aria-pressed={saved}
           onClick={() => actions.setSavedJob(job.slug, !saved)}
-          className={cn(saved && "text-brand-primary")}
-          iconClassName="size-5"
-        />
+          className={cn(
+            "inline-flex h-11 items-center gap-1.5 rounded-full border bg-surface-default px-3 text-body-sm-semibold text-text-primary hover:bg-grey-100",
+            saved && "border-brand-primary text-brand-primary",
+          )}
+        >
+          <Icon name={saved ? "bookmarkFilled" : "bookmark"} className="size-5" />
+          {saved ? "Saved" : "Save"}
+        </button>
         <IconButton
           variant="outline"
           icon="share"
@@ -78,10 +79,10 @@ export function JobDetailPanel({
         <IconButton variant="outline" icon="close" label="Close job details" onClick={onBack} iconClassName="size-5" />
       </div>
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-6">
-        {job.status === "expired" && (
-          <Banner tone="error">This job is no longer accepting applications.</Banner>
+        {status === "expired" && (
+          <Banner tone="error">This job expired. The apply-by date has passed.</Banner>
         )}
-        {job.status === "closed" && (
+        {status === "closed" && (
           <Banner tone="error">This job is closed. The employer is no longer hiring for this role.</Banner>
         )}
         {application && job.status === "open" && (
@@ -90,11 +91,7 @@ export function JobDetailPanel({
         <div className="flex flex-col gap-2">
           <h2 className="text-heading-semibold text-text-primary">{job.title}</h2>
           <div className="flex items-center gap-2">
-            {sampleLogo ? (
-              <Image src={sampleLogo} alt="" width={32} height={32} className="size-8 rounded-sm object-cover" />
-            ) : (
-              <LogoPlaceholder className="size-8 rounded-sm" />
-            )}
+            <CompanyMark name={job.company.name} className="size-8 rounded-sm text-label-semibold" />
             <span className="text-body-semibold text-brand-primary">{job.company.name}</span>
             {job.company.verified && <Icon name="verified" className="size-5 text-success-700" />}
           </div>
@@ -113,7 +110,7 @@ export function JobDetailPanel({
               <Icon name="calendar" className="size-4" />
               Posted {timeAgo(job.datePosted)}
             </span>
-            {job.status === "open" && (
+            {status === "open" && (
               <span className="inline-flex items-center gap-1">
                 <Icon name="calendar" className="size-4" />
                 Apply by {formatDate(job.validThrough)}
@@ -157,7 +154,7 @@ export function JobDetailPanel({
         </section>
       </div>
       <div className="shrink-0 border-t bg-surface-default px-6 py-4">
-        <ApplyButton jobSlug={job.slug} status={job.status} className="w-full" />
+        <ApplyButton jobSlug={job.slug} status={status} className="w-full" />
       </div>
     </MapPanel>
   );

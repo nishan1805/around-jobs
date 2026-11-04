@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
@@ -105,11 +104,11 @@ function activity(application: Application): Activity[] {
 /** S13 application detail. View Job opens the same map job sheet as a card on the map. */
 export function ApplicationDetail({ job }: { job: Job }) {
   const hydrated = useHydrated();
-  const router = useRouter();
   const { user, openLogin } = useAuth();
   const seeker = useSeeker();
   const application = applicationFor(seeker, job.slug);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   return (
     <AppShell active="applications">
@@ -143,6 +142,11 @@ export function ApplicationDetail({ job }: { job: Job }) {
             onWithdraw={() => setConfirmOpen(true)}
           />
         )}
+        {toast && (
+          <p role="status" className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-grey-900 px-4 py-3 text-body-sm-medium text-text-on-brand shadow-lg">
+            {toast}
+          </p>
+        )}
       </main>
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen} className="md:w-[440px]">
         <h2 className="text-heading-semibold text-text-primary">Withdraw application?</h2>
@@ -160,7 +164,7 @@ export function ApplicationDetail({ job }: { job: Job }) {
             onClick={() => {
               seekerActions.withdraw(job.slug);
               setConfirmOpen(false);
-              router.push("/applications");
+              setToast("Application withdrawn");
             }}
           >
             Withdraw application

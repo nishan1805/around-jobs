@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Wordmark } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { useSearchParam } from "@/hooks/use-search-param";
+import { useUnreadCount } from "@/lib/alerts";
 import { POPULAR_AREAS, SEARCH_PLACEHOLDER } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ export function TopBar({
   const locationRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user } = useAuth();
+  const unread = useUnreadCount();
   const locationParam = useSearchParam("location");
   const [localQuery, setLocalQuery] = useState("");
   const [locationOpen, setLocationOpen] = useState(false);
@@ -68,6 +70,8 @@ export function TopBar({
       window.removeEventListener("keydown", onKey);
     };
   }, [locationOpen]);
+
+  if (area !== locationLabel && !locationOpen) setArea(locationLabel);
 
   const chooseArea = (next: string) => {
     setArea(next);
@@ -171,14 +175,14 @@ export function TopBar({
           </Link>
         )}
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Notifications, 1 unread"
+          <Link
+            href="/alerts"
+            aria-label={unread > 0 ? "Notifications, 1 unread" : "Notifications"}
             className="relative flex size-10 items-center justify-center rounded-full border border-grey-300 bg-surface-default transition-colors hover:bg-grey-50"
           >
             <Icon name="bell" className="size-5 text-text-primary" />
-            <span className="absolute top-[9px] left-[21px] size-2 rounded-full bg-error-default" />
-          </button>
+            {unread > 0 && <span className="absolute top-[9px] left-[21px] size-2 rounded-full bg-error-default" />}
+          </Link>
           <AccountButton />
         </div>
       </div>

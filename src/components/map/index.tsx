@@ -6,7 +6,7 @@ export type { FitRequest, MapCompany, MapFocus, MapView } from "./jobs-map";
 
 export function MapSkeleton() {
   return (
-    <div role="status" className="flex size-full items-center justify-center bg-grey-100">
+    <div role="status" className="flex size-full items-center justify-center bg-[#e6e1d3]">
       <span className="flex items-center gap-2 rounded-full bg-surface-default px-4 py-2 text-body-sm-medium text-text-secondary shadow-sm">
         <span className="size-2 animate-pulse rounded-full bg-brand-primary" />
         Loading map…

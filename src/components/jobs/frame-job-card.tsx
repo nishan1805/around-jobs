@@ -6,17 +6,14 @@ import type { FrameJobCard } from "@/lib/seeker-design-seed";
 import { SAMPLE_APPLY_SLUG } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
 
-function LogoMark({ initials, tone }: { initials: string; tone: "info" | "orange" }) {
+const logoTones = ["bg-info-50 text-info-700", "bg-secondary-50 text-secondary-700", "bg-success-50 text-success-700", "bg-primary-50 text-primary-700", "bg-warning-50 text-warning-700"];
+
+function LogoMark({ initials, name }: { initials: string; name?: string }) {
+  let hash = 0;
+  for (const char of name || initials) hash = (hash + char.charCodeAt(0)) % logoTones.length;
   return (
-    <span
-      className={cn(
-        "relative flex size-12 shrink-0 flex-col items-center justify-center overflow-hidden rounded-sm",
-        tone === "orange" ? "bg-secondary-50" : "bg-info-50",
-      )}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/icons/logo-roof.svg" alt="" width={20} height={20} />
-      <span className="text-body-bold text-text-primary">{initials}</span>
+    <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-sm text-body-bold", logoTones[hash])}>
+      {initials}
     </span>
   );
 }
@@ -72,7 +69,7 @@ export function FrameJobCardView({
         />
       )}
       <div className={cn("flex items-start gap-3", onOpen && "pointer-events-none")}>
-        {showLogo && card.initials && <LogoMark initials={card.initials} tone={card.tone ?? "info"} />}
+        {showLogo && card.initials && <LogoMark initials={card.initials} name={card.company} />}
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-col gap-1">
             <h3 className="text-body-semibold text-text-primary">{card.title}</h3>
@@ -131,12 +128,12 @@ export function FrameJobCardView({
         </div>
       ) : (
         <div className={cn("flex items-center justify-between gap-3", onOpen && "pointer-events-none")}>
-          <p className="flex items-center gap-2 text-body-sm-regular text-text-tertiary">
+          <p className="flex shrink-0 items-center gap-2 text-body-sm-regular text-text-tertiary">
             <Icon name="calendar" className="size-5" />
-            {card.posted}
+            <span className="whitespace-nowrap">{card.posted}</span>
           </p>
           {card.applied && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-3 py-0.5 text-body-sm-semibold text-success-700">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-50 px-3 py-0.5 text-body-sm-semibold text-success-700">
               <Icon name="checkCircle" className="size-4" />
               Applied
             </span>

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
@@ -39,6 +38,7 @@ import {
   type EducationEntry,
   type ExperienceEntry,
 } from "@/lib/seeker-design-seed";
+import { profilePhotoActions, useProfilePhoto } from "@/lib/profile-photo";
 import { cn } from "@/lib/utils";
 
 import {
@@ -109,7 +109,9 @@ export function ProfileDesktop() {
   const [relocate, setRelocate] = useState(false);
   const [savedPreferences, setSavedPreferences] = useState<{ locations: string[]; roles: string[]; notice: string } | null>(null);
   const [preferenceAttempted, setPreferenceAttempted] = useState(false);
-  const [photoFile, setPhotoFile] = useState<ProfilePhoto | null>(null);
+  const [draftPhoto, setDraftPhoto] = useState<ProfilePhoto | null>(null);
+  const [savedPhoto, setSavedPhoto] = useState<ProfilePhoto | null>(null);
+  const headerPhoto = useProfilePhoto();
   const [resumeFile, setResumeFile] = useState<{ name: string; kb: number } | null>(null);
   const [basic, setBasic] = useState({ ...profileBasicSeed });
   const [dialog, setDialog] = useState<string | null>(null);
@@ -196,21 +198,17 @@ export function ProfileDesktop() {
                   type="button"
                   aria-label="Change profile photo"
                   onClick={() => setPhotoPhase("initial")}
-                  className="relative size-14 shrink-0"
+                  className="relative size-16 shrink-0"
                 >
-                  {photoFile ? (
+                  {savedPhoto || headerPhoto ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photoFile.url} alt="" width={56} height={56} className="size-14 rounded-full object-cover" />
+                    <img src={(savedPhoto ?? headerPhoto)!.url} alt="" width={64} height={64} className="size-16 rounded-full object-cover" />
                   ) : photoSuccess ? (
-                    <Image
-                      src="/images/profile-photo.jpg"
-                      alt=""
-                      width={56}
-                      height={56}
-                      className="size-14 rounded-full object-cover"
-                    />
+                    <span className="flex size-16 items-center justify-center rounded-full bg-primary-100 text-subheading-semibold text-primary-700">
+                      {PROFILE_DISPLAY_NAME.charAt(0)}
+                    </span>
                   ) : (
-                    <span className="flex size-14 items-center justify-center rounded-full bg-grey-200 text-subheading-semibold text-text-primary">
+                    <span className="flex size-16 items-center justify-center rounded-full bg-grey-200 text-subheading-semibold text-text-primary">
                       {PROFILE_DISPLAY_NAME.charAt(0)}
                     </span>
                   )}
@@ -244,7 +242,9 @@ export function ProfileDesktop() {
                   <div className="my-4 h-px bg-border-default" />
                   <p className="flex items-center gap-2 text-body-sm-regular text-text-secondary">
                     <Icon name="info" className="size-4 text-text-tertiary" />
-                    Add your education details to get better job recommendations.
+                    {education.length > 0
+                      ? "Save your job preferences to finish your profile."
+                      : "Add your education details to get better job recommendations."}
                   </p>
                 </>
               )}
@@ -471,15 +471,19 @@ export function ProfileDesktop() {
       {photo && photo !== "success" && (
         <PhotoDialog
           phase={photo === "initial" || photo === "selected" || photo === "saving" || photo === "error" || photo === "remove" ? photo : "initial"}
-          photo={photoFile}
+          photo={draftPhoto}
           onClose={() => setPhotoPhase(null)}
           onSelect={(next) => {
-            if (photoFile?.url.startsWith("blob:")) URL.revokeObjectURL(photoFile.url);
-            setPhotoFile(next);
+            if (draftPhoto?.url.startsWith("blob:")) URL.revokeObjectURL(draftPhoto.url);
+            setDraftPhoto(next);
             setPhotoPhase("selected");
           }}
           onPhase={(next) => {
             if (next === "success") {
+              if (draftPhoto) {
+                setSavedPhoto(draftPhoto);
+                profilePhotoActions.set(draftPhoto);
+              }
               setPhotoSaved(true);
               setPhotoPhase(null);
               return;
@@ -487,8 +491,10 @@ export function ProfileDesktop() {
             setPhotoPhase(next);
           }}
           onRemove={() => {
-            if (photoFile?.url.startsWith("blob:")) URL.revokeObjectURL(photoFile.url);
-            setPhotoFile(null);
+            if (draftPhoto?.url.startsWith("blob:") && draftPhoto.url !== savedPhoto?.url) URL.revokeObjectURL(draftPhoto.url);
+            setDraftPhoto(null);
+            setSavedPhoto(null);
+            profilePhotoActions.set(null);
             setPhotoSaved(false);
             setPhotoPhase("initial");
           }}

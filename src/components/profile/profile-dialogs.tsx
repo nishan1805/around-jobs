@@ -628,14 +628,17 @@ export function PhotoDialog({
             )}
           </span>
         ) : (
-          <span
+          <button
+            type="button"
+            onClick={pick}
+            aria-label="Choose photo"
             className={cn(
               "flex size-24 items-center justify-center rounded-full bg-grey-200 text-heading-semibold text-text-primary",
               phase === "error" && "border-[3px] border-error-default",
             )}
           >
             N
-          </span>
+          </button>
         ))}
       {phase === "selected" || phase === "saving" ? (
         <p className="text-body-sm-regular text-text-secondary">

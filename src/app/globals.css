@@ -42,7 +42,8 @@
 
 @layer components {
   .leaflet-container {
-    @apply bg-grey-100 font-sans;
+    background: #e6e1d3;
+    @apply font-sans;
   }
   .leaflet-control-attribution {
     @apply max-w-[min(40rem,70%)] text-label-regular! whitespace-normal! text-text-tertiary;

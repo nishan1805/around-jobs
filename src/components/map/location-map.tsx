@@ -3,6 +3,7 @@
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
+import { useState } from "react";
 import { CircleMarker, MapContainer, Marker, TileLayer } from "react-leaflet";
 
 import { companyMarkerHtml } from "./markers";
@@ -22,7 +23,9 @@ export default function LocationMap({
   compact?: boolean;
 }) {
   const generation = useMapGeneration();
+  const [failed, setFailed] = useState(false);
   return (
+    <div className="relative size-full">
     <MapContainer
       key={generation}
       center={position}
@@ -38,6 +41,7 @@ export default function LocationMap({
         subdomains={tileLayer.subdomains}
         maxZoom={tileLayer.maxZoom}
         maxNativeZoom={tileLayer.maxNativeZoom}
+        eventHandlers={{ tileerror: () => setFailed(true), tileload: () => setFailed(false) }}
       />
       {tileLayer.labelsUrl && (
         <TileLayer url={tileLayer.labelsUrl} maxZoom={tileLayer.maxZoom} maxNativeZoom={tileLayer.maxNativeZoom} />
@@ -61,5 +65,11 @@ export default function LocationMap({
       />
       )}
     </MapContainer>
+    {failed && (
+      <p className="absolute inset-0 z-500 flex items-center justify-center bg-[#e6e1d3] px-4 text-center text-label-medium text-text-secondary">
+        Map preview unavailable
+      </p>
+    )}
+    </div>
   );
 }
