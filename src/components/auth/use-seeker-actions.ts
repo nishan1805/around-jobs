@@ -9,7 +9,7 @@ export function useSeekerActions() {
   const { requireAuth } = useAuth();
   return {
     setSavedJob: (slug: string, saved: boolean) =>
-      requireAuth(() => seekerActions.setSavedJob(slug, saved), "Log in to save jobs and find them later."),
+      requireAuth(() => seekerActions.setSavedJob(slug, saved)),
     setSavedEmployer: (slug: string, saved: boolean) =>
       requireAuth(() => seekerActions.setSavedEmployer(slug, saved), "Log in to save employers and hear about new jobs."),
   };

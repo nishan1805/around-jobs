@@ -13,6 +13,15 @@ export const POPULAR_AREAS = [
   "Kota, Raipur",
 ] as const;
 
+/** Neighbourhood centres the location menu flies the map to. */
+export const AREA_CENTERS: Record<(typeof POPULAR_AREAS)[number], [number, number]> = {
+  "Shankar Nagar, Raipur": [21.2499, 81.6603],
+  "Pandri, Raipur": [21.2536, 81.6462],
+  "Telibandha, Raipur": [21.2358, 81.6645],
+  "Amanaka, Raipur": [21.2615, 81.6348],
+  "Kota, Raipur": [21.2178, 81.6685],
+};
+
 export const PROFILE_UPDATED_LABEL = "16 Oct 2026";
 
 /** Header, completion card and account menu. The basic-info form uses a different name — see TODO. */
@@ -452,6 +461,9 @@ export const FILTERED_LIST_SUBTITLE = "3 jobs match your filters";
 
 export const RAIPUR_BUILDER_SLUG = "raipur-builder";
 export const CIVIL_ENGINEER_SLUG = "civil-engineer";
+
+/** Catalog job the sample S02 "Apply now" opens. The sheet itself stays the Civil Engineer frame. */
+export const SAMPLE_APPLY_SLUG = "retail-sales-associate-magneto-retail";
 
 export const employerOverviewSeed = {
   name: "Raipur Builder Pvt. Ltd.",

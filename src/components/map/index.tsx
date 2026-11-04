@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-export type { FitRequest, MapCompany, MapView } from "./jobs-map";
+export type { FitRequest, MapCompany, MapFocus, MapView } from "./jobs-map";
 
 export function MapSkeleton() {
   return (

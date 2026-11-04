@@ -24,6 +24,7 @@ export const icons = {
   graduationCap: "/icons/graduation-cap.svg",
   filters: "/icons/filters.svg",
   globe: "/icons/globe.svg",
+  gpsFix: "/icons/gps-fix-fill.svg",
   heart: "/icons/heart.svg",
   heartFilled: "/icons/heart-filled.svg",
   help: "/icons/help.svg",

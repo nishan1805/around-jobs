@@ -85,7 +85,7 @@ export function MapPanel({
         "md:inset-auto md:bottom-6 md:rounded-lg",
         dock === "right"
           ? "md:top-5 md:right-5 md:bottom-5 md:left-auto md:animate-[panel-from-right_280ms_ease-out]"
-          : "md:top-6 md:left-6 md:animate-[panel-from-left_280ms_ease-out]",
+          : "md:top-[5.5rem] md:bottom-[5.5rem] md:left-6 md:animate-[panel-from-left_280ms_ease-out]",
         width === "wide" ? "md:w-112" : "md:w-[380px]",
         className,
       )}

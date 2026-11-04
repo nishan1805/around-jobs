@@ -1,23 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
 import { Chip } from "@/components/jobs/chip";
-import { EmptyPage, PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/page-header";
 import { SeekerPage } from "@/components/seeker-page";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { cities, daysSince, distanceKm, isExpiringSoon, jobs, type Job } from "@/lib/jobs";
-import { savedCardsSeed, type SavedCardSeed } from "@/lib/seeker-design-seed";
+import {
+  CIVIL_ENGINEER_SLUG,
+  browseListSeed,
+  employerOverviewSeed,
+  filteredListSeed,
+  savedCardsSeed,
+  type FrameJobCard,
+  type SavedCardSeed,
+} from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
 
 const INTRO = "Keep jobs you like here and apply when you are ready.";
 const from = cities[0].center;
 const jobsBySlug = new Map(jobs.map((job) => [job.slug, job]));
+const designById = new Map(
+  [...browseListSeed, ...filteredListSeed, ...employerOverviewSeed.jobs].map((card) => [card.id, card]),
+);
 
 export const NEARBY_KM = 4;
 export const RECENTLY_SAVED_DAYS = 3;
@@ -60,6 +73,10 @@ function SavedContent() {
     () => seeker.savedJobs.flatMap((slug) => jobsBySlug.get(slug) ?? []),
     [seeker.savedJobs],
   );
+  const designSaved = useMemo(
+    () => seeker.savedJobs.flatMap((id) => designById.get(id) ?? []),
+    [seeker.savedJobs],
+  );
   const matches = (job: Job, key: SavedFilter) => {
     if (key === "nearby") return job.workMode !== "REMOTE" && distanceKm(from, job.company.position) <= NEARBY_KM;
     if (key === "recent") {
@@ -72,25 +89,8 @@ function SavedContent() {
 
   const emptyPreview = useSearchParam("empty") === "1";
 
-  if (saved.length === 0 || emptyPreview) {
-    return (
-      <>
-        <div className={emptyPreview ? "md:hidden" : undefined}>
-          <PageHeader title="Saved jobs" subtitle={INTRO} />
-          <EmptyPage
-            icon="bookmark"
-            title="Nothing saved yet"
-            body="Tap the bookmark on any job to save it for later."
-            action={
-              <Link href="/" className={buttonVariants()}>
-                Browse jobs
-              </Link>
-            }
-          />
-        </div>
-        {emptyPreview && <DesktopSaved empty />}
-      </>
-    );
+  if ((saved.length === 0 && designSaved.length === 0) || emptyPreview) {
+    return <DesktopSaved empty />;
   }
 
   const expiring = saved.filter(isExpiringSoon).length;
@@ -127,6 +127,11 @@ function SavedContent() {
         />
       ) : (
         <ul aria-label="Saved jobs" className="grid items-start gap-4 md:grid-cols-2 md:gap-6 min-[80rem]:grid-cols-3">
+          {designSaved.map((card) => (
+            <li key={card.id} className="flex">
+              <DesignSavedCard card={card} />
+            </li>
+          ))}
           {visible.map((job) => (
             <li key={job.slug} className="flex">
               <JobCard job={job} from={from} variant="saved" />
@@ -135,12 +140,26 @@ function SavedContent() {
         </ul>
       )}
       </div>
-      <DesktopSaved />
+      <DesktopSaved extras={designSaved} />
     </>
   );
 }
 
-function DesktopSaved({ empty = false }: { empty?: boolean }) {
+function DesignSavedCard({ card }: { card: FrameJobCard }) {
+  const actions = useSeekerActions();
+  const router = useRouter();
+  return (
+    <FrameJobCardView
+      layout="saved"
+      saved
+      card={card}
+      onOpen={() => router.push(`/?job=${CIVIL_ENGINEER_SLUG}`)}
+      onToggleSave={() => actions.setSavedJob(card.id, false)}
+    />
+  );
+}
+
+function DesktopSaved({ empty = false, extras = [] }: { empty?: boolean; extras?: FrameJobCard[] }) {
   const [filter, setFilter] = useState<"all" | "nearby" | "recent">("all");
   const [removed, setRemoved] = useState<string[]>([]);
   const cards = savedCardsSeed.filter((card) => !removed.includes(card.id));
@@ -157,7 +176,7 @@ function DesktopSaved({ empty = false }: { empty?: boolean }) {
 
   if (empty || cards.length === 0) {
     return (
-      <div className="hidden min-h-0 flex-1 flex-col gap-6 md:flex">
+      <div className="flex min-h-0 flex-1 flex-col gap-6">
         <header className="flex flex-col gap-1">
           <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
           <p className="text-body-sm-regular text-text-secondary">Keep jobs you like here and apply when you are ready.</p>
@@ -199,6 +218,11 @@ function DesktopSaved({ empty = false }: { empty?: boolean }) {
         ))}
       </div>
       <ul className="grid items-start gap-4 min-[80rem]:grid-cols-3">
+        {extras.map((card) => (
+          <li key={card.id}>
+            <DesignSavedCard card={card} />
+          </li>
+        ))}
         {visible.map((card) => (
           <li key={card.id}>
             <SavedDesignCard card={card} onUnsave={() => setRemoved((current) => [...current, card.id])} />
@@ -210,11 +234,13 @@ function DesktopSaved({ empty = false }: { empty?: boolean }) {
 }
 
 function SavedDesignCard({ card, onUnsave }: { card: SavedCardSeed; onUnsave: () => void }) {
+  const router = useRouter();
   return (
     <FrameJobCardView
       layout="saved"
       saved
       expiring={card.expiring}
+      onOpen={() => router.push(`/?job=${CIVIL_ENGINEER_SLUG}`)}
       onToggleSave={onUnsave}
       card={{
         id: card.id,

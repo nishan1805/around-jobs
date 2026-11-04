@@ -21,6 +21,9 @@ export type MapView = [[number, number], [number, number]];
 /** Bump `key` to fly the map so `positions` are all visible. */
 export type FitRequest = { key: number; positions: [number, number][] };
 
+/** Bump `key` to fly to one neighbourhood. */
+export type MapFocus = { key: number; center: [number, number]; zoom: number };
+
 type Cluster = { key: string; members: MapCompany[]; center: L.LatLng };
 
 const CLUSTER_RADIUS_PX = 72;
@@ -96,6 +99,8 @@ export default function JobsMap({
   onSelectCompany,
   onViewChange,
   fitRequest,
+  focus,
+  locateSignal = 0,
   insetLeft = 0,
   insetRight = 0,
 }: {
@@ -106,6 +111,9 @@ export default function JobsMap({
   onSelectCompany: (slug: string) => void;
   onViewChange?: (view: MapView) => void;
   fitRequest?: FitRequest | null;
+  focus?: MapFocus | null;
+  /** Bump to run the same geolocation fly as the locate control. */
+  locateSignal?: number;
   /** Pixels on the left covered by an overlay panel; the map keeps selections clear of it. */
   insetLeft?: number;
   /** Pixels on the right covered by S01/S02, so zoom stays clear of the panel. */
@@ -189,6 +197,11 @@ export default function JobsMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, fitRequest?.key]);
 
+  useEffect(() => {
+    if (!map || !focus) return;
+    map.flyTo(focus.center, focus.zoom);
+  }, [map, focus]);
+
   const clusters = useMemo(() => (map && zoom !== null ? clusterCompanies(map, companies, zoom) : []), [map, companies, zoom]);
 
   const locate = () => {
@@ -213,6 +226,13 @@ export default function JobsMap({
       { enableHighAccuracy: true, timeout: 8000 },
     );
   };
+
+  useEffect(() => {
+    if (!map || locateSignal === 0) return;
+    locate();
+    // The signal is the trigger; locate reads the current map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, locateSignal]);
 
   return (
     <div className="relative size-full">

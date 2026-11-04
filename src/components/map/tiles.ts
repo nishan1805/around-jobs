@@ -1,18 +1,17 @@
 /**
  * Basemap for the jobs map.
  *
- * The default is the OpenStreetMap standard style: green parks, blue water,
- * and white or yellow roads, with no API key. Labels are baked into the tiles.
- * The OSMF tile policy allows this on a public site when traffic stays light,
- * the tile URL is exactly `tile.openstreetmap.org/{z}/{x}/{y}.png`, the
- * copyright line stays visible, and the browser sends its usual Referer.
- * A tile requested with Referer `https://around-jobs.vercel.app/` returns 200.
+ * The default is CyclOSM: a free, keyless, coloured street style (parks, water,
+ * roads) with labels baked in. A tile at z12 is a real PNG of about 40KB.
  *
  * Drop a key in later without changing the map code:
  * - `NEXT_PUBLIC_STADIA_API_KEY` uses Stadia OSM Bright.
  * - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` uses Google roadmap tiles.
  * - `NEXT_PUBLIC_MAP_TILE_URL` (or `NEXT_PUBLIC_MAP_TILES_URL`) replaces the URL.
  * `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION` replaces the credit line.
+ *
+ * If CyclOSM is unreachable, the no-key stand-in is Esri World Street Map
+ * (`.../MapServer/tile/{z}/{y}/{x}` — note y then x).
  */
 
 type TileSource = {
@@ -20,13 +19,16 @@ type TileSource = {
   labelsUrl: string | null;
   attribution: string;
   maxNativeZoom: number;
+  subdomains: string;
 };
 
-const osm: TileSource = {
-  url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+const cyclosm: TileSource = {
+  url: "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
   labelsUrl: null,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxNativeZoom: 19,
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.cyclosm.org">CyclOSM</a> hosted by <a href="https://openstreetmap.fr/">OpenStreetMap France</a>',
+  maxNativeZoom: 20,
+  subdomains: "abc",
 };
 
 const stadiaKey = process.env.NEXT_PUBLIC_STADIA_API_KEY?.trim();
@@ -41,6 +43,7 @@ const stadia: TileSource | null = stadiaKey
       attribution:
         '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxNativeZoom: 20,
+      subdomains: "abc",
     }
   : null;
 
@@ -50,21 +53,22 @@ const google: TileSource | null = googleKey
       labelsUrl: null,
       attribution: "Map data &copy; Google",
       maxNativeZoom: 20,
+      subdomains: "abc",
     }
   : null;
 
 const override: TileSource | null = urlOverride
-  ? { url: urlOverride, labelsUrl: null, attribution: osm.attribution, maxNativeZoom: 20 }
+  ? { url: urlOverride, labelsUrl: null, attribution: cyclosm.attribution, maxNativeZoom: 20, subdomains: "abc" }
   : null;
 
-const chosen = override ?? google ?? stadia ?? osm;
+const chosen = override ?? google ?? stadia ?? cyclosm;
 
 export const tileLayer = {
   url: chosen.url,
   /** Transparent place-name layer. Null when the base URL already includes labels. */
   labelsUrl: chosen.labelsUrl,
   attribution: attributionOverride ?? chosen.attribution,
-  subdomains: "abc",
+  subdomains: chosen.subdomains,
   maxZoom: 20,
   maxNativeZoom: chosen.maxNativeZoom,
 };

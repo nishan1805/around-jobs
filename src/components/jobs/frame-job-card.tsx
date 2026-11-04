@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
+import { ApplyButton } from "@/components/jobs/apply-button";
 import { Icon } from "@/components/icon";
-import { buttonVariants } from "@/components/ui/button";
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
+import { SAMPLE_APPLY_SLUG } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
 
 function LogoMark({ initials, tone }: { initials: string; tone: "info" | "orange" }) {
@@ -24,6 +23,19 @@ function LogoMark({ initials, tone }: { initials: string; tone: "info" | "orange
 
 function GreyChip({ children }: { children: string }) {
   return <span className="rounded-full bg-grey-100 px-2 py-0.5 text-label-medium text-text-secondary">{children}</span>;
+}
+
+/** "Salary not disclosed" stays bare. A string that already says /mo does not gain a second "/ month". */
+function SalaryText({ salary, withMonth }: { salary: string; withMonth?: boolean }) {
+  const undisclosed = /not disclosed/i.test(salary);
+  const text = undisclosed ? "Salary not disclosed" : salary.replace(/\s*\/\s*month\s*$/i, "");
+  const showMonth = Boolean(withMonth) && !undisclosed && !/\/\s*mo(nth)?\b/i.test(text);
+  return (
+    <p className="flex items-baseline gap-1">
+      <span className={undisclosed ? "text-body-sm-regular text-text-secondary" : "text-body-semibold text-text-primary"}>{text}</span>
+      {showMonth && <span className="text-body-sm-regular text-text-tertiary">/ month</span>}
+    </p>
+  );
 }
 
 /** Finalized job card used by S03, S06, S17 and the employer jobs list. */
@@ -46,21 +58,24 @@ export function FrameJobCardView({
   return (
     <article
       className={cn(
-        "flex w-full flex-col gap-3 rounded-md border bg-surface-default shadow-sm",
+        "relative flex w-full flex-col gap-3 rounded-md border bg-surface-default shadow-sm",
+        onOpen && "cursor-pointer",
         layout === "saved" ? "px-4 py-5" : layout === "employer" ? "p-3" : "p-4",
       )}
     >
-      <div className="flex items-start gap-3">
+      {onOpen && (
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-label={`View ${card.title}`}
+          className="absolute inset-0 z-0 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/40"
+        />
+      )}
+      <div className={cn("flex items-start gap-3", onOpen && "pointer-events-none")}>
         {showLogo && card.initials && <LogoMark initials={card.initials} tone={card.tone ?? "info"} />}
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-col gap-1">
-            {onOpen ? (
-              <button type="button" onClick={onOpen} className="text-left text-body-semibold text-text-primary">
-                {card.title}
-              </button>
-            ) : (
-              <h3 className="text-body-semibold text-text-primary">{card.title}</h3>
-            )}
+            <h3 className="text-body-semibold text-text-primary">{card.title}</h3>
             {card.company && (
               <p className="flex items-center gap-1 text-body-sm-regular text-text-secondary">
                 {card.company}
@@ -74,15 +89,12 @@ export function FrameJobCardView({
               <span className={layout === "saved" ? "whitespace-nowrap" : "truncate"}>{card.location}</span>
             </p>
             {layout === "employer" ? (
-              <p className="flex items-baseline gap-1">
-                <span className="text-body-semibold text-text-primary">{card.salary}</span>
-                <span className="text-body-sm-regular text-text-tertiary">/ month</span>
-              </p>
+              <SalaryText salary={card.salary} withMonth />
             ) : layout !== "saved" ? (
-              card.salary === "Salary not disclosed" ? (
-                <GreyChip>{card.salary}</GreyChip>
+              /not disclosed/i.test(card.salary) ? (
+                <GreyChip>Salary not disclosed</GreyChip>
               ) : (
-                <p className="text-body-semibold text-text-primary">{card.salary}</p>
+                <p className="text-body-semibold text-text-primary">{card.salary.replace(/\s*\/\s*month\s*$/i, "")}</p>
               )
             ) : null}
             <div className="flex flex-wrap gap-1.5">
@@ -96,31 +108,29 @@ export function FrameJobCardView({
           type="button"
           aria-label={saved ? `Remove ${card.title} from saved` : `Save ${card.title}`}
           aria-pressed={saved}
-          onClick={onToggleSave}
-          className={cn("text-text-primary", saved && "text-brand-primary")}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleSave?.();
+          }}
+          className={cn("pointer-events-auto relative z-1 text-text-primary", saved && "text-brand-primary")}
         >
           <Icon name={saved ? "bookmarkFilled" : "bookmark"} className="size-5" />
         </button>
       </div>
-      <div className="h-px w-full bg-border-default" />
+      <div className={cn("h-px w-full bg-border-default", onOpen && "pointer-events-none")} />
       {layout === "saved" ? (
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div className={cn("flex flex-wrap items-center justify-between gap-x-3 gap-y-2", onOpen && "pointer-events-none")}>
           <div className="flex flex-col gap-1">
-            <p className="flex items-baseline gap-1 whitespace-nowrap">
-              <span className="text-body-semibold text-text-primary">{card.salary}</span>
-              <span className="text-body-sm-regular text-text-tertiary">/ month</span>
-            </p>
+            <SalaryText salary={card.salary} withMonth />
             <p className="flex items-center gap-2 text-body-sm-regular text-text-tertiary">
               <Icon name="calendar" className="size-5" />
               {card.posted}
             </p>
           </div>
-          <Link href={`/?job=civil-engineer`} className={buttonVariants({ shape: "rect" })}>
-            Apply now
-          </Link>
+          <ApplyButton jobSlug={SAMPLE_APPLY_SLUG} status="open" className="pointer-events-auto relative z-1" />
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-3">
+        <div className={cn("flex items-center justify-between gap-3", onOpen && "pointer-events-none")}>
           <p className="flex items-center gap-2 text-body-sm-regular text-text-tertiary">
             <Icon name="calendar" className="size-5" />
             {card.posted}

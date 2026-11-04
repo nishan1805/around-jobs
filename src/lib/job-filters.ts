@@ -11,7 +11,9 @@ import {
   type WorkMode,
 } from "@/lib/jobs";
 
-export const SALARY_BOUNDS = { min: 0, max: 60_000, step: 1_000 } as const;
+/** Slider ceiling. Change this one number to move the top of the range. At the ceiling the label reads 1L+. */
+export const SALARY_MAX = 100_000;
+export const SALARY_BOUNDS = { min: 0, max: SALARY_MAX, step: 1_000 } as const;
 
 export const morePresets = {
   posted24h: "Posted in 24h",
@@ -57,6 +59,14 @@ const matchesQuery = (job: Job, query: string) => {
 const salaryIsFiltered = (filters: JobFilters) =>
   filters.salary[0] !== SALARY_BOUNDS.min || filters.salary[1] !== SALARY_BOUNDS.max;
 
+/** The top of the slider means "this amount and above", so a higher salary still matches. */
+const salaryWithin = (job: Job, filters: JobFilters) => {
+  if (!job.salaryDisclosed) return true;
+  const [low, high] = filters.salary;
+  const upperOpen = high >= SALARY_BOUNDS.max;
+  return job.salary.max >= low && (upperOpen || job.salary.min <= high);
+};
+
 export function matchesFilters(job: Job, filters: JobFilters) {
   const { more } = filters;
   return (
@@ -65,9 +75,7 @@ export function matchesFilters(job: Job, filters: JobFilters) {
     (filters.experience.length === 0 || filters.experience.some((bucket) => matchesExperience(job, bucket))) &&
     (filters.types.length === 0 || filters.types.includes(job.employmentType)) &&
     (filters.workModes.length === 0 || filters.workModes.includes(job.workMode)) &&
-    (!salaryIsFiltered(filters) ||
-      !job.salaryDisclosed ||
-      (job.salary.max >= filters.salary[0] && job.salary.min <= filters.salary[1])) &&
+    (!salaryIsFiltered(filters) || salaryWithin(job, filters)) &&
     (!more.includes("posted24h") || daysSince(job.datePosted) <= 1) &&
     (!more.includes("posted7d") || daysSince(job.datePosted) <= 7) &&
     (!more.includes("verifiedOnly") || job.company.verified) &&
@@ -115,13 +123,15 @@ export function activeFilters(filters: JobFilters): ActiveFilter[] {
 }
 
 /**
- * Number on the Filters control. Figma S05 selects Retail, Fresher, Full-time,
- * a salary range and On-site, and the button still reads Filters 2. The badge
- * counts employment type, work mode and the "more" presets. Category, experience
- * and salary stay out of it.
+ * Number on the Filters control, matching S05 (2018:46140).
+ *
+ * Fresher + Full-time + On-site, with the salary slider at ₹10,000–₹50,000,
+ * shows badge 2. The badge is one point per active group, not one per chip:
+ * Employment type, Work mode, and More filters. Experience, the salary slider,
+ * and the category chips on the map do not add to it.
  */
 export function filterBadgeCount(filters: JobFilters) {
-  return filters.types.length + filters.workModes.length + filters.more.length;
+  return (filters.types.length > 0 ? 1 : 0) + (filters.workModes.length > 0 ? 1 : 0) + (filters.more.length > 0 ? 1 : 0);
 }
 
 /** `Retail · Full-time · On-site`, used in "6 results for …". */

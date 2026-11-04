@@ -2,20 +2,25 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
+import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import { Icon } from "@/components/icon";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { Tag } from "@/components/jobs/chip";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
-import { Button } from "@/components/ui/button";
+import { ApplyButton, applicationPath } from "@/components/jobs/apply-button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import {
+  SAMPLE_APPLY_SLUG,
   civilEngineerDetail,
   employerOverviewSeed,
   jobDetailVariantCopy,
   type JobDetailVariant,
 } from "@/lib/seeker-design-seed";
+import { useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
 import { MapPanel, SectionHeader } from "./panel-parts";
@@ -37,6 +42,8 @@ export function DesignEmployerPanel({
   onOpenJob: () => void;
 }) {
   const [tab, setTab] = useState<"jobs" | "about">(variant === "about" ? "about" : "jobs");
+  const seeker = useSeeker();
+  const actions = useSeekerActions();
   const verified = variant !== "unverified";
   const jobs = variant === "one" ? employerOverviewSeed.jobs.slice(0, 1) : variant === "empty" ? [] : employerOverviewSeed.jobs;
   const employer = employerOverviewSeed;
@@ -123,7 +130,16 @@ export function DesignEmployerPanel({
               </p>
             </div>
           ) : (
-            jobs.map((job) => <FrameJobCardView key={job.id} card={job} layout="employer" onOpen={onOpenJob} />)
+            jobs.map((job) => (
+              <FrameJobCardView
+                key={job.id}
+                card={job}
+                layout="employer"
+                saved={seeker.savedJobs.includes(job.id)}
+                onOpen={onOpenJob}
+                onToggleSave={() => actions.setSavedJob(job.id, !seeker.savedJobs.includes(job.id))}
+              />
+            ))
           )
         ) : (
           <div className="flex flex-col gap-6">
@@ -164,7 +180,9 @@ export function DesignJobDetailPanel({
 }) {
   const detail = civilEngineerDetail;
   const state = jobDetailVariantCopy[variant];
-  const [saved, setSaved] = useState(false);
+  const seeker = useSeeker();
+  const actions = useSeekerActions();
+  const saved = seeker.savedJobs.includes("rb-civil");
   const salary = state.salary ?? detail.salary;
   const mode = state.mode ?? detail.mode;
   const area = state.area ?? detail.area;
@@ -177,7 +195,7 @@ export function DesignJobDetailPanel({
         <RoundIcon
           icon={saved ? "bookmarkFilled" : "bookmark"}
           label={saved ? "Remove job from saved" : "Save job"}
-          onClick={() => setSaved((value) => !value)}
+          onClick={() => actions.setSavedJob("rb-civil", !saved)}
         />
         <RoundIcon icon="share" label="Share job" />
         <RoundIcon icon="close" label="Close job details" onClick={onBack} />
@@ -255,17 +273,21 @@ export function DesignJobDetailPanel({
         </section>
       </div>
       <div className="shrink-0 border-t bg-surface-default px-6 py-4">
-        <Button
-          shape="rect"
-          variant={state.buttonVariant ?? "default"}
-          className={cn(
-            "w-full",
-            state.buttonDisabled && "bg-grey-100 text-text-disabled disabled:bg-grey-100 disabled:text-text-disabled disabled:opacity-100",
-          )}
-          disabled={state.buttonDisabled}
-        >
-          {state.button}
-        </Button>
+        {variant === "applied" ? (
+          <Link href={applicationPath("cashier-magneto-retail")} className={cn(buttonVariants({ variant: "outline", shape: "rect" }), "w-full")}>
+            View application
+          </Link>
+        ) : state.buttonDisabled ? (
+          <Button
+            shape="rect"
+            disabled
+            className="w-full bg-grey-100 text-text-disabled disabled:bg-grey-100 disabled:text-text-disabled disabled:opacity-100"
+          >
+            {state.button}
+          </Button>
+        ) : (
+          <ApplyButton jobSlug={SAMPLE_APPLY_SLUG} status="open" className="w-full" />
+        )}
       </div>
     </MapPanel>
   );

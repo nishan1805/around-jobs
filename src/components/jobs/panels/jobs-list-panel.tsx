@@ -236,7 +236,12 @@ export function JobsListPanel({
               <ul className="hidden flex-col gap-3 md:flex">
                 {desktopCards.map((card) => (
                   <li key={card.id}>
-                    <FrameJobCardView card={card} onOpen={onOpenDesignJob} />
+                    <FrameJobCardView
+                      card={card}
+                      saved={seeker.savedJobs.includes(card.id)}
+                      onOpen={onOpenDesignJob}
+                      onToggleSave={() => actions.setSavedJob(card.id, !seeker.savedJobs.includes(card.id))}
+                    />
                   </li>
                 ))}
               </ul>
