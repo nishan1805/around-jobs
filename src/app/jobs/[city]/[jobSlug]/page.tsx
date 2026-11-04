@@ -14,6 +14,7 @@ import {
   formatDate,
   formatSalary,
   isOpen,
+  listingStatus,
   workModes,
   getAllJobs,
   getJob,
@@ -152,7 +153,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
                     </div>
                   ))}
                 </dl>
-                <ApplyButton jobSlug={job.slug} status={job.status} className="hidden w-full md:inline-flex" />
+                <ApplyButton jobSlug={job.slug} status={listingStatus(job)} className="hidden w-full md:inline-flex" />
               </div>
 
               {moreAtCompany.length > 0 && (
@@ -173,7 +174,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
           <span className="text-label-medium text-text-tertiary">Salary</span>
           <span className="truncate text-body-sm-semibold text-text-primary">{pay}</span>
         </div>
-        <ApplyButton jobSlug={job.slug} status={job.status} />
+        <ApplyButton jobSlug={job.slug} status={listingStatus(job)} />
       </div>
     </AppShell>
   );

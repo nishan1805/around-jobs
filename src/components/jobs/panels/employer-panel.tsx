@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Icon } from "@/components/icon";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
-import { LogoPlaceholder } from "@/components/jobs/job-card";
+import { CompanyMark } from "@/components/jobs/job-card";
 import { IconButton } from "@/components/ui/icon-button";
 import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import {
@@ -74,7 +74,7 @@ export function EmployerPanel({
     <MapPanel label={`${company.name} overview`} dock="right" onDismiss={onClose}>
       <div className="flex shrink-0 flex-col gap-5 py-4 pr-4 pl-6">
         <div className="flex items-start gap-3">
-          <LogoPlaceholder className="size-16 rounded-md border border-grey-300" />
+          <CompanyMark name={company.name} className="size-16 rounded-md text-subheading-semibold" />
           <span className="flex-1" />
           <div className="flex gap-1">
             <IconButton

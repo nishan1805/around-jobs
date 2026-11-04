@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import { useSeekerActions } from "@/components/auth/use-seeker-actions";
-import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
 import { Chip } from "@/components/jobs/chip";
 import { PageHeader } from "@/components/page-header";
@@ -14,23 +12,11 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { cities, daysSince, distanceKm, isExpiringSoon, jobs, type Job } from "@/lib/jobs";
-import {
-  CIVIL_ENGINEER_SLUG,
-  browseListSeed,
-  employerOverviewSeed,
-  filteredListSeed,
-  savedCardsSeed,
-  type FrameJobCard,
-  type SavedCardSeed,
-} from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
 
 const INTRO = "Keep jobs you like here and apply when you are ready.";
 const from = cities[0].center;
 const jobsBySlug = new Map(jobs.map((job) => [job.slug, job]));
-const designById = new Map(
-  [...browseListSeed, ...filteredListSeed, ...employerOverviewSeed.jobs].map((card) => [card.id, card]),
-);
 
 export const NEARBY_KM = 4;
 export const RECENTLY_SAVED_DAYS = 3;
@@ -67,16 +53,18 @@ export function SavedView() {
 
 function SavedContent() {
   const seeker = useSeeker();
+  const router = useRouter();
   const [filter, setFilter] = useState<SavedFilter>("all");
+  const emptyPreview = useSearchParam("empty") === "1";
 
-  const saved = useMemo(
-    () => seeker.savedJobs.flatMap((slug) => jobsBySlug.get(slug) ?? []),
-    [seeker.savedJobs],
-  );
-  const designSaved = useMemo(
-    () => seeker.savedJobs.flatMap((id) => designById.get(id) ?? []),
-    [seeker.savedJobs],
-  );
+  const saved = useMemo(() => {
+    const unique = [...new Set(seeker.savedJobs)];
+    return unique.flatMap((slug) => {
+      const job = jobsBySlug.get(slug);
+      return job ? [job] : [];
+    });
+  }, [seeker.savedJobs]);
+
   const matches = (job: Job, key: SavedFilter) => {
     if (key === "nearby") return job.workMode !== "REMOTE" && distanceKm(from, job.company.position) <= NEARBY_KM;
     if (key === "recent") {
@@ -86,25 +74,48 @@ function SavedContent() {
     return true;
   };
   const visible = saved.filter((job) => matches(job, filter));
-
-  const emptyPreview = useSearchParam("empty") === "1";
-
-  if ((saved.length === 0 && designSaved.length === 0) || emptyPreview) {
-    return <DesktopSaved empty />;
-  }
-
   const expiring = saved.filter(isExpiringSoon).length;
   const subtitle = `${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? `, ${expiring} expiring soon` : ""}.`;
 
-  return (
-    <>
-      <div className="md:hidden">
-      <PageHeader
-        title="Saved jobs"
-        subtitle={subtitle}
-        mobileSubtitle={`${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? ` · ${expiring} expiring soon` : ""}`}
-      />
+  if (saved.length === 0 || emptyPreview) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col gap-6">
+        <header className="hidden flex-col gap-1 md:flex">
+          <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
+          <p className="text-body-sm-regular text-text-secondary">{INTRO}</p>
+        </header>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/illustrations/saved-empty.svg" alt="" width={280} height={200} className="hidden md:block" />
+          <EmptyBlock
+            icon="bookmark"
+            title="No saved jobs yet"
+            body="Tap the bookmark on any job to save it here for later."
+            className="md:border-0 md:bg-transparent"
+            action={
+              <Link href="/" className={buttonVariants({ shape: "pill" })}>
+                Browse jobs
+              </Link>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
 
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="md:hidden">
+        <PageHeader
+          title="Saved jobs"
+          subtitle={subtitle}
+          mobileSubtitle={`${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? ` · ${expiring} expiring soon` : ""}`}
+        />
+      </div>
+      <header className="hidden flex-col gap-1 md:flex">
+        <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
+        <p className="text-body-sm-regular text-text-secondary">{subtitle}</p>
+      </header>
       <div role="group" aria-label="Filter saved jobs" className="-mx-5 flex shrink-0 gap-2 overflow-x-auto px-5 md:mx-0 md:px-0">
         {savedFilters.map(({ key, label }) => (
           <Chip key={key} selected={filter === key} onClick={() => setFilter(key)}>
@@ -112,7 +123,6 @@ function SavedContent() {
           </Chip>
         ))}
       </div>
-
       {visible.length === 0 ? (
         <EmptyBlock
           icon="bookmark"
@@ -127,134 +137,13 @@ function SavedContent() {
         />
       ) : (
         <ul aria-label="Saved jobs" className="grid items-start gap-4 md:grid-cols-2 md:gap-6 min-[80rem]:grid-cols-3">
-          {designSaved.map((card) => (
-            <li key={card.id} className="flex">
-              <DesignSavedCard card={card} />
-            </li>
-          ))}
           {visible.map((job) => (
             <li key={job.slug} className="flex">
-              <JobCard job={job} from={from} variant="saved" />
+              <JobCard job={job} from={from} variant="saved" onSelect={() => router.push(`/?job=${job.slug}`)} />
             </li>
           ))}
         </ul>
       )}
-      </div>
-      <DesktopSaved extras={designSaved} />
-    </>
-  );
-}
-
-function DesignSavedCard({ card }: { card: FrameJobCard }) {
-  const actions = useSeekerActions();
-  const router = useRouter();
-  return (
-    <FrameJobCardView
-      layout="saved"
-      saved
-      card={card}
-      onOpen={() => router.push(`/?job=${CIVIL_ENGINEER_SLUG}`)}
-      onToggleSave={() => actions.setSavedJob(card.id, false)}
-    />
-  );
-}
-
-function DesktopSaved({ empty = false, extras = [] }: { empty?: boolean; extras?: FrameJobCard[] }) {
-  const [filter, setFilter] = useState<"all" | "nearby" | "recent">("all");
-  const [removed, setRemoved] = useState<string[]>([]);
-  const cards = savedCardsSeed.filter((card) => !removed.includes(card.id));
-  const visible = cards.filter((card) => {
-    if (filter === "nearby") return card.nearby;
-    if (filter === "recent") return card.recent;
-    return true;
-  });
-  const counts = {
-    all: cards.length,
-    nearby: cards.filter((card) => card.nearby).length,
-    recent: cards.filter((card) => card.recent).length,
-  };
-
-  if (empty || cards.length === 0) {
-    return (
-      <div className="flex min-h-0 flex-1 flex-col gap-6">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
-          <p className="text-body-sm-regular text-text-secondary">Keep jobs you like here and apply when you are ready.</p>
-        </header>
-        <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/illustrations/saved-empty.svg" alt="" width={280} height={200} />
-          <div className="flex max-w-[260px] flex-col gap-3 text-center">
-            <p className="text-subheading-semibold text-text-primary">No saved jobs yet</p>
-            <p className="text-body-sm-regular text-text-secondary">Tap the bookmark on any job to save it here for later.</p>
-          </div>
-          <Link href="/" className={buttonVariants({ shape: "pill" })}>
-            Browse jobs
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="hidden flex-col gap-6 md:flex">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-display-small-semibold text-text-primary">Saved jobs</h1>
-        <p className="text-body-sm-regular text-text-secondary">
-          {counts.all} saved jobs, 2 expiring soon.
-        </p>
-      </header>
-      <div role="group" aria-label="Filter saved jobs" className="flex gap-2">
-        {(
-          [
-            ["all", "All"],
-            ["nearby", "Nearby"],
-            ["recent", "Recently added"],
-          ] as const
-        ).map(([key, label]) => (
-          <Chip key={key} selected={filter === key} onClick={() => setFilter(key)}>
-            {label} · {counts[key]}
-          </Chip>
-        ))}
-      </div>
-      <ul className="grid items-start gap-4 min-[80rem]:grid-cols-3">
-        {extras.map((card) => (
-          <li key={card.id}>
-            <DesignSavedCard card={card} />
-          </li>
-        ))}
-        {visible.map((card) => (
-          <li key={card.id}>
-            <SavedDesignCard card={card} onUnsave={() => setRemoved((current) => [...current, card.id])} />
-          </li>
-        ))}
-      </ul>
     </div>
-  );
-}
-
-function SavedDesignCard({ card, onUnsave }: { card: SavedCardSeed; onUnsave: () => void }) {
-  const router = useRouter();
-  return (
-    <FrameJobCardView
-      layout="saved"
-      saved
-      expiring={card.expiring}
-      onOpen={() => router.push(`/?job=${CIVIL_ENGINEER_SLUG}`)}
-      onToggleSave={onUnsave}
-      card={{
-        id: card.id,
-        title: card.title,
-        company: card.company,
-        initials: card.initials,
-        tone: "orange",
-        verified: card.verified,
-        location: `${card.location} · ${card.distance}`,
-        salary: card.salary,
-        employment: card.type,
-        experience: card.experience,
-        posted: card.posted,
-      }}
-    />
   );
 }

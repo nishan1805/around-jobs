@@ -1,12 +1,13 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Icon } from "@/components/icon";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { authActions } from "@/lib/auth-store";
+import { useProfilePhoto } from "@/lib/profile-photo";
 import { PROFILE_COMPLETION, PROFILE_DISPLAY_NAME } from "@/lib/seeker-design-seed";
 
 import { useAuth } from "./auth-provider";
@@ -21,6 +22,8 @@ const itemClass =
  */
 export function AccountButton() {
   const { user, openLogin } = useAuth();
+  const router = useRouter();
+  const photo = useProfilePhoto();
   const menuParam = useSearchParam("menu");
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState<string | null>(null);
@@ -49,16 +52,26 @@ export function AccountButton() {
       <Menu.Root open={open} onOpenChange={setOpen}>
         <Menu.Trigger
           aria-label={`Account menu for ${PROFILE_DISPLAY_NAME}`}
-          className="flex size-10 items-center justify-center rounded-full border border-primary-200 bg-primary-100 text-heading-semibold leading-none text-primary-700 outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/40"
+          className="flex size-10 items-center justify-center overflow-hidden rounded-full border border-primary-200 bg-primary-100 text-heading-semibold leading-none text-primary-700 outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/40"
         >
-          {initial}
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo.url} alt="" className="size-full object-cover" />
+          ) : (
+            initial
+          )}
         </Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner sideOffset={8} align="end" className="z-50">
             <Menu.Popup className="w-[360px] rounded-xl border bg-surface-elevated p-5 shadow-lg outline-none">
               <div className="flex items-center gap-4 pb-3">
-                <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-grey-200 text-heading-semibold leading-none text-text-primary">
-                  {initial}
+                <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-grey-200 text-heading-semibold leading-none text-text-primary">
+                  {photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photo.url} alt="" className="size-full object-cover" />
+                  ) : (
+                    initial
+                  )}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-2">
                   <span className="truncate text-body-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
@@ -72,17 +85,17 @@ export function AccountButton() {
                 </span>
               </div>
               <div className="h-px w-full bg-grey-200" />
-              <Menu.Item className={itemClass} render={<Link href="/profile" />}>
+              <Menu.Item className={itemClass} onClick={() => router.push("/profile")}>
                 <Icon name="user" className="size-5 text-text-secondary" />
                 <span className="flex-1">Profile settings</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
-              <Menu.Item className={itemClass} render={<Link href="/alerts" />}>
+              <Menu.Item className={itemClass} onClick={() => router.push("/alerts")}>
                 <Icon name="bellOutline" className="size-5 text-text-secondary" />
                 <span className="flex-1">Job alerts</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
-              <Menu.Item className={itemClass} render={<a href="mailto:support@around.jobs" />}>
+              <Menu.Item className={itemClass} onClick={() => router.push("/help")}>
                 <Icon name="help" className="size-5 text-text-secondary" />
                 <span className="flex-1">Help & support</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />

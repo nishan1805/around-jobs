@@ -13,7 +13,6 @@ import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import { categories, experienceLabel, formatSalaryShort, locationLine, relativeDay, type EmploymentType, type Job } from "@/lib/jobs";
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
-import { cn } from "@/lib/utils";
 
 import { MapPanel } from "./panel-parts";
 
@@ -60,9 +59,7 @@ export function JobsListPanel({
   onChangeArea,
   onRetry,
   from,
-  desktopCards,
-  desktopSubtitle,
-  onOpenDesignJob,
+  areaName = "you",
 }: {
   cityName: string;
   status: ListStatus;
@@ -79,17 +76,15 @@ export function JobsListPanel({
   onChangeArea?: () => void;
   onRetry: () => void;
   from: [number, number];
-  /** Finalized S03/S06 cards. Mobile keeps the live job list. */
-  desktopCards?: FrameJobCard[] | null;
-  desktopSubtitle?: string;
-  onOpenDesignJob?: () => void;
+  areaName?: string;
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
   const chips = activeFilters(filters);
   const badgeCount = filterBadgeCount(filters);
+  const hasPanelFilters = chips.length > 0 || filters.query.trim().length > 0;
   const description = describeFilters(filters);
-  const clearAll = () => onFiltersChange({ ...defaultFilters, query: filters.query, categories: filters.categories });
+  const clearAll = () => onFiltersChange({ ...defaultFilters, query: filters.query });
   const resetEverything = () => onFiltersChange(defaultFilters);
 
   const subtitle =
@@ -128,19 +123,21 @@ export function JobsListPanel({
           <div className="min-w-0 flex-1">
             <h2 className="text-heading-semibold text-text-primary">Jobs in {cityName}</h2>
             <p aria-live="polite" className="text-label-medium text-text-tertiary">
-              {desktopSubtitle ?? subtitle}
+              {hasPanelFilters
+              ? `${plural(totalMatching, "job")} match your filters`
+              : `${plural(totalMatching, "job")} near ${areaName}`}
             </p>
           </div>
-          {!desktopCards && <FiltersButton count={badgeCount} onClick={onOpenFilters} />}
+          <FiltersButton count={badgeCount} onClick={onOpenFilters} />
           <IconButton variant="outline" icon="close" label="Close jobs list" onClick={onClose} iconClassName="size-4" />
         </div>
-        <div className={cn("flex items-center gap-3", desktopCards && "md:hidden")}>
+        <div className="flex items-center gap-3">
           <p className="min-w-0 flex-1 truncate text-body-sm-regular text-text-secondary" title={resultsLine}>
             {resultsLine}
           </p>
           <ViewToggle view="list" size="sm" onChange={(view) => view === "map" && onClose()} />
         </div>
-        <div role="group" aria-label="Job categories" className={cn("flex flex-wrap gap-2", desktopCards && "md:hidden")}>
+        <div role="group" aria-label="Job categories" className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <Chip
               key={category}
@@ -151,7 +148,7 @@ export function JobsListPanel({
             </Chip>
           ))}
         </div>
-        {chips.length > 0 && !desktopCards && (
+        {chips.length > 0 && (
           <div role="group" aria-label="Applied filters" className="flex flex-wrap items-center gap-2">
             {chips.map((chip) => (
               <RemovableChip key={chip.key} label={chip.label} onRemove={() => onFiltersChange(chip.remove(filters))} />
@@ -184,7 +181,7 @@ export function JobsListPanel({
           />
         ) : (
           <>
-            <div className={desktopCards ? "md:hidden" : undefined}>
+            <div>
               {totalMatching === 0 ? (
                 <EmptyBlock
                   title="No matching jobs"
@@ -212,40 +209,28 @@ export function JobsListPanel({
                 />
               ) : (
                 <ul className="flex flex-col gap-3">
-                  {jobs.map((job) => (
-                    <li key={job.slug}>
-                      <div className={desktopCards ? undefined : "md:hidden"}>
-                        <JobCard job={job} from={from} onSelect={onSelectJob} />
-                      </div>
-                      {!desktopCards && (
+                  {jobs.map((job) => {
+                    const saved = seeker.savedJobs.includes(job.slug);
+                    const applied = seeker.applications.some((item) => item.jobSlug === job.slug && item.stage !== "withdrawn");
+                    return (
+                      <li key={job.slug}>
+                        <div className="md:hidden">
+                          <JobCard job={job} from={from} onSelect={onSelectJob} />
+                        </div>
                         <div className="hidden md:block">
                           <FrameJobCardView
-                            card={liveListCard(job, from)}
-                            saved={seeker.savedJobs.includes(job.slug)}
+                            card={{ ...liveListCard(job, from), applied }}
+                            saved={saved}
                             onOpen={() => onSelectJob(job)}
-                            onToggleSave={() => actions.setSavedJob(job.slug, !seeker.savedJobs.includes(job.slug))}
+                            onToggleSave={() => actions.setSavedJob(job.slug, !saved)}
                           />
                         </div>
-                      )}
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
-            {desktopCards && (
-              <ul className="hidden flex-col gap-3 md:flex">
-                {desktopCards.map((card) => (
-                  <li key={card.id}>
-                    <FrameJobCardView
-                      card={card}
-                      saved={seeker.savedJobs.includes(card.id)}
-                      onOpen={onOpenDesignJob}
-                      onToggleSave={() => actions.setSavedJob(card.id, !seeker.savedJobs.includes(card.id))}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
           </>
         )}
       </div>

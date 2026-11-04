@@ -13,6 +13,7 @@ import {
   isExpiringSoon,
   isOpen,
   jobPath,
+  listingStatus,
   locationLine,
   timeAgo,
   type Job,
@@ -21,6 +22,20 @@ import { useSeekerActions } from "@/components/auth/use-seeker-actions";
 import { ApplyButton } from "@/components/jobs/apply-button";
 import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
+
+const markTones = ["bg-info-50 text-info-700", "bg-secondary-50 text-secondary-700", "bg-success-50 text-success-700", "bg-primary-50 text-primary-700", "bg-warning-50 text-warning-700"];
+
+export function CompanyMark({ name, className }: { name: string; className?: string }) {
+  const words = name.split(/\s+/).filter((word) => /[A-Za-z]/.test(word));
+  const letters = ((words[0]?.[0] ?? "") + (words[1]?.[0] ?? "")).toUpperCase() || "•";
+  let hash = 0;
+  for (const char of name) hash = (hash + char.charCodeAt(0)) % markTones.length;
+  return (
+    <span aria-hidden className={cn("flex size-12 shrink-0 items-center justify-center rounded-sm text-body-bold", markTones[hash], className)}>
+      {letters}
+    </span>
+  );
+}
 
 export function LogoPlaceholder({ className }: { className?: string }) {
   return <span aria-hidden className={cn("block size-12 shrink-0 rounded-sm bg-grey-100", className)} />;
@@ -87,7 +102,7 @@ export function JobCard({
         className,
       )}
     >
-      <LogoPlaceholder />
+      <CompanyMark name={job.company.name} />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <h3 className="text-body-semibold text-text-primary">
           <Link
@@ -115,8 +130,8 @@ export function JobCard({
           <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
           <Badge type="experience">{experienceLabel(job.experience)}</Badge>
         </div>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-label-medium text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="whitespace-nowrap text-label-medium text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
           {applied && <Badge type="applied">Applied</Badge>}
           {isSavedTile && isExpiringSoon(job) && <Badge type="expiring">Expiring soon</Badge>}
           {isSavedTile && !isOpen(job) && <Badge type={job.status === "expired" ? "expired" : "closed"}>{job.status === "expired" ? "Expired" : "Closed"}</Badge>}
@@ -124,7 +139,13 @@ export function JobCard({
         {isSavedTile && (
           <div className="flex items-center gap-2 pt-1.5">
             {bookmark}
-            <ApplyButton jobSlug={job.slug} status={job.status} applyLabel="Apply" className="relative z-1 h-11 min-w-0 flex-1" />
+            {applied ? (
+              <span className="relative z-1 inline-flex h-11 flex-1 items-center justify-center rounded-sm bg-success-50 text-body-sm-semibold text-success-700">
+                Applied
+              </span>
+            ) : (
+              <ApplyButton jobSlug={job.slug} status={listingStatus(job)} applyLabel="Apply" className="relative z-1 h-11 min-w-0 flex-1" />
+            )}
           </div>
         )}
       </div>

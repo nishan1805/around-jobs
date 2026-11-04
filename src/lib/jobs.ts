@@ -281,6 +281,16 @@ const companySeeds: CompanySeed[] = [
     jobs: [],
   },
   {
+    slug: "raipur-builder",
+    name: "Raipur Builder",
+    category: "Office admin",
+    area: "Shankar Nagar",
+    streetAddress: "Near Shankar Nagar Chowk",
+    postalCode: "492007",
+    position: [21.2512, 81.6588],
+    jobs: [["Site Supervisor", "FULL_TIME", 18000, 24000, { experience: [1, 3], expiresIn: 4 }]],
+  },
+  {
     slug: "pandri-textiles",
     name: "Pandri Textiles",
     category: "Retail",
@@ -525,6 +535,12 @@ export function locationLine(job: Job, from: [number, number]) {
 
 const daysBetween = (fromIso: string, toIso: string) =>
   Math.round((Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / 86_400_000);
+
+/** Past "Apply by" dates close the role even when the seed status is still open. */
+export function listingStatus(job: Pick<Job, "status" | "validThrough">): JobStatus {
+  if (job.status !== "open") return job.status;
+  return daysBetween(SAMPLE_TODAY, job.validThrough) < 0 ? "expired" : "open";
+}
 
 export function timeAgo(isoDate: string) {
   const days = daysBetween(isoDate, SAMPLE_TODAY);

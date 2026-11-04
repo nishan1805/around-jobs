@@ -59,7 +59,7 @@ const sampleSubmission: Submission = {
   experience: "2 years",
   education: "Class 12",
   skills: ["Billing", "Customer service"],
-  resumeName: "Aarti_Sahu_Resume.pdf",
+  resumeName: "Resume_Nishan_Kumar_Mondal.pdf",
   resumeKb: 240,
   coverNote: "",
 };
@@ -67,14 +67,16 @@ const sampleSubmission: Submission = {
 /** Sample data matching the My applications and Saved screens in Figma. */
 const sampleState: SeekerState = {
   savedJobs: [
+    "site-supervisor-raipur-builder",
     "barista-urban-bites-cafe",
     "retail-sales-associate-magneto-retail",
+    "cashier-magneto-retail",
     "wellness-centre-receptionist-patanjali-wellness",
     "stock-associate-shree-shyam-mart",
     "waiter-waitress-nds-cafe",
-    "billing-executive-shree-shyam-mart",
   ],
   savedOn: {
+    "site-supervisor-raipur-builder": "2026-10-13",
     "barista-urban-bites-cafe": "2026-10-06",
     "retail-sales-associate-magneto-retail": "2026-10-05",
     "wellness-centre-receptionist-patanjali-wellness": "2026-10-13",
