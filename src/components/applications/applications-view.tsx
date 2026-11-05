@@ -82,11 +82,11 @@ function ApplicationsContent() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-heading-semibold text-text-primary md:text-display-small-semibold">My Applications</h1>
+        <h1 className="text-heading-semibold text-text-primary max-md:hidden md:text-display-small-semibold">My Applications</h1>
         <p className="text-body-sm-regular text-text-secondary">{INTRO}</p>
       </header>
 
-      <div role="group" aria-label="Filter applications" className="flex gap-2">
+      <div role="group" aria-label="Filter applications" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
         {filters.map(({ key, label }) => (
           <Chip key={key} selected={filter === key} onClick={() => setFilter(key)} className="h-8 px-3">
             {label} ({counts[key]})
@@ -165,7 +165,7 @@ function ApplicationsEmpty() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-heading-semibold text-text-primary md:text-display-small-semibold">My Applications</h1>
+        <h1 className="text-heading-semibold text-text-primary max-md:hidden md:text-display-small-semibold">My Applications</h1>
         <p className="text-body-sm-regular text-text-secondary">{INTRO}</p>
       </header>
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-16 text-center">

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AppShell, Wordmark } from "@/components/app-shell";
+import { AboveTabBar } from "@/components/above-tab-bar";
+import { AppShell } from "@/components/app-shell";
+import { MobileHeader } from "@/components/mobile-header";
 import { Icon } from "@/components/icon";
 import { ApplyButton } from "@/components/jobs/apply-button";
 import { JobCard, VerifiedBadge } from "@/components/jobs/job-card";
@@ -66,13 +68,14 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
 
   return (
     <AppShell active="jobs">
+      <AboveTabBar />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jobPostingJsonLd(job)) }} />
 
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b bg-background-primary px-4 md:h-18 md:px-6">
-        <Wordmark className="md:hidden" />
+      <MobileHeader title={job.title} backHref="/" backLabel="All jobs on the map" heading={false} />
+      <header className="hidden h-18 shrink-0 items-center gap-3 border-b bg-background-primary px-6 md:flex">
         <Link
           href="/"
-          className="ml-auto flex items-center gap-1.5 rounded-full px-3 py-2 text-body-sm-semibold text-text-primary hover:bg-grey-100 md:ml-0 md:-translate-x-3"
+          className="flex items-center gap-1.5 rounded-full px-3 py-2 text-body-sm-semibold text-text-primary hover:bg-grey-100 md:-translate-x-3"
         >
           <Icon name="chevronDown" className="size-4 rotate-90" />
           All jobs on the map
@@ -169,7 +172,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[city]/[jobSl
         </div>
       </main>
 
-      <div className="flex shrink-0 items-center justify-between gap-3 border-t bg-surface-default px-4 py-3 md:hidden">
+      <div className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-t bg-surface-default px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden">
         <div className="flex min-w-0 flex-col">
           <span className="text-label-medium text-text-tertiary">Salary</span>
           <span className="truncate text-body-sm-semibold text-text-primary">{pay}</span>

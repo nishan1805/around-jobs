@@ -18,7 +18,7 @@ export function Chip({
       type="button"
       aria-pressed={selected}
       className={cn(
-        "inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-label-medium whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-brand-primary/40 focus-visible:outline-none",
+        "inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-label-medium whitespace-nowrap transition-colors max-md:min-h-11 max-md:active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-brand-primary/40 focus-visible:outline-none",
         selected && soft
           ? "border-brand-primary bg-primary-50 text-brand-primary"
           : selected

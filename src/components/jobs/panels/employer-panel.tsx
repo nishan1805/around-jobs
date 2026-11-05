@@ -19,7 +19,7 @@ import { useSeeker } from "@/lib/seeker-store";
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
 
-import { MapPanel, shareLink } from "./panel-parts";
+import { MapPanel, shareLink, type SheetSnap } from "./panel-parts";
 
 const cardEmployment: Record<EmploymentType, string> = {
   FULL_TIME: "Full Time",
@@ -53,6 +53,7 @@ export function EmployerPanel({
   cityName,
   onClose,
   onSelectJob,
+  onSnapChange,
 }: {
   company: Company;
   jobs: Job[];
@@ -60,6 +61,7 @@ export function EmployerPanel({
   cityName: string;
   onClose: () => void;
   onSelectJob: (job: Job) => void;
+  onSnapChange?: (snap: SheetSnap) => void;
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
@@ -71,7 +73,7 @@ export function EmployerPanel({
     `${company.name} hires for ${company.category.toLowerCase()} roles in ${company.area}, ${cityName}.`;
 
   return (
-    <MapPanel label={`${company.name} overview`} dock="right" onDismiss={onClose}>
+    <MapPanel key={company.slug} label={`${company.name} overview`} dock="right" initialSnap="half" onDismiss={onClose} onSnapChange={onSnapChange}>
       <div className="flex shrink-0 flex-col gap-5 py-4 pr-4 pl-6">
         <div className="flex items-start gap-3">
           <CompanyMark name={company.name} className="size-16 rounded-md text-subheading-semibold" />
@@ -153,7 +155,7 @@ export function EmployerPanel({
                 <Icon name="briefcase" className="size-5" />
               </span>
               <p className="text-body-semibold text-text-primary">No open jobs right now</p>
-              <p className="w-80 text-center text-body-sm-regular text-text-secondary">
+              <p className="w-full max-w-80 text-center text-body-sm-regular text-text-secondary">
                 This employer has no active openings. Save them to see new jobs here.
               </p>
             </div>

@@ -14,7 +14,7 @@ import { categories, experienceLabel, formatSalaryShort, locationLine, relativeD
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
 
-import { MapPanel } from "./panel-parts";
+import { MapPanel, type SheetSnap } from "./panel-parts";
 
 export type ListStatus = "ready" | "loading" | "error";
 
@@ -60,6 +60,7 @@ export function JobsListPanel({
   onRetry,
   from,
   areaName = "you",
+  onSnapChange,
 }: {
   cityName: string;
   status: ListStatus;
@@ -77,6 +78,7 @@ export function JobsListPanel({
   onRetry: () => void;
   from: [number, number];
   areaName?: string;
+  onSnapChange?: (snap: SheetSnap) => void;
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
@@ -110,10 +112,10 @@ export function JobsListPanel({
             : `${plural(jobs.length, "result")} in ${cityName}`;
 
   return (
-    <MapPanel label={`Jobs in ${cityName}`} onDismiss={onClose}>
+    <MapPanel label={`Jobs in ${cityName}`} initialSnap="half" onDismiss={onClose} onSnapChange={onSnapChange}>
       <div className="flex shrink-0 flex-col gap-4 px-5 pt-1 pb-4 md:p-6 md:pb-4">
         <div className="flex items-center gap-2 md:hidden">
-          <IconButton variant="plain" icon="chevronLeft" label="Back to map" onClick={onClose} className="-ml-2" />
+          <IconButton variant="plain" icon="chevronLeft" label="Back to map" onClick={onClose} className="-ml-1 size-11" />
           <h2 className="text-heading-semibold text-text-primary">Jobs near you</h2>
           <p aria-live="polite" className="sr-only">
             {subtitle}
