@@ -3,6 +3,7 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import type { ComponentProps, ReactNode } from "react";
 
+import { GrabHandle, useSheetDrag } from "@/components/jobs/panels/panel-parts";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,9 @@ export function Dialog({
   screen?: boolean;
   className?: string;
 }) {
+  const drag = useSheetDrag({
+    onDown: () => onOpenChange(false),
+  });
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -36,7 +40,9 @@ export function Dialog({
             "md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:w-100 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-md md:p-6 md:shadow-lg md:data-ending-style:-translate-y-1/2 md:data-ending-style:scale-95 md:data-starting-style:-translate-y-1/2 md:data-starting-style:scale-95",
             className,
           )}
+          style={drag.offset > 0 && !screen ? { transform: `translateY(${drag.offset}px)`, transition: "none" } : undefined}
         >
+          {!screen && <GrabHandle className="-mt-3 -mb-2 md:hidden" {...drag.handlers} />}
           {children}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>

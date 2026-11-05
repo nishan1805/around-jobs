@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { AppShell, Wordmark } from "@/components/app-shell";
+import { AppShell } from "@/components/app-shell";
 import { Icon, type IconName } from "@/components/icon";
+import { MobileHeader } from "@/components/mobile-header";
 import { buttonVariants } from "@/components/ui/button";
 
 export function PlaceholderPage({
@@ -17,9 +18,8 @@ export function PlaceholderPage({
 }) {
   return (
     <AppShell active={active}>
-      <header className="flex h-16 shrink-0 items-center border-b bg-background-primary px-4 md:h-18 md:px-6">
-        <Wordmark className="md:hidden" />
-      </header>
+      <MobileHeader title={title} backHref="/" backLabel="Back to jobs" />
+      <header className="hidden h-18 shrink-0 items-center border-b bg-background-primary px-6 md:flex" />
       <main className="flex min-h-0 flex-1 items-center justify-center bg-background-secondary p-6">
         <div className="flex max-w-sm flex-col items-center gap-4 text-center">
           <span className="flex size-14 items-center justify-center rounded-full bg-primary-50 text-brand-primary">

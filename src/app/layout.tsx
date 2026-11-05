@@ -25,12 +25,25 @@ export const metadata: Metadata = {
   description:
     "Find retail, hospitality, sales, healthcare, office and technology jobs on a map of your neighbourhood in Raipur.",
   applicationName: "around jobs",
+  appleWebApp: {
+    capable: true,
+    title: "around",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/pwa-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/pwa-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#0163ff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

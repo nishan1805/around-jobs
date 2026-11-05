@@ -9,15 +9,19 @@ export function PageHeader({
   subtitle,
   mobileTitle,
   mobileSubtitle,
+  className,
+  titleClassName,
 }: {
   title: string;
   subtitle?: ReactNode;
   mobileTitle?: string;
   mobileSubtitle?: ReactNode;
+  className?: string;
+  titleClassName?: string;
 }) {
   return (
-    <header className="flex flex-col gap-1 max-md:gap-3">
-      <h1 className="text-heading-semibold text-text-primary md:text-display-small-semibold">
+    <header className={cn("flex flex-col gap-1 max-md:gap-3", className)}>
+      <h1 className={cn("text-heading-semibold text-text-primary md:text-display-small-semibold", titleClassName)}>
         {mobileTitle ? (
           <>
             <span className="md:hidden">{mobileTitle}</span>

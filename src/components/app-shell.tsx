@@ -31,7 +31,7 @@ export function Wordmark({ className }: { className?: string }) {
 
 export function AppShell({ active, children }: { active?: NavKey; children: ReactNode }) {
   return (
-    <div className="flex h-dvh flex-col bg-background-primary md:flex-row">
+    <div data-app-frame className="flex h-dvh flex-col bg-background-primary md:flex-row">
       <aside className="hidden w-[124px] shrink-0 flex-col items-center border-r bg-background-primary px-4 pt-5 pb-6 md:flex">
         <div className="flex flex-col items-center gap-8">
           <Wordmark />
@@ -43,7 +43,7 @@ export function AppShell({ active, children }: { active?: NavKey; children: Reac
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
+      <div data-app-main className="flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-7 max-md:has-[.leaflet-container]:pb-0">{children}</div>
 
       <MobileTabBar active={active} />
     </div>
@@ -64,7 +64,7 @@ function MobileTabBar({ active }: { active?: NavKey }) {
         href={tab.href}
         aria-current={isActive ? "page" : undefined}
         className={cn(
-          "flex w-18 flex-col items-center gap-1 pt-2 pb-1.5 outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/40 rounded-sm",
+          "flex min-h-11 w-18 flex-col items-center gap-1 rounded-sm pt-2 pb-1.5 outline-none transition-transform active:scale-95 focus-visible:ring-3 focus-visible:ring-brand-primary/40",
           isActive ? "text-label-semibold text-brand-primary" : "text-label-regular text-text-tertiary",
         )}
       >
@@ -84,7 +84,7 @@ function MobileTabBar({ active }: { active?: NavKey }) {
       <Link
         href="/post-a-job"
         aria-label="Post a job"
-        className="absolute -top-5 left-1/2 flex -translate-x-1/2 items-center justify-center rounded-2xl border-4 border-primary-100 bg-brand-primary p-4 text-text-on-brand outline-none transition-colors hover:bg-primary-600 focus-visible:ring-3 focus-visible:ring-brand-primary/40"
+        className="absolute -top-5 left-1/2 flex -translate-x-1/2 items-center justify-center rounded-2xl border-4 border-primary-100 bg-brand-primary p-4 text-text-on-brand outline-none transition-transform hover:bg-primary-600 active:scale-95 focus-visible:ring-3 focus-visible:ring-brand-primary/40"
       >
         <Icon name="plus" className="size-8" />
       </Link>

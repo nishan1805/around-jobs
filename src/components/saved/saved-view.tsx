@@ -108,6 +108,7 @@ function SavedContent() {
       <div className="md:hidden">
         <PageHeader
           title="Saved jobs"
+          titleClassName="hidden"
           subtitle={subtitle}
           mobileSubtitle={`${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? ` · ${expiring} expiring soon` : ""}`}
         />

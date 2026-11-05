@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Chip } from "@/components/jobs/chip";
 import { FiltersButton } from "@/components/jobs/filters-button";
-import { MapPeek, MobileSearchBar } from "@/components/jobs/mobile-map-controls";
+import { LocationPill, LocationSheet, MapAccountCluster, MapPeek, MobileSearchBar } from "@/components/jobs/mobile-map-controls";
+import type { SheetSnap } from "@/components/jobs/panels/panel-parts";
 import { EmployerPanel } from "@/components/jobs/panels/employer-panel";
 import { FiltersPanel } from "@/components/jobs/panels/filters-panel";
 import { JobDetailPanel } from "@/components/jobs/panels/job-detail-panel";
@@ -33,7 +34,7 @@ import {
 } from "@/lib/jobs";
 import { AREA_CENTERS } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
-import { useCoverTabBar } from "@/hooks/use-cover-tab-bar";
+import { useAboveTabBar, useCoverTabBar } from "@/hooks/use-cover-tab-bar";
 
 type Panel =
   | { kind: "none" }
@@ -65,6 +66,8 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const [areaName, setAreaName] = useState(LOCATION_AREA);
   const [origin, setOrigin] = useState<[number, number]>(city.center);
   const [retried, setRetried] = useState(false);
+  const [mobileSnap, setMobileSnap] = useState<SheetSnap>("peek");
+  const [locationOpen, setLocationOpen] = useState(false);
   const isTablet = useMediaQuery(breakpoints.md);
 
   // Deep links: `?view=list`, `?company=<slug>` (shared employer links), `?job=<slug>`,
@@ -75,6 +78,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const viewParam = useSearchParam("view");
   const filtersParam = useSearchParam("filters");
   const stateParam = useSearchParam("state");
+  const locationParam = useSearchParam("location");
   const queryParam = useSearchParam("q");
   const categoryParam = useSearchParam("category");
   const typeParam = useSearchParam("type");
@@ -107,6 +111,11 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
     return list;
   };
   const panel: Panel = panelState ?? linkedPanel();
+  const [seenLocation, setSeenLocation] = useState<string | null>(null);
+  if (locationParam !== seenLocation) {
+    setSeenLocation(locationParam);
+    if (locationParam === "open") setLocationOpen(true);
+  }
 
   const openJobs = useMemo(() => jobs.filter(isOpen), [jobs]);
   const matching = useMemo(
@@ -133,7 +142,10 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const initialBounds = useMemo(() => companies.map((item) => item.position), [companies]);
   const status: ListStatus = !retried && (stateParam === "loading" || stateParam === "error") ? stateParam : "ready";
 
-  const open = useCallback((next: Panel) => setPanel(next), []);
+  const open = useCallback((next: Panel) => {
+    setPanel(next);
+    setMobileSnap(next.kind === "list" || next.kind === "company" ? "half" : next.kind === "none" ? "peek" : "full");
+  }, []);
   const close = useCallback(() => setPanel(none), []);
   const back = (current: Panel) => ("back" in current ? current.back : none);
 
@@ -156,9 +168,11 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const panelWidth = panel.kind === "filters" ? "narrow" : "wide";
   const dockRight = panel.kind === "company" || panel.kind === "job";
   const panelOpen = panel.kind !== "none";
-  const coversTabBar = panel.kind === "job" || panel.kind === "filters";
+  const coversTabBar = (panel.kind === "job" || panel.kind === "filters") && mobileSnap === "full";
+  const hideMapChrome = panel.kind === "job" || panel.kind === "filters" || (panelOpen && mobileSnap === "full");
 
   useCoverTabBar(coversTabBar);
+  useAboveTabBar(panelOpen);
   const insetLeft = isTablet && panelOpen && !dockRight ? panelInset[panelWidth] : 0;
   const insetRight = isTablet && panelOpen && dockRight ? panelInset.wide : 0;
 
@@ -178,6 +192,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           <JobsListPanel
             cityName={city.name}
             areaName={areaName}
+            onSnapChange={setMobileSnap}
             status={status}
             jobs={stateParam === "empty" ? [] : matching}
             totalMatching={stateParam === "none" ? 0 : stateParam === "empty" ? Math.max(matching.length, 1) : matching.length}
@@ -209,13 +224,14 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
             cityName={city.name}
             onClose={() => open(back(panel))}
             onSelectJob={openJob}
+            onSnapChange={setMobileSnap}
           />
         );
       }
       case "job": {
         const job = jobs.find((item) => item.slug === panel.slug);
         if (!job) return null;
-        return <JobDetailPanel job={job} onBack={() => open(back(panel))} backLabel="Back" />;
+        return <JobDetailPanel job={job} onBack={() => open(back(panel))} backLabel="Back" onSnapChange={setMobileSnap} />;
       }
       case "filters":
         return (
@@ -224,9 +240,29 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
             onChange={setFilters}
             resultCount={matching.length}
             onDone={() => open(back(panel))}
+            onSnapChange={setMobileSnap}
           />
         );
     }
+  };
+
+  const chooseArea = (label: string) => {
+    setAreaLabel(label);
+    const center = AREA_CENTERS[label as keyof typeof AREA_CENTERS];
+    if (center) {
+      setOrigin(center);
+      setAreaName(label.split(",")[0]?.trim() || label);
+      setFocus({ key: Date.now(), center, zoom: 15 });
+    }
+    setLocationOpen(false);
+    setQueryParam("location", null);
+  };
+  const useCurrentLocation = () => {
+    setAreaLabel("Current location");
+    setAreaName("you");
+    setLocateSignal((current) => current + 1);
+    setLocationOpen(false);
+    setQueryParam("location", null);
   };
 
   return (
@@ -236,25 +272,15 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
         query={filters.query}
         onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
         locationLabel={areaLabel}
-        onLocationChange={(label) => {
-          setAreaLabel(label);
-          const center = AREA_CENTERS[label as keyof typeof AREA_CENTERS];
-          if (!center) return;
-          setOrigin(center);
-          setAreaName(label.split(",")[0]?.trim() || label);
-          setFocus({ key: Date.now(), center, zoom: 15 });
-        }}
-        onUseCurrentLocation={() => {
-          setAreaLabel("Current location");
-          setAreaName("you");
-          setLocateSignal((current) => current + 1);
-        }}
+        onLocationChange={chooseArea}
+        onUseCurrentLocation={useCurrentLocation}
       />
 
       <main
         className={cn(
           "relative isolate flex min-h-0 flex-1 flex-col overflow-hidden",
-          !panelOpen && "max-md:[--map-inset-bottom:8.75rem]",
+          (!panelOpen || mobileSnap === "peek") && "max-md:[--map-inset-bottom:140px]",
+          panelOpen && mobileSnap === "half" && "max-md:[--map-inset-bottom:min(480px,58%)]",
         )}
       >
         <h1 className="sr-only">Jobs near you in {city.name}</h1>
@@ -277,17 +303,23 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
 
         <div
           className={cn(
-            "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col gap-2 px-5 pt-3 md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
-            panelOpen && "max-md:hidden",
+            "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col gap-2 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
+            hideMapChrome && "max-md:hidden",
             panelOpen && dockRight && "md:pr-[496px]",
           )}
         >
-          <MobileSearchBar
-            query={filters.query}
-            onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
-            filterCount={badgeCount}
-            onOpenFilters={openFilters}
-          />
+          <div className="pointer-events-auto flex flex-col gap-2 md:hidden">
+            <div className="flex items-center gap-2">
+              <MobileSearchBar
+                query={filters.query}
+                onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
+                filterCount={badgeCount}
+                onOpenFilters={openFilters}
+              />
+              <MapAccountCluster />
+            </div>
+            <LocationPill label={areaLabel} expanded={locationOpen} onClick={() => setLocationOpen(true)} />
+          </div>
           <div
             role="group"
             aria-label="Job categories"
@@ -353,6 +385,18 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           </p>
         )}
       </main>
+      {!isTablet && (
+        <LocationSheet
+          open={locationOpen}
+          area={areaLabel}
+          onClose={() => {
+            setLocationOpen(false);
+            setQueryParam("location", null);
+          }}
+          onChoose={chooseArea}
+          onUseCurrentLocation={useCurrentLocation}
+        />
+      )}
     </>
   );
 }

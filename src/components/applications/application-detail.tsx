@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { TopBar } from "@/components/jobs/top-bar";
+import { MobileHeader } from "@/components/mobile-header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { useHydrated } from "@/hooks/use-hydrated";
@@ -112,9 +113,10 @@ export function ApplicationDetail({ job }: { job: Job }) {
 
   return (
     <AppShell active="applications">
+      <MobileHeader title="Application" backHref="/applications" backLabel="Back to My Applications" heading={false} />
       <TopBar />
-      <main className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto bg-background-secondary px-5 py-6 md:px-10 md:py-8">
-        <Link href="/applications" className="inline-flex w-fit items-center gap-2 text-body-sm-medium text-text-secondary hover:text-text-primary">
+      <main className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto bg-background-secondary px-5 pt-5 pb-12 md:px-10 md:py-8">
+        <Link href="/applications" className="inline-flex w-fit items-center gap-2 text-body-sm-medium text-text-secondary hover:text-text-primary max-md:hidden">
           <Icon name="arrowLeft" className="size-4" />
           Back to My Applications
         </Link>
@@ -143,7 +145,7 @@ export function ApplicationDetail({ job }: { job: Job }) {
           />
         )}
         {toast && (
-          <p role="status" className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-grey-900 px-4 py-3 text-body-sm-medium text-text-on-brand shadow-lg">
+          <p role="status" className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-md bg-grey-900 px-4 py-3 text-center text-body-sm-medium text-text-on-brand shadow-lg md:bottom-6">
             {toast}
           </p>
         )}
@@ -153,14 +155,15 @@ export function ApplicationDetail({ job }: { job: Job }) {
         <p className="text-body-sm-regular text-text-secondary">
           Your application will be marked as withdrawn. You may not be able to undo this action.
         </p>
-        <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" shape="rect" onClick={() => setConfirmOpen(false)}>
+        <div className="flex flex-col-reverse gap-3 md:flex-row md:justify-end">
+          <Button type="button" variant="outline" shape="rect" className="max-md:w-full" onClick={() => setConfirmOpen(false)}>
             Keep application
           </Button>
           <Button
             type="button"
             variant="destructive"
             shape="rect"
+            className="max-md:w-full"
             onClick={() => {
               seekerActions.withdraw(job.slug);
               setConfirmOpen(false);
@@ -281,10 +284,10 @@ function ApplicationBody({
 
 function DetailRow({ icon, label, value }: { icon: "file" | "calendar" | "briefcase" | "user" | "pinSm"; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2 border-b border-grey-200 py-2.5 text-body-sm-regular">
-      <Icon name={icon} className="size-4 text-text-tertiary" />
-      <dt className="w-44 shrink-0 text-text-secondary">{label}</dt>
-      <dd className="text-body-sm-semibold text-text-primary">{value}</dd>
+    <div className="flex items-start gap-2 border-b border-grey-200 py-3 text-body-sm-regular md:items-center md:py-2.5">
+      <Icon name={icon} className="mt-0.5 size-4 shrink-0 text-text-tertiary md:mt-0" />
+      <dt className="w-28 shrink-0 text-text-secondary md:w-44">{label}</dt>
+      <dd className="min-w-0 flex-1 text-body-sm-semibold text-text-primary">{value}</dd>
     </div>
   );
 }

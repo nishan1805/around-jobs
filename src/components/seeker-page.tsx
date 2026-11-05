@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth/auth-provider";
 import type { IconName } from "@/components/icon";
 import { TopBar } from "@/components/jobs/top-bar";
+import { MobileHeader } from "@/components/mobile-header";
 import { EmptyPage, PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { useHydrated } from "@/hooks/use-hydrated";
@@ -46,16 +47,17 @@ export function SeekerPage({
 
   return (
     <AppShell active={active}>
+      <MobileHeader title={mobileTitle ?? title} />
       <TopBar />
       <main
         className={cn(
-          "flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-6 md:gap-6 md:px-10 md:py-8",
+          "flex min-h-0 flex-1 animate-[screen-in_220ms_ease-out] flex-col gap-5 overflow-y-auto px-5 pt-5 pb-12 motion-reduce:animate-none md:animate-none md:gap-6 md:px-10 md:py-8",
           canvas === "plain" ? "bg-surface-default" : "bg-background-secondary",
         )}
       >
         {!hydrated ? (
           <>
-            <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} />
+            <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} titleClassName="max-md:hidden" />
             <div aria-busy className="flex flex-col gap-4">
               <span className="sr-only">Loading</span>
               {skeleton}
@@ -63,7 +65,7 @@ export function SeekerPage({
           </>
         ) : !user ? (
           <>
-            <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} />
+            <PageHeader title={title} mobileTitle={mobileTitle} subtitle={intro} titleClassName="max-md:hidden" />
             <EmptyPage
               icon={loginIcon}
               title={loginTitle}

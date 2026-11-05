@@ -19,7 +19,7 @@ import {
 } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 
-import { MapPanel } from "./panel-parts";
+import { MapPanel, type SheetSnap } from "./panel-parts";
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -167,28 +167,32 @@ export function FiltersPanel({
   onChange,
   resultCount,
   onDone,
+  onSnapChange,
 }: {
   filters: JobFilters;
   onChange: (filters: JobFilters) => void;
   resultCount: number;
   onDone: () => void;
+  onSnapChange?: (snap: SheetSnap) => void;
 }) {
   const reset = () => onChange({ ...defaultFilters, query: filters.query });
   return (
     <MapPanel
       label="Filters"
       width="narrow"
+      initialSnap="full"
       onDismiss={onDone}
+      onSnapChange={onSnapChange}
       className="md:max-h-[min(720px,calc(100%-7.5rem))]"
     >
       <div className="flex shrink-0 items-center gap-3 px-5 pt-1 md:p-4 md:pb-0">
         <h2 className="flex-1 text-heading-semibold text-text-primary md:text-subheading-semibold">Filters</h2>
         <IconButton variant="outline" icon="close" label="Close filters" onClick={onDone} iconClassName="size-4" />
       </div>
-      <div className="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-10 py-5 md:p-4">
+      <div className="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-5 py-5 md:p-4">
         <FilterFields filters={filters} onChange={onChange} />
       </div>
-      <div className="flex shrink-0 gap-3 border-t px-5 py-3 md:border-t-0 md:p-4 md:pt-0">
+      <div className="flex shrink-0 gap-3 border-t px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:border-t-0 md:p-4 md:pt-0 md:pb-4">
         <Button variant="outline" shape="rect" className="h-11 flex-1" onClick={reset}>
           Reset
         </Button>

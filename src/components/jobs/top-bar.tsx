@@ -83,8 +83,8 @@ export function TopBar({
     <header className="hidden shrink-0 items-center justify-end gap-6 border-b bg-background-primary px-6 py-3 md:flex">
       <Wordmark className="md:hidden" />
       {showFinder && <div className="flex min-w-0 max-w-[894px] flex-1 items-center justify-between gap-4">
-        <label className="flex shrink-0 items-center gap-2 rounded-full border border-grey-200 bg-grey-50 p-3 transition-colors focus-within:border-brand-primary focus-within:bg-surface-default">
-          <Icon name="search" className="size-6 text-text-tertiary" />
+        <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-grey-200 bg-grey-50 p-3 transition-colors focus-within:border-brand-primary focus-within:bg-surface-default min-[80rem]:flex-none min-[80rem]:shrink-0">
+          <Icon name="search" className="size-6 shrink-0 text-text-tertiary" />
           <span className="sr-only">Search</span>
           <input
             ref={inputRef}
@@ -98,7 +98,7 @@ export function TopBar({
             }}
             enterKeyHint="search"
             placeholder={SEARCH_PLACEHOLDER}
-            className="w-[26rem] bg-transparent text-body-regular text-text-primary outline-none placeholder:text-text-tertiary [&::-webkit-search-cancel-button]:hidden"
+            className="w-full min-w-0 bg-transparent text-body-regular text-text-primary outline-none placeholder:text-text-tertiary min-[80rem]:w-[26rem] [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
 
@@ -121,7 +121,7 @@ export function TopBar({
               id={listId}
               role="listbox"
               aria-label="Popular areas"
-              className="absolute top-[calc(100%+8px)] right-0 z-50 flex w-[340px] flex-col gap-3 rounded-lg border bg-surface-default p-3 shadow-lg"
+              className="absolute top-[calc(100%+8px)] right-0 z-50 flex w-[min(340px,calc(100vw-8rem))] flex-col gap-3 rounded-lg border bg-surface-default p-3 shadow-lg min-[80rem]:w-[340px]"
             >
               <button
                 type="button"

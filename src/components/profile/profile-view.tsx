@@ -16,6 +16,7 @@ import { Dialog, DialogHeader } from "@/components/ui/dialog";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { breakpoints, useMediaQuery } from "@/hooks/use-media-query";
 import { authActions, maskPhone, type User } from "@/lib/auth-store";
+import { useProfilePhoto } from "@/lib/profile-photo";
 import { toggleValue } from "@/lib/job-filters";
 import { categories, employmentTypes, type Category, type EmploymentType } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,7 @@ function ProfileSkeleton() {
 
 function ProfileContent() {
   const { user, editProfile } = useAuth();
+  const photo = useProfilePhoto();
   const [resumeOpen, setResumeOpen] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -98,10 +100,17 @@ function ProfileContent() {
 
   return (
     <div className="flex flex-col gap-5 md:mx-auto md:w-full md:max-w-140">
-      <PageHeader title="Profile" />
+      <PageHeader title="Profile" className="max-md:hidden" />
 
       <div className="flex items-center gap-4">
-        <span aria-hidden className="size-16 shrink-0 rounded-full bg-grey-200" />
+        <span aria-hidden className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-grey-200 text-heading-semibold text-text-primary">
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo.url} alt="" className="size-full object-cover" />
+          ) : (
+            (user.name ?? "Y").trim().charAt(0).toUpperCase()
+          )}
+        </span>
         <div className="flex min-w-0 flex-col gap-0.5">
           <p className="truncate text-subheading-semibold text-text-primary">{user.name ?? "Your account"}</p>
           <p className="truncate text-body-sm-regular text-text-secondary">

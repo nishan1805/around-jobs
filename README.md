@@ -3,7 +3,8 @@
 A map-first local job board for Raipur, built from the **around** Figma design system.
 
 - **Stack:** Next.js 16 (App Router, Cache Components), TypeScript, Tailwind CSS v4, shadcn/ui (Base UI), Leaflet + react-leaflet.
-- **Mobile first** with three breakpoints: `sm` 412px, `md` 768px and `lg` 1440px.
+- **Mobile first** with three breakpoints: `sm` 412px, `md` 768px and `lg` 1440px. Phones (about 360–430) use a bottom tab bar, a full-bleed map and draggable sheets. From 768 up the sidebar layout is the desktop one, and 1280–1920 is unchanged.
+- **Installable.** `src/app/manifest.ts` sets `display: standalone` and the Around blue. There is no service worker, so sign-in is never cached for offline use.
 - **Map** is Leaflet, loaded only in the browser via `next/dynamic({ ssr: false })`.
 - **Job pages** at `/jobs/[city]/[jobSlug]` are server-rendered and include `JobPosting` JSON-LD, canonical URLs and Open Graph tags. `sitemap.xml` and `robots.txt` list every job.
 

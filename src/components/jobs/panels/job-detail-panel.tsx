@@ -24,7 +24,7 @@ import {
 import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
-import { BulletList, MapPanel, SectionHeader, shareLink } from "./panel-parts";
+import { BulletList, MapPanel, SectionHeader, shareLink, type SheetSnap } from "./panel-parts";
 
 /**
  * Job pin / card panel. Matches Around / Jobs / Job Detail Panel on S02
@@ -34,10 +34,12 @@ import { BulletList, MapPanel, SectionHeader, shareLink } from "./panel-parts";
 export function JobDetailPanel({
   job,
   onBack,
+  onSnapChange,
 }: {
   job: Job;
   onBack: () => void;
   backLabel: string;
+  onSnapChange?: (snap: SheetSnap) => void;
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
@@ -50,9 +52,9 @@ export function JobDetailPanel({
     ? "Remote"
     : `${job.company.streetAddress}, ${job.company.area}, ${job.city.name}, ${job.city.region} ${job.company.postalCode}`;
   return (
-    <MapPanel label={`${job.title} details`} dock="right" onDismiss={onBack}>
+    <MapPanel key={job.slug} label={`${job.title} details`} dock="right" initialSnap="full" onDismiss={onBack} onSnapChange={onSnapChange}>
       <div className="flex shrink-0 items-center gap-1 px-4 pt-3 pb-2">
-        <IconButton variant="outline" icon="arrowLeft" label="Back" onClick={onBack} iconClassName="size-5" />
+        <IconButton variant="outline" icon="arrowLeft" label="Back" onClick={onBack} iconClassName="size-5" className="max-md:size-11" />
         <span className="flex-1" />
         <button
           type="button"
@@ -153,8 +155,8 @@ export function JobDetailPanel({
           )}
         </section>
       </div>
-      <div className="shrink-0 border-t bg-surface-default px-6 py-4">
-        <ApplyButton jobSlug={job.slug} status={status} className="w-full" />
+      <div className="shrink-0 border-t bg-surface-default px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6 md:py-4">
+        <ApplyButton jobSlug={job.slug} status={status} className="w-full max-md:h-12" />
       </div>
     </MapPanel>
   );

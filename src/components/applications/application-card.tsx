@@ -37,7 +37,7 @@ export function ApplicationCard({ application, job }: { application: Application
   return (
     <Link
       href={applicationPath(job.slug)}
-      className="flex w-full flex-col gap-3 rounded-2xl border border-grey-200 bg-surface-default px-4 py-4 shadow-none transition-colors outline-none hover:border-grey-300 focus-visible:ring-3 focus-visible:ring-brand-primary/40 md:flex-row md:items-center md:gap-4 md:px-5"
+      className="flex w-full flex-col gap-3 rounded-2xl border border-grey-200 bg-surface-default px-4 py-4 shadow-none transition-colors outline-none hover:border-grey-300 max-md:active:bg-grey-50 focus-visible:ring-3 focus-visible:ring-brand-primary/40 md:flex-row md:items-center md:gap-4 md:px-5"
     >
       <span className="flex size-12 shrink-0 flex-col items-center justify-center rounded-lg bg-[#fff2e8] text-body-bold text-text-primary">
         {initials(job.company.name)}

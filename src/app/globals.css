@@ -38,6 +38,27 @@
   html {
     @apply bg-background-primary font-sans text-body-regular text-text-primary antialiased;
   }
+  html,
+  body {
+    overflow-x: clip;
+  }
+  @media (width < theme(--breakpoint-md)) {
+    a,
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0.6;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @layer components {
@@ -88,5 +109,9 @@
 @media (width < theme(--breakpoint-md)) {
   body[data-sheet="full"] [data-mobile-tabbar] {
     display: none;
+  }
+  body[data-panel="open"] [data-app-main] {
+    position: relative;
+    z-index: 20;
   }
 }
