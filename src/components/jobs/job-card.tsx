@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { MouseEvent } from "react";
 
+import { ApplyButton } from "@/components/jobs/apply-button";
 import { Badge } from "@/components/ui/badge";
 import { IconButton } from "@/components/ui/icon-button";
 import { Icon } from "@/components/icon";
@@ -11,7 +12,6 @@ import {
   experienceLabel,
   formatSalaryRange,
   formatSalaryShort,
-  isExpiringSoon,
   isOpen,
   jobPath,
   locationLine,
@@ -74,7 +74,7 @@ export function JobCard({
   job: Job;
   from: [number, number];
   onSelect?: (job: Job) => void;
-  /** "saved": Saved jobs tile (2510:38512) with a bookmark and status footer. */
+  /** "saved": Saved jobs tile (2510:38512) with a bookmark and application footer. */
   variant?: "default" | "saved";
   className?: string;
 }) {
@@ -131,14 +131,8 @@ export function JobCard({
           <Icon name="pinSm" className="size-4" />
           <span className="truncate" title={locationLine(job, from)}>{locationLine(job, from)}</span>
         </p>
-        {isSavedTile && job.salaryDisclosed && (
-          <p className="flex flex-wrap items-baseline gap-x-1">
-            <span className="text-body-semibold text-text-primary">{formatSalaryRange(job.salary).replace(" / month", "")}</span>
-            <span className="text-body-sm-regular text-text-tertiary">/ month</span>
-          </p>
-        )}
         <div className="flex flex-wrap gap-1.5">
-          {(!isSavedTile || !job.salaryDisclosed) && <SalaryBadge job={job} />}
+          {!isSavedTile && <SalaryBadge job={job} />}
           <Badge type="employment">{isSavedTile ? cardEmployment[job.employmentType] : employmentTypes[job.employmentType]}</Badge>
           <Badge type="experience">{isSavedTile ? experienceLabel(job.experience).replace("–", "-") : experienceLabel(job.experience)}</Badge>
         </div>
@@ -152,10 +146,24 @@ export function JobCard({
       {bookmark}
       {isSavedTile && (
         <div className="col-span-2 flex flex-wrap items-center gap-2 border-t pt-3">
-          <span className="mr-auto text-body-sm-regular text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
+          <div className="mr-auto flex min-w-0 flex-col items-start gap-1">
+            {job.salaryDisclosed ? (
+              <p className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-body-semibold text-text-primary">{formatSalaryRange(job.salary).replace(" / month", "")}</span>
+                <span className="text-body-sm-regular text-text-tertiary">/ month</span>
+              </p>
+            ) : <SalaryBadge job={job} />}
+            <span className="flex items-center gap-2 text-body-sm-regular text-text-tertiary">
+              <Icon name="calendar" className="size-5 shrink-0" />
+              Posted {timeAgo(job.datePosted)}
+            </span>
+          </div>
           {applied && <Badge type="applied">Applied</Badge>}
-          {isExpiringSoon(job) && <Badge type="expiring">Expiring soon</Badge>}
-          {!isOpen(job) && <Badge type={job.status === "expired" ? "expired" : "closed"}>{job.status === "expired" ? "Expired" : "Closed"}</Badge>}
+          {isOpen(job) ? (
+            <ApplyButton jobSlug={job.slug} status={job.status} className="relative z-1 shrink-0" />
+          ) : (
+            <Badge type={job.status === "expired" ? "expired" : "closed"}>{job.status === "expired" ? "Expired" : "Closed"}</Badge>
+          )}
         </div>
       )}
     </article>

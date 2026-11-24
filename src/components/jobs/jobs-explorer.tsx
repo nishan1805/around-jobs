@@ -115,6 +115,18 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   if (locationParam !== seenLocation) {
     setSeenLocation(locationParam);
     if (locationParam === "open") setLocationOpen(true);
+    if (locationParam === "current") {
+      setAreaLabel("Current location");
+      setAreaName("you");
+      setLocateSignal((current) => current + 1);
+    }
+    if (locationParam && Object.hasOwn(AREA_CENTERS, locationParam)) {
+      const center = AREA_CENTERS[locationParam as keyof typeof AREA_CENTERS];
+      setAreaLabel(locationParam);
+      setAreaName(locationParam.split(",")[0].trim());
+      setOrigin(center);
+      setFocus((previous) => ({ key: (previous?.key ?? 0) + 1, center, zoom: 15 }));
+    }
   }
 
   const openJobs = useMemo(() => jobs.filter(isOpen), [jobs]);

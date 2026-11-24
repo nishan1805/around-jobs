@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { EllipsisVertical } from "lucide-react";
+import { Check, EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -109,7 +109,7 @@ export function ApplicationDetail({ job }: { job: Job }) {
   return (
     <AppShell active="applications">
       <MobileHeader title="Application" backHref="/applications" backLabel="Back to My Applications" heading={false} />
-      <TopBar />
+      <TopBar showFinder />
       <main className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto bg-background-secondary px-5 pt-5 pb-12 md:px-10 md:py-8">
         <Link href="/applications" className="inline-flex w-fit items-center gap-2 text-body-sm-medium text-text-secondary hover:text-text-primary max-md:hidden">
           <Icon name="arrowLeft" className="size-4" />
@@ -193,32 +193,34 @@ function ApplicationBody({
 
   return (
     <>
-      <section className="flex flex-col flex-wrap items-start gap-3 rounded-2xl border border-grey-200 bg-surface-default p-4 sm:p-6 lg:flex-nowrap lg:gap-6">
-        <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-[#fff2e8] text-subheading-semibold text-text-primary">
-          {initials(job.company.name)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-heading-semibold text-text-primary">{job.title}</h1>
-          <p className="mt-1 flex items-center gap-1 text-body-sm-regular text-text-secondary">
-            {job.company.name}
-            {job.company.verified && <Icon name="verified" className="size-5 text-success-700" />}
-          </p>
-          <p className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{employmentTypes[job.employmentType]}</span>
-            <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{experienceLabel(job.experience)}</span>
-          </p>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-body-sm-regular text-text-tertiary">
-            <span className="flex min-w-0 items-center gap-1">
-              <Icon name="pinSm" className="size-4" />
-              <span className="truncate" title={place(job)}>{place(job)}</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <Icon name="calendar" className="size-4" />
-              Applied on {formatDate(application.appliedOn)}
-            </span>
+      <section className="flex flex-col gap-4 rounded-lg border border-grey-200 bg-surface-default p-4 sm:p-6 md:flex-row md:items-center md:gap-6">
+        <div className="flex min-w-0 flex-1 items-start gap-3 md:items-center md:gap-4">
+          <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-[#fff2e8] text-subheading-semibold text-text-primary">
+            {initials(job.company.name)}
+          </span>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-heading-semibold text-text-primary">{job.title}</h1>
+            <p className="mt-1 flex items-center gap-1 text-body-sm-regular text-text-secondary">
+              {job.company.name}
+              {job.company.verified && <Icon name="verified" className="size-5 text-success-700" />}
+            </p>
+            <p className="mt-2 flex flex-wrap gap-2">
+              <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{employmentTypes[job.employmentType]}</span>
+              <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{experienceLabel(job.experience)}</span>
+            </p>
           </div>
         </div>
-        <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
+        <div className="flex min-w-0 flex-col items-end gap-2 text-right md:max-w-[35%] md:items-start md:text-left text-body-sm-regular text-text-tertiary">
+          <span className="flex min-w-0 max-w-full items-center gap-1">
+            <Icon name="pinSm" className="size-4 shrink-0" />
+            <span className="truncate" title={place(job)}>{place(job)}</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <Icon name="calendar" className="size-4 shrink-0" />
+            Applied on {formatDate(application.appliedOn)}
+          </span>
+        </div>
+        <div className="flex w-full items-center justify-end gap-3 md:w-auto md:shrink-0">
           <ApplicationStatusBadge {...badge} />
           <Menu.Root>
             <Menu.Trigger aria-label="Application actions" className="flex h-8 w-5 items-center justify-center rounded-md text-text-secondary hover:bg-grey-100 focus-visible:outline-2 focus-visible:outline-brand-primary">
@@ -261,13 +263,15 @@ function ApplicationBody({
           <DocumentRow title="Cover Letter" detail={cover ? cover : "Not attached"} />
         </section>
 
-        <section className="flex flex-col gap-5 rounded-2xl border border-grey-200 bg-surface-default p-6">
+        <section className="flex flex-col gap-5 rounded-lg border border-grey-200 bg-surface-default p-6">
           <h2 className="text-subheading-semibold text-text-primary">Application Activity</h2>
           <ol className="flex flex-col">
             {steps.map((step, index) => (
               <li key={step.title} aria-current={step.current ? "step" : undefined} className={cn("flex min-h-[84px] gap-3 pr-3", step.current ? "min-h-[92px] rounded-md bg-warning-50 p-3" : "pl-3")}>
                 <span aria-hidden className="flex w-5 shrink-0 flex-col items-center">
-                  <span className={cn("size-5 shrink-0 rounded-full", step.current ? "border-3 border-brand-primary bg-surface-default" : "bg-success-default")} />
+                  <span className={cn("flex size-5 shrink-0 items-center justify-center rounded-full", step.current ? "border-3 border-brand-primary bg-surface-default" : "bg-success-default text-white")}>
+                    {!step.current && <Check className="size-3" />}
+                  </span>
                   {index < steps.length - 1 && <span className={cn("w-0.5 flex-1 bg-success-default", steps[index + 1]?.current && "-mb-3")} />}
                 </span>
                 <span className={cn("flex min-w-0 flex-1 flex-col gap-1", !step.current && "pb-4")}>

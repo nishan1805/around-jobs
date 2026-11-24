@@ -48,7 +48,7 @@ export function SeekerPage({
   return (
     <AppShell active={active}>
       <MobileHeader title={mobileTitle ?? title} />
-      <TopBar />
+      <TopBar showFinder={active === "applications" || active === "saved"} />
       <main
         className={cn(
           "flex min-h-0 flex-1 animate-[screen-in_220ms_ease-out] flex-col gap-5 overflow-y-auto px-5 pt-5 pb-12 motion-reduce:animate-none md:animate-none md:gap-6 md:px-10 md:py-8",
