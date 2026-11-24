@@ -56,18 +56,14 @@ export function JobDetailPanel({
       <div className="flex shrink-0 items-center gap-1 px-4 pt-3 pb-2">
         <IconButton variant="outline" icon="arrowLeft" label="Back" onClick={onBack} iconClassName="size-5" className="max-md:size-11" />
         <span className="flex-1" />
-        <button
-          type="button"
+        <IconButton
+          variant="outline"
+          icon={saved ? "bookmarkFilled" : "bookmark"}
+          label={saved ? "Remove from saved jobs" : "Save job"}
           aria-pressed={saved}
           onClick={() => actions.setSavedJob(job.slug, !saved)}
-          className={cn(
-            "inline-flex h-11 items-center gap-1.5 rounded-full border bg-surface-default px-3 text-body-sm-semibold text-text-primary hover:bg-grey-100",
-            saved && "border-brand-primary text-brand-primary",
-          )}
-        >
-          <Icon name={saved ? "bookmarkFilled" : "bookmark"} className="size-5" />
-          {saved ? "Saved" : "Save"}
-        </button>
+          className={cn("size-10", saved && "border-primary-200 bg-primary-50 text-primary-600")}
+        />
         <IconButton
           variant="outline"
           icon="share"

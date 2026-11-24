@@ -1,24 +1,16 @@
 import Link from "next/link";
 
+import { ApplicationStatusBadge } from "./application-status-badge";
+
 import { Icon } from "@/components/icon";
 import { applicationPath } from "@/components/jobs/apply-button";
 import type { StatusTone } from "@/components/ui/status-pill";
-import { applicationBadge, groupOf, type ApplicationBadgeTone } from "@/lib/applications";
+import { applicationBadge, groupOf } from "@/lib/applications";
 import { employmentTypes, experienceLabel, formatDate, type Job } from "@/lib/jobs";
 import type { Application } from "@/lib/seeker-store";
-import { cn } from "@/lib/utils";
 
 export const statusTone = (application: Application, job: Job): StatusTone =>
   application.stage === "rejected" ? "rejected" : groupOf(application, job);
-
-const badgeClass: Record<ApplicationBadgeTone, string> = {
-  review: "bg-[#fff9e7] text-[#b58708]",
-  shortlisted: "bg-[#e6efff] text-[#0146b5]",
-  interview: "bg-[#f3ebfd] text-[#5d28a8]",
-  rejected: "bg-[#ffbacb] text-[#8c122f]",
-  withdrawn: "bg-grey-100 text-text-secondary",
-  closed: "bg-grey-100 text-text-tertiary",
-};
 
 function initials(name: string) {
   const parts = name.split(/\s+/).filter((part) => /[A-Za-z]/.test(part));
@@ -27,7 +19,7 @@ function initials(name: string) {
 
 function place(job: Job) {
   const area = job.workMode === "REMOTE" ? "Remote" : job.company.area;
-  if (area.toLowerCase().includes(job.city.name.toLowerCase())) return area;
+  if (job.workMode === "REMOTE" || area.toLowerCase().includes(job.city.name.toLowerCase())) return area;
   return `${area}, ${job.city.name}`;
 }
 
@@ -37,7 +29,7 @@ export function ApplicationCard({ application, job }: { application: Application
   return (
     <Link
       href={applicationPath(job.slug)}
-      className="flex w-full flex-col gap-3 rounded-2xl border border-grey-200 bg-surface-default px-4 py-4 shadow-none transition-colors outline-none hover:border-grey-300 max-md:active:bg-grey-50 focus-visible:ring-3 focus-visible:ring-brand-primary/40 md:flex-row md:items-center md:gap-4 md:px-5"
+      className="flex w-full flex-col gap-3 rounded-2xl border border-grey-200 bg-surface-default px-4 py-4 shadow-none transition-colors outline-none hover:border-grey-300 max-md:active:bg-grey-50 focus-visible:ring-3 focus-visible:ring-brand-primary/40 lg:flex-row lg:items-center lg:gap-4 sm:px-5"
     >
       <span className="flex size-12 shrink-0 flex-col items-center justify-center rounded-lg bg-[#fff2e8] text-body-bold text-text-primary">
         {initials(job.company.name)}
@@ -55,21 +47,20 @@ export function ApplicationCard({ application, job }: { application: Application
           <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{experienceLabel(job.experience)}</span>
         </span>
       </span>
-      <span className="flex flex-col gap-2 text-body-sm-regular text-text-tertiary md:w-[220px] md:shrink-0">
+      <span className="flex min-w-0 flex-col gap-2 text-body-sm-regular text-text-tertiary lg:w-[min(27%,220px)]">
         <span className="flex items-center gap-1">
           <Icon name="pinSm" className="size-4" />
-          {place(job)}
+          <span className="truncate" title={place(job)}>{place(job)}</span>
         </span>
         <span className="flex items-center gap-2">
           <Icon name="calendar" className="size-5" />
           Applied {formatDate(application.appliedOn)}
         </span>
       </span>
-      <span className={cn("inline-flex w-fit items-center gap-1 rounded-full px-3 py-1 text-label-medium md:w-[180px]", badgeClass[badge.tone])}>
-        <span className="size-2 rounded-full bg-current" />
-        {badge.label}
+      <span className="flex items-center justify-between gap-3 lg:ml-auto lg:min-w-[145px] lg:justify-end">
+        <ApplicationStatusBadge {...badge} />
+        <Icon name="chevronRight" className="size-5 text-text-secondary" />
       </span>
-      <Icon name="chevronRight" className="hidden size-5 text-text-secondary md:inline-block" />
     </Link>
   );
 }

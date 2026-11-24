@@ -8,7 +8,7 @@ const options = [
   { value: "list", label: "List", icon: "list" },
 ] as const;
 
-/** Map / List segmented control (top-right of the map and in the Jobs List header). */
+/** Map / List segmented control (top-right of the map). */
 export function ViewToggle({
   view,
   onChange,

@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "./auth-provider";
 
 const itemClass =
-  "flex h-12 w-full cursor-default items-center gap-3 rounded-sm px-1 py-3 text-body-sm-medium text-text-primary outline-none data-highlighted:bg-grey-100";
+  "flex h-12 w-full cursor-default items-center gap-3 rounded-sm px-1 py-3 text-body-regular text-text-primary outline-none data-highlighted:bg-grey-100";
 
 /**
  * Logged out: grey profile glyph (S00). Logged in: blue initial on the trigger;
@@ -83,7 +83,7 @@ export function AccountButton({ className }: { className?: string }) {
                 setOpen(false);
                 authActions.logout();
               }}
-              className="flex h-12 w-full items-center gap-3 text-left text-body-sm-semibold text-error-default active:bg-error-50"
+              className="flex h-12 w-full items-center gap-3 text-left text-body-regular text-error-default active:bg-error-50"
             >
               <Icon name="logout" className="size-5" />
               Sign out
@@ -110,27 +110,27 @@ export function AccountButton({ className }: { className?: string }) {
         </Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner sideOffset={8} align="end" className="z-50">
-            <Menu.Popup className="w-[360px] rounded-xl border bg-surface-elevated p-5 shadow-lg outline-none">
+            <Menu.Popup className="w-[360px] rounded-lg border bg-surface-default p-5 shadow-md outline-none">
               <AccountSummary photo={photo?.url} initial={initial} />
-              <div className="h-px w-full bg-grey-200" />
+              <div className="mt-3 h-px w-full bg-border-default" />
               <Menu.Item className={itemClass} onClick={() => router.push("/profile")}>
-                <Icon name="user" className="size-5 text-text-secondary" />
+                <Icon name="user" className="size-5 text-text-primary" />
                 <span className="flex-1">Profile settings</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
               <Menu.Item className={itemClass} onClick={() => router.push("/alerts")}>
-                <Icon name="bellOutline" className="size-5 text-text-secondary" />
+                <Icon name="bellOutline" className="size-5 text-text-primary" />
                 <span className="flex-1">Job alerts</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
               <Menu.Item className={itemClass} onClick={() => router.push("/help")}>
-                <Icon name="help" className="size-5 text-text-secondary" />
+                <Icon name="help" className="size-5 text-text-primary" />
                 <span className="flex-1">Help & support</span>
                 <Icon name="chevronRight" className="size-4 text-text-tertiary" />
               </Menu.Item>
-              <Menu.Separator className="my-1 h-px bg-border-default" />
+              <Menu.Separator className="my-3 h-px bg-border-default" />
               <Menu.Item
-                className="flex h-12 w-full cursor-default items-center gap-3 rounded-sm px-1 py-3 text-body-sm-semibold text-error-default outline-none data-highlighted:bg-error-50"
+                className="flex h-12 w-full cursor-default items-center gap-3 rounded-sm px-1 py-3 text-body-regular text-error-default outline-none data-highlighted:bg-error-50"
                 onClick={() => authActions.logout()}
               >
                 <Icon name="logout" className="size-5" />
@@ -146,7 +146,7 @@ export function AccountButton({ className }: { className?: string }) {
 
 function AccountSummary({ photo, initial }: { photo?: string; initial: string }) {
   return (
-    <div className="flex items-center gap-4 pb-3">
+    <div className="flex items-center gap-4 pb-1">
       <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-grey-200 text-heading-semibold leading-none text-text-primary">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -156,7 +156,7 @@ function AccountSummary({ photo, initial }: { photo?: string; initial: string })
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-2">
-        <span className="truncate text-body-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
+        <span className="truncate text-heading-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
         <span className="flex items-center justify-between gap-3">
           <span className="text-body-sm-regular text-text-secondary">Profile completion</span>
           <span className="text-body-sm-semibold text-brand-primary">{PROFILE_COMPLETION}%</span>
@@ -171,8 +171,8 @@ function AccountSummary({ photo, initial }: { photo?: string; initial: string })
 
 function SheetItem({ icon, label, onClick }: { icon: IconName; label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="flex h-12 w-full items-center gap-3 text-left text-body-sm-medium text-text-primary active:bg-grey-100">
-      <Icon name={icon} className="size-5 text-text-secondary" />
+    <button type="button" onClick={onClick} className="flex h-12 w-full items-center gap-3 text-left text-body-regular text-text-primary active:bg-grey-100">
+      <Icon name={icon} className="size-5 text-text-primary" />
       <span className="flex-1">{label}</span>
       <Icon name="chevronRight" className="size-4 text-text-tertiary" />
     </button>

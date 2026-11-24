@@ -9,17 +9,16 @@ import { Icon } from "@/components/icon";
 import {
   employmentTypes,
   experienceLabel,
+  formatSalaryRange,
   formatSalaryShort,
   isExpiringSoon,
   isOpen,
   jobPath,
-  listingStatus,
   locationLine,
   timeAgo,
   type Job,
 } from "@/lib/jobs";
 import { useSeekerActions } from "@/components/auth/use-seeker-actions";
-import { ApplyButton } from "@/components/jobs/apply-button";
 import { activeApplicationFor, useSeeker } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +49,13 @@ export function SalaryBadge({ job }: { job: Job }) {
   return <Badge type="salary">{job.salaryDisclosed ? formatSalaryShort(job.salary) : "Salary not disclosed"}</Badge>;
 }
 
+const cardEmployment = {
+  FULL_TIME: "Full Time",
+  PART_TIME: "Part Time",
+  CONTRACTOR: "Contract",
+  INTERN: "Internship",
+};
+
 const isPlainClick = (event: MouseEvent) =>
   event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
@@ -68,7 +74,7 @@ export function JobCard({
   job: Job;
   from: [number, number];
   onSelect?: (job: Job) => void;
-  /** "saved": Saved jobs tile (1988:24572) with unsave + Apply actions under the details. */
+  /** "saved": Saved jobs tile (2510:38512) with a bookmark and status footer. */
   variant?: "default" | "saved";
   className?: string;
 }) {
@@ -87,8 +93,8 @@ export function JobCard({
       onClick={() => actions.setSavedJob(job.slug, !saved)}
       className={cn(
         "relative z-1",
-        isSavedTile ? "size-9 rounded-lg bg-primary-50 hover:bg-primary-100" : "-m-0.5",
-        saved && "text-brand-primary",
+        isSavedTile ? "absolute top-2 right-2 size-9" : "-m-0.5",
+        saved ? "text-primary-600" : "text-grey-500",
       )}
     />
   );
@@ -98,12 +104,12 @@ export function JobCard({
       className={cn(
         "relative flex w-full items-start gap-3 rounded-md border bg-surface-default p-4 transition-colors hover:border-border-strong",
         applied && !isSavedTile && "border-brand-primary hover:border-brand-primary",
-        isSavedTile && "rounded-xl shadow-sm",
+        isSavedTile && "grid grid-cols-[auto_minmax(0,1fr)] rounded-md",
         className,
       )}
     >
       <CompanyMark name={job.company.name} />
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className={cn("flex min-w-0 flex-1 flex-col gap-1.5", isSavedTile && "pr-7")}>
         <h3 className="text-body-semibold text-text-primary">
           <Link
             href={jobPath(job)}
@@ -123,33 +129,35 @@ export function JobCard({
         </div>
         <p className="flex items-center gap-1 text-label-medium text-text-tertiary">
           <Icon name="pinSm" className="size-4" />
-          {locationLine(job, from)}
+          <span className="truncate" title={locationLine(job, from)}>{locationLine(job, from)}</span>
         </p>
+        {isSavedTile && job.salaryDisclosed && (
+          <p className="flex flex-wrap items-baseline gap-x-1">
+            <span className="text-body-semibold text-text-primary">{formatSalaryRange(job.salary).replace(" / month", "")}</span>
+            <span className="text-body-sm-regular text-text-tertiary">/ month</span>
+          </p>
+        )}
         <div className="flex flex-wrap gap-1.5">
-          <SalaryBadge job={job} />
-          <Badge type="employment">{employmentTypes[job.employmentType]}</Badge>
-          <Badge type="experience">{experienceLabel(job.experience)}</Badge>
+          {(!isSavedTile || !job.salaryDisclosed) && <SalaryBadge job={job} />}
+          <Badge type="employment">{isSavedTile ? cardEmployment[job.employmentType] : employmentTypes[job.employmentType]}</Badge>
+          <Badge type="experience">{isSavedTile ? experienceLabel(job.experience).replace("–", "-") : experienceLabel(job.experience)}</Badge>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="whitespace-nowrap text-label-medium text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
-          {applied && <Badge type="applied">Applied</Badge>}
-          {isSavedTile && isExpiringSoon(job) && <Badge type="expiring">Expiring soon</Badge>}
-          {isSavedTile && !isOpen(job) && <Badge type={job.status === "expired" ? "expired" : "closed"}>{job.status === "expired" ? "Expired" : "Closed"}</Badge>}
-        </div>
-        {isSavedTile && (
-          <div className="flex items-center gap-2 pt-1.5">
-            {bookmark}
-            {applied ? (
-              <span className="relative z-1 inline-flex h-11 flex-1 items-center justify-center rounded-sm bg-success-50 text-body-sm-semibold text-success-700">
-                Applied
-              </span>
-            ) : (
-              <ApplyButton jobSlug={job.slug} status={listingStatus(job)} applyLabel="Apply" className="relative z-1 h-11 min-w-0 flex-1" />
-            )}
+        {!isSavedTile && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="whitespace-nowrap text-label-medium text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
+            {applied && <Badge type="applied">Applied</Badge>}
           </div>
         )}
       </div>
-      {!isSavedTile && bookmark}
+      {bookmark}
+      {isSavedTile && (
+        <div className="col-span-2 flex flex-wrap items-center gap-2 border-t pt-3">
+          <span className="mr-auto text-body-sm-regular text-text-tertiary">Posted {timeAgo(job.datePosted)}</span>
+          {applied && <Badge type="applied">Applied</Badge>}
+          {isExpiringSoon(job) && <Badge type="expiring">Expiring soon</Badge>}
+          {!isOpen(job) && <Badge type={job.status === "expired" ? "expired" : "closed"}>{job.status === "expired" ? "Expired" : "Closed"}</Badge>}
+        </div>
+      )}
     </article>
   );
 }

@@ -46,7 +46,7 @@ type Panel =
 const none: Panel = { kind: "none" };
 
 /** The searched location until the seeker picks another area. */
-const LOCATION_AREA = "Shankar Nagar";
+const LOCATION_AREA = "Pandri";
 
 function setQueryParam(key: string, value: string | null) {
   const url = new URL(window.location.href);
@@ -64,7 +64,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
   const [locateSignal, setLocateSignal] = useState(0);
   const [areaLabel, setAreaLabel] = useState(`${LOCATION_AREA}, ${city.name}`);
   const [areaName, setAreaName] = useState(LOCATION_AREA);
-  const [origin, setOrigin] = useState<[number, number]>(city.center);
+  const [origin, setOrigin] = useState<[number, number]>(AREA_CENTERS["Pandri, Raipur"]);
   const [retried, setRetried] = useState(false);
   const [mobileSnap, setMobileSnap] = useState<SheetSnap>("peek");
   const [locationOpen, setLocationOpen] = useState(false);
@@ -191,14 +191,12 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
         return (
           <JobsListPanel
             cityName={city.name}
-            areaName={areaName}
             onSnapChange={setMobileSnap}
             status={status}
-            jobs={stateParam === "empty" ? [] : matching}
+            jobs={stateParam === "empty" || stateParam === "none" ? [] : matching}
             totalMatching={stateParam === "none" ? 0 : stateParam === "empty" ? Math.max(matching.length, 1) : matching.length}
-            filters={filters}
-            onFiltersChange={setFilters}
-            onOpenFilters={openFilters}
+            filtered={hasAnyFilter}
+            onResetFilters={() => setFilters(defaultFilters)}
             onClose={close}
             onSelectJob={openJob}
             onSearchArea={() => setFitRequest((current) => ({ key: (current?.key ?? 0) + 1, positions: matching.map((job) => job.company.position) }))}
@@ -305,7 +303,7 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           className={cn(
             "pointer-events-none absolute inset-x-0 top-0 z-1000 flex flex-col gap-2 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] md:flex-row md:items-start md:justify-between md:gap-4 md:p-6",
             hideMapChrome && "max-md:hidden",
-            panelOpen && dockRight && "md:pr-[496px]",
+            panelOpen && dockRight && "max-lg:md:hidden lg:pr-[496px]",
           )}
         >
           <div className="pointer-events-auto flex flex-col gap-2 md:hidden">
@@ -376,14 +374,6 @@ export function JobsExplorer({ jobs, companies, city }: { jobs: Job[]; companies
           onClick={openFilters}
           className="absolute bottom-6 left-6 z-1000 max-md:hidden"
         />
-        {panel.kind !== "list" && panel.kind !== "filters" && (
-          <p
-            data-job-count={matching.length}
-            className="pointer-events-none absolute bottom-6 left-44 z-1000 hidden h-11 items-center rounded-full bg-surface-default px-4 text-body-sm-semibold text-text-primary shadow-md md:flex"
-          >
-            {matching.length} {matching.length === 1 ? "job" : "jobs"} near {areaName}
-          </p>
-        )}
       </main>
       {!isTablet && (
         <LocationSheet

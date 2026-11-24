@@ -39,7 +39,7 @@ export function MobileSearchBar({
         type="button"
         onClick={onOpenFilters}
         aria-label={filterCount ? `Filters, ${filterCount} applied` : "Filters"}
-        className="relative flex size-12 shrink-0 items-center justify-center rounded-full border bg-surface-default text-text-primary shadow-md outline-none active:bg-grey-100 focus-visible:ring-3 focus-visible:ring-brand-primary/40"
+        className="relative flex size-12 shrink-0 items-center justify-center rounded-md border bg-surface-default text-text-primary outline-none active:bg-grey-100 focus-visible:ring-3 focus-visible:ring-brand-primary/40"
       >
         <Icon name="filters" className="size-5" />
         {filterCount > 0 && (
@@ -168,7 +168,7 @@ export function MapPeek({ title, onOpenList, className }: { title: string; onOpe
           <p aria-live="polite" className="text-body-semibold text-text-primary">
             {title}
           </p>
-          <p className="text-label-medium text-text-secondary">Swipe up for the list</p>
+          <p className="text-label-medium text-text-secondary">Sample listings · swipe up for list</p>
         </div>
         <button
           type="button"
