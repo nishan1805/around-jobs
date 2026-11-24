@@ -32,7 +32,7 @@ export function TopBar({
   locationLabel?: string;
   onLocationChange?: (label: string) => void;
   onUseCurrentLocation?: () => void;
-  /** Search and area picker stay on the jobs map. Other menus keep the account cluster only. */
+  /** Show the Jobs search and area picker alongside the account controls. */
   showFinder?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,9 +86,16 @@ export function TopBar({
 
   if (area !== locationLabel && !locationOpen) setArea(locationLabel);
 
+  const goToJobs = (location: string) => {
+    const params = new URLSearchParams({ location });
+    if (query.trim()) params.set("q", query.trim());
+    router.push(`/?${params}`);
+  };
+
   const chooseArea = (next: string) => {
     setArea(next);
-    onLocationChange?.(next);
+    if (onLocationChange) onLocationChange(next);
+    else goToJobs(next);
     setLocationOpen(false);
   };
 
@@ -143,7 +150,7 @@ export function TopBar({
                 onClick={() => {
                   setLocationOpen(false);
                   if (onUseCurrentLocation) onUseCurrentLocation();
-                  else chooseArea(DEFAULT_LOCATION_LABEL);
+                  else goToJobs("current");
                 }}
                 className="flex w-full items-center gap-2 rounded-md border border-grey-200 bg-grey-100 px-3 py-2 text-body-sm-medium text-grey-700 hover:bg-grey-200"
               >

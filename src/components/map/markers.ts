@@ -8,13 +8,13 @@ const escapeHtml = (value: string) =>
 // directly under the tip (Figma 1888:42397, path 2034:21664).
 export function companyMarkerHtml({ name, count, selected = false }: { name: string; count: number; selected?: boolean }) {
   return `
-<div class="absolute top-0 left-0 flex w-[111px] -translate-x-1/2 -translate-y-[65px] cursor-pointer flex-col items-center">
+<div class="absolute top-0 left-0 flex w-max max-w-[280px] -translate-x-1/2 -translate-y-[65px] cursor-pointer flex-col items-center">
   <div class="relative h-[65px] w-[62px]">
     <img alt="" src="/icons/marker-pin${selected ? "-selected" : ""}.svg" width="56" height="65" class="absolute top-0 left-[3px] max-w-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)]" />
     <span aria-hidden="true" style="--icon:url(${icons.briefcase})" class="absolute top-7 left-1/2 size-5 -translate-1/2 bg-text-primary mask-(--icon) mask-contain mask-center mask-no-repeat"></span>
     ${count > 0 ? `<span class="absolute -top-1 left-9.5 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-surface-default bg-brand-secondary px-1 text-label-medium text-text-on-brand">${count}</span>` : ""}
   </div>
-  <span class="w-full truncate rounded-full px-2.5 py-1.25 text-center text-label-semibold shadow-sm ${selected ? "bg-brand-primary text-text-on-brand" : "bg-surface-default text-text-primary"}">${escapeHtml(name)}</span>
+  <span class="max-w-full truncate rounded-full px-2.5 py-1.25 text-center text-label-semibold shadow-sm ${selected ? "bg-brand-primary text-text-on-brand" : "bg-surface-default text-text-primary"}">${escapeHtml(name)}</span>
 </div>`;
 }
 

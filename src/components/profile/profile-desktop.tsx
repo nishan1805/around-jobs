@@ -219,7 +219,7 @@ export function ProfileDesktop() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-body-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</p>
+                      <p className="text-subheading-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</p>
                       <p className="text-body-sm-regular text-text-secondary">
                         {complete
                           ? "Your profile is complete. Employers can see all your details."

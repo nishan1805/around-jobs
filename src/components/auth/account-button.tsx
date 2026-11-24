@@ -156,7 +156,7 @@ function AccountSummary({ photo, initial }: { photo?: string; initial: string })
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-2">
-        <span className="truncate text-heading-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
+        <span className="truncate text-subheading-semibold text-text-primary">{PROFILE_DISPLAY_NAME}</span>
         <span className="flex items-center justify-between gap-3">
           <span className="text-body-sm-regular text-text-secondary">Profile completion</span>
           <span className="text-body-sm-semibold text-brand-primary">{PROFILE_COMPLETION}%</span>
