@@ -83,7 +83,7 @@ export function FrameJobCardView({
           <div className="flex flex-col gap-2">
             <p className="flex items-start gap-1 text-body-sm-regular text-text-tertiary">
               <Icon name="pinSm" className="mt-0.5 size-4 shrink-0" />
-              <span className={layout === "saved" ? "whitespace-nowrap" : "truncate"}>{card.location}</span>
+              <span className="truncate">{card.location}</span>
             </p>
             {layout === "employer" ? (
               <SalaryText salary={card.salary} withMonth />
@@ -109,7 +109,7 @@ export function FrameJobCardView({
             event.stopPropagation();
             onToggleSave?.();
           }}
-          className={cn("pointer-events-auto relative z-1 text-text-primary", saved && "text-brand-primary")}
+          className={cn("pointer-events-auto relative z-1 ", saved ? "text-primary-600" : "text-grey-500")}
         >
           <Icon name={saved ? "bookmarkFilled" : "bookmark"} className="size-5" />
         </button>

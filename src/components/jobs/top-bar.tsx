@@ -1,19 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { AccountButton } from "@/components/auth/account-button";
 import { useAuth } from "@/components/auth/auth-provider";
-import { Wordmark } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { useSearchParam } from "@/hooks/use-search-param";
 import { useUnreadCount } from "@/lib/alerts";
 import { POPULAR_AREAS, SEARCH_PLACEHOLDER } from "@/lib/seeker-design-seed";
 import { cn } from "@/lib/utils";
 
-export const DEFAULT_LOCATION_LABEL = "Shankar Nagar, Raipur";
+export const DEFAULT_LOCATION_LABEL = "Pandri, Raipur";
 
 /**
  * Job-seeker top bar from the finalized Around Jobs frames.
@@ -39,6 +38,7 @@ export function TopBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const notificationsActive = usePathname() === "/alerts";
   const { user } = useAuth();
   const unread = useUnreadCount();
   const locationParam = useSearchParam("location");
@@ -54,6 +54,19 @@ export function TopBar({
     setSeenLocation(locationParam);
     if (locationParam === "open") setLocationOpen(true);
   }
+
+  useEffect(() => {
+    const onShortcut = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (event.defaultPrevented || event.key !== "/" || event.metaKey || event.altKey || event.ctrlKey) return;
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select, [role=dialog], [role=menu]"))) return;
+      if (!inputRef.current?.getClientRects().length) return;
+      event.preventDefault();
+      inputRef.current.focus();
+    };
+    window.addEventListener("keydown", onShortcut);
+    return () => window.removeEventListener("keydown", onShortcut);
+  }, []);
 
   useEffect(() => {
     if (!locationOpen) return;
@@ -80,10 +93,9 @@ export function TopBar({
   };
 
   return (
-    <header className="hidden shrink-0 items-center justify-end gap-6 border-b bg-background-primary px-6 py-3 md:flex">
-      <Wordmark className="md:hidden" />
-      {showFinder && <div className="flex min-w-0 max-w-[894px] flex-1 items-center justify-between gap-4">
-        <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-grey-200 bg-grey-50 p-3 transition-colors focus-within:border-brand-primary focus-within:bg-surface-default min-[80rem]:flex-none min-[80rem]:shrink-0">
+    <header className="hidden shrink-0 items-center justify-end h-[72px] gap-4 border-b bg-background-primary px-6 py-3 md:flex">
+      {showFinder && <div className="flex min-w-0 flex-1 items-center gap-4">
+        <label className="flex h-12 w-[383px] min-w-0 shrink items-center gap-2 rounded-full border border-grey-200 bg-grey-50 px-3 transition-colors focus-within:border-brand-primary focus-within:bg-surface-default">
           <Icon name="search" className="size-6 shrink-0 text-text-tertiary" />
           <span className="sr-only">Search</span>
           <input
@@ -98,8 +110,11 @@ export function TopBar({
             }}
             enterKeyHint="search"
             placeholder={SEARCH_PLACEHOLDER}
-            className="w-full min-w-0 bg-transparent text-body-regular text-text-primary outline-none placeholder:text-text-tertiary min-[80rem]:w-[26rem] [&::-webkit-search-cancel-button]:hidden"
+            className="w-full min-w-0 bg-transparent text-body-regular text-text-primary outline-none placeholder:text-text-tertiary [&::-webkit-search-cancel-button]:hidden"
           />
+          <kbd aria-hidden="true" className="hidden h-[26px] w-[42px] shrink-0 items-center justify-center rounded-[6px] border bg-surface-default font-sans text-label-medium text-text-tertiary lg:inline-flex">
+            /
+          </kbd>
         </label>
 
         <div ref={locationRef} className="relative shrink-0">
@@ -108,13 +123,13 @@ export function TopBar({
             aria-expanded={locationOpen}
             aria-controls={listId}
             onClick={() => setLocationOpen((open) => !open)}
-            className="flex h-10 items-center gap-4 rounded-full border bg-surface-default px-3 text-body-sm-medium text-grey-600 transition-colors hover:bg-grey-50"
+            className="flex h-10 w-[239px] items-center justify-between gap-4 rounded-full border bg-surface-default px-3 text-body-sm-medium text-grey-600 transition-colors hover:bg-grey-50"
           >
-            <span className="flex items-center gap-2">
+            <span className="flex min-w-0 items-center gap-2">
               <Icon name="pin" className="size-5 text-brand-primary" />
-              {area}
+              <span className="truncate">{area}</span>
             </span>
-            <Icon name="chevronDown" className={cn("size-5 text-text-tertiary transition-transform", locationOpen && "rotate-180")} />
+            <Icon name="chevronDown" className={cn("size-5 shrink-0 text-text-tertiary transition-transform", locationOpen && "rotate-180")} />
           </button>
           {locationOpen && (
             <div
@@ -164,23 +179,24 @@ export function TopBar({
         </div>
       </div>}
 
-      <div className="flex shrink-0 items-center gap-6">
+      <div className="flex shrink-0 items-center gap-4">
         {!user && (
           <Link
             href="/post-a-job"
-            className="inline-flex items-center gap-2 rounded-sm border border-primary-600 px-3 py-2 text-body-semibold text-primary-600 transition-colors hover:bg-primary-50"
+            className="inline-flex h-10 w-[132px] items-center justify-center gap-2 rounded-[8px] border border-primary-600 px-3 text-body-sm-semibold text-primary-600 transition-colors hover:bg-primary-50"
           >
             <Icon name="plusSquare" className="size-4" />
-            Post a job
+            Post
           </Link>
         )}
         <div className="flex items-center gap-3">
           <Link
             href="/alerts"
             aria-label={unread > 0 ? "Notifications, 1 unread" : "Notifications"}
-            className="relative flex size-10 items-center justify-center rounded-full border border-grey-300 bg-surface-default transition-colors hover:bg-grey-50"
+            aria-current={notificationsActive ? "page" : undefined}
+            className={cn("relative flex size-10 items-center justify-center rounded-full border border-grey-300 transition-colors", notificationsActive ? "border-primary-200 bg-primary-50 text-primary-600" : "bg-surface-default text-text-primary hover:bg-grey-50")}
           >
-            <Icon name="bell" className="size-5 text-text-primary" />
+            <Icon name="bellOutline" className="size-5" />
             {unread > 0 && <span className="absolute top-[9px] left-[21px] size-2 rounded-full bg-error-default" />}
           </Link>
           <AccountButton />

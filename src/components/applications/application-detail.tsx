@@ -1,29 +1,24 @@
 "use client";
 
+import { Menu } from "@base-ui/react/menu";
+import { EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { AppShell } from "@/components/app-shell";
+import { ApplicationStatusBadge } from "./application-status-badge";
+
 import { Icon } from "@/components/icon";
 import { TopBar } from "@/components/jobs/top-bar";
 import { MobileHeader } from "@/components/mobile-header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { useHydrated } from "@/hooks/use-hydrated";
-import { applicationBadge, applicationDisplayId, isEnded, type ApplicationBadgeTone } from "@/lib/applications";
+import { applicationBadge, applicationDisplayId, isEnded } from "@/lib/applications";
 import { employmentTypes, experienceLabel, formatDate, isOpen, jobPath, type Job } from "@/lib/jobs";
 import { applicationFor, seekerActions, useSeeker, type Application, type ApplicationEvent } from "@/lib/seeker-store";
 import { cn } from "@/lib/utils";
-
-const badgeClass: Record<ApplicationBadgeTone, string> = {
-  review: "bg-[#fff9e7] text-[#b58708]",
-  shortlisted: "bg-[#e6efff] text-[#0146b5]",
-  interview: "bg-[#f3ebfd] text-[#5d28a8]",
-  rejected: "bg-[#ffbacb] text-[#8c122f]",
-  withdrawn: "bg-grey-100 text-text-secondary",
-  closed: "bg-grey-100 text-text-tertiary",
-};
 
 function initials(name: string) {
   const parts = name.split(/\s+/).filter((part) => /[A-Za-z]/.test(part));
@@ -198,7 +193,7 @@ function ApplicationBody({
 
   return (
     <>
-      <section className="flex flex-col gap-4 rounded-2xl border border-grey-200 bg-surface-default p-6 md:flex-row md:items-center md:gap-6">
+      <section className="flex flex-col flex-wrap items-start gap-3 rounded-2xl border border-grey-200 bg-surface-default p-4 sm:p-6 lg:flex-nowrap lg:gap-6">
         <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-[#fff2e8] text-subheading-semibold text-text-primary">
           {initials(job.company.name)}
         </span>
@@ -212,25 +207,42 @@ function ApplicationBody({
             <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{employmentTypes[job.employmentType]}</span>
             <span className="rounded-full bg-grey-100 px-2 py-1 text-label-medium text-text-secondary">{experienceLabel(job.experience)}</span>
           </p>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-body-sm-regular text-text-tertiary">
+            <span className="flex min-w-0 items-center gap-1">
+              <Icon name="pinSm" className="size-4" />
+              <span className="truncate" title={place(job)}>{place(job)}</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Icon name="calendar" className="size-4" />
+              Applied on {formatDate(application.appliedOn)}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col gap-2 text-body-sm-regular text-text-tertiary">
-          <span className="flex items-center gap-1">
-            <Icon name="pinSm" className="size-4" />
-            {place(job)}
-          </span>
-          <span className="flex items-center gap-2">
-            <Icon name="calendar" className="size-5" />
-            Applied on {formatDate(application.appliedOn)}
-          </span>
-          {withdrawnOn && <span>Withdrawn on {formatDate(withdrawnOn)}</span>}
+        <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
+          <ApplicationStatusBadge {...badge} />
+          <Menu.Root>
+            <Menu.Trigger aria-label="Application actions" className="flex h-8 w-5 items-center justify-center rounded-md text-text-secondary hover:bg-grey-100 focus-visible:outline-2 focus-visible:outline-brand-primary">
+              <EllipsisVertical aria-hidden className="size-5" />
+            </Menu.Trigger>
+            <Menu.Portal>
+              <Menu.Positioner align="end" sideOffset={6} className="z-50">
+                <Menu.Popup className="min-w-48 rounded-md border bg-surface-default p-1.5 shadow-md outline-none">
+                  <Menu.LinkItem render={<Link href={`/?job=${job.slug}`} />} className="block rounded-sm px-3 py-2 text-body-sm-medium text-text-primary outline-none data-highlighted:bg-grey-100">
+                    View Job
+                  </Menu.LinkItem>
+                  {!ended && (
+                    <Menu.Item onClick={onWithdraw} className="cursor-pointer rounded-sm px-3 py-2 text-body-sm-medium text-error-700 outline-none data-highlighted:bg-error-50">
+                      Withdraw Application
+                    </Menu.Item>
+                  )}
+                </Menu.Popup>
+              </Menu.Positioner>
+            </Menu.Portal>
+          </Menu.Root>
         </div>
-        <span className={cn("inline-flex w-fit items-center gap-1 self-start rounded-full px-3 py-1 text-label-medium", badgeClass[badge.tone])}>
-          <span className="size-2 rounded-full bg-current" />
-          {badge.label}
-        </span>
       </section>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.75fr)_minmax(280px,1fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)]">
         <section className="flex flex-col gap-4 rounded-2xl border border-grey-200 bg-surface-default p-6">
           <h2 className="text-subheading-semibold text-text-primary">Application Details</h2>
           <dl className="flex flex-col">
@@ -247,31 +259,21 @@ function ApplicationBody({
             detail={resumeName ? [resumeName, resumeSize].filter(Boolean).join(" ") : "No resume attached"}
           />
           <DocumentRow title="Cover Letter" detail={cover ? cover : "Not attached"} />
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link href={`/?job=${job.slug}`} className={buttonVariants({ shape: "rect" })}>
-              View Job
-            </Link>
-            {!ended && (
-              <Button type="button" variant="outline" shape="rect" className="border-[#ff2056] text-[#ff2056] hover:bg-error-50" onClick={onWithdraw}>
-                Withdraw Application
-              </Button>
-            )}
-          </div>
         </section>
 
         <section className="flex flex-col gap-5 rounded-2xl border border-grey-200 bg-surface-default p-6">
           <h2 className="text-subheading-semibold text-text-primary">Application Activity</h2>
           <ol className="flex flex-col">
             {steps.map((step, index) => (
-              <li key={step.title} className={cn("flex gap-3", step.current && "rounded-xl bg-[#fff9e7] p-3")}>
-                <span className="flex w-5 shrink-0 flex-col items-center">
-                  <span className={cn("mt-1 size-2.5 rounded-full", step.current ? "bg-[#b58708]" : "bg-success-500")} />
-                  {index < steps.length - 1 && <span className="mt-1 w-px flex-1 bg-grey-200" />}
+              <li key={step.title} aria-current={step.current ? "step" : undefined} className={cn("flex min-h-[84px] gap-3 pr-3", step.current ? "min-h-[92px] rounded-md bg-warning-50 p-3" : "pl-3")}>
+                <span aria-hidden className="flex w-5 shrink-0 flex-col items-center">
+                  <span className={cn("size-5 shrink-0 rounded-full", step.current ? "border-3 border-brand-primary bg-surface-default" : "bg-success-default")} />
+                  {index < steps.length - 1 && <span className={cn("w-0.5 flex-1 bg-success-default", steps[index + 1]?.current && "-mb-3")} />}
                 </span>
                 <span className={cn("flex min-w-0 flex-1 flex-col gap-1", !step.current && "pb-4")}>
-                  <span className="text-body-sm-semibold text-text-primary">{step.title}</span>
+                  <span className="text-body-semibold text-text-primary">{step.title}</span>
                   <span className="text-body-sm-regular text-text-secondary">{step.body}</span>
-                  {step.on && <span className="text-label-medium text-text-tertiary">{formatDate(step.on)}</span>}
+                  {step.on && <time dateTime={step.on} className="text-label-medium text-text-tertiary">{formatDate(step.on)}</time>}
                 </span>
               </li>
             ))}

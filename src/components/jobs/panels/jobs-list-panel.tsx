@@ -1,16 +1,12 @@
 "use client";
 
-import { Chip, RemovableChip } from "@/components/jobs/chip";
-import { FiltersButton } from "@/components/jobs/filters-button";
 import { FrameJobCardView } from "@/components/jobs/frame-job-card";
 import { JobCard, JobCardSkeleton } from "@/components/jobs/job-card";
-import { ViewToggle } from "@/components/jobs/view-toggle";
 import { Button } from "@/components/ui/button";
 import { EmptyBlock } from "@/components/ui/empty-block";
 import { IconButton } from "@/components/ui/icon-button";
-import { activeFilters, defaultFilters, describeFilters, filterBadgeCount, toggleValue, type JobFilters } from "@/lib/job-filters";
 import { useSeekerActions } from "@/components/auth/use-seeker-actions";
-import { categories, experienceLabel, formatSalaryShort, locationLine, relativeDay, type EmploymentType, type Job } from "@/lib/jobs";
+import { experienceLabel, formatSalaryShort, locationLine, relativeDay, type EmploymentType, type Job } from "@/lib/jobs";
 import type { FrameJobCard } from "@/lib/seeker-design-seed";
 import { useSeeker } from "@/lib/seeker-store";
 
@@ -50,16 +46,14 @@ export function JobsListPanel({
   status,
   jobs,
   totalMatching,
-  filters,
-  onFiltersChange,
-  onOpenFilters,
+  filtered,
+  onResetFilters,
   onClose,
   onSelectJob,
   onSearchArea,
   onChangeArea,
   onRetry,
   from,
-  areaName = "you",
   onSnapChange,
 }: {
   cityName: string;
@@ -68,27 +62,20 @@ export function JobsListPanel({
   jobs: Job[];
   /** Matching jobs anywhere in the city. */
   totalMatching: number;
-  filters: JobFilters;
-  onFiltersChange: (filters: JobFilters) => void;
-  onOpenFilters: () => void;
+  filtered: boolean;
+  onResetFilters: () => void;
   onClose: () => void;
   onSelectJob: (job: Job) => void;
   onSearchArea: () => void;
   onChangeArea?: () => void;
   onRetry: () => void;
   from: [number, number];
-  areaName?: string;
   onSnapChange?: (snap: SheetSnap) => void;
 }) {
   const seeker = useSeeker();
   const actions = useSeekerActions();
-  const chips = activeFilters(filters);
-  const badgeCount = filterBadgeCount(filters);
-  const hasPanelFilters = chips.length > 0 || filters.query.trim().length > 0;
-  const description = describeFilters(filters);
-  const clearAll = () => onFiltersChange({ ...defaultFilters, query: filters.query });
-  const resetEverything = () => onFiltersChange(defaultFilters);
 
+  const count = plural(jobs.length, "job");
   const subtitle =
     status === "loading"
       ? "Finding jobs…"
@@ -96,70 +83,19 @@ export function JobsListPanel({
         ? "Something went wrong"
         : jobs.length === 0 && totalMatching > 0
           ? "0 jobs in this area"
-          : badgeCount > 0
-            ? `${plural(jobs.length, "job")} · ${plural(badgeCount, "filter")} applied`
-            : `${plural(jobs.length, "job")} near you`;
-
-  const resultsLine =
-    status === "loading"
-      ? "Searching jobs…"
-      : status === "error"
-        ? "Results unavailable right now"
-        : jobs.length === 0 && totalMatching > 0
-          ? "0 results in this area"
-          : description
-            ? `${plural(jobs.length, "result")} for “${description}” in ${cityName}`
-            : `${plural(jobs.length, "result")} in ${cityName}`;
+          : filtered
+            ? `${count} ${jobs.length === 1 ? "matches" : "match"} your filters`
+            : `${count} near you`;
 
   return (
     <MapPanel label={`Jobs in ${cityName}`} initialSnap="half" onDismiss={onClose} onSnapChange={onSnapChange}>
-      <div className="flex shrink-0 flex-col gap-4 px-5 pt-1 pb-4 md:p-6 md:pb-4">
-        <div className="flex items-center gap-2 md:hidden">
-          <IconButton variant="plain" icon="chevronLeft" label="Back to map" onClick={onClose} className="-ml-1 size-11" />
-          <h2 className="text-heading-semibold text-text-primary">Jobs near you</h2>
-          <p aria-live="polite" className="sr-only">
-            {subtitle}
-          </p>
+      <div className="flex shrink-0 items-center gap-3 px-5 pt-1 pb-4 md:p-6">
+        <IconButton variant="plain" icon="chevronLeft" label="Back to map" onClick={onClose} className="-ml-1 size-11 md:hidden" />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <h2 className="text-heading-semibold text-text-primary">Jobs in {cityName}</h2>
+          <p data-job-count={jobs.length} aria-live="polite" className="text-label-medium text-text-tertiary">{subtitle}</p>
         </div>
-        <div className="hidden items-start gap-3 md:flex">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-heading-semibold text-text-primary">Jobs in {cityName}</h2>
-            <p aria-live="polite" className="text-label-medium text-text-tertiary">
-              {hasPanelFilters
-              ? `${plural(totalMatching, "job")} match your filters`
-              : `${plural(totalMatching, "job")} near ${areaName}`}
-            </p>
-          </div>
-          <FiltersButton count={badgeCount} onClick={onOpenFilters} />
-          <IconButton variant="outline" icon="close" label="Close jobs list" onClick={onClose} iconClassName="size-4" />
-        </div>
-        <div className="flex items-center gap-3">
-          <p className="min-w-0 flex-1 truncate text-body-sm-regular text-text-secondary" title={resultsLine}>
-            {resultsLine}
-          </p>
-          <ViewToggle view="list" size="sm" onChange={(view) => view === "map" && onClose()} />
-        </div>
-        <div role="group" aria-label="Job categories" className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <Chip
-              key={category}
-              selected={filters.categories.includes(category)}
-              onClick={() => onFiltersChange({ ...filters, categories: toggleValue(filters.categories, category) })}
-            >
-              {category}
-            </Chip>
-          ))}
-        </div>
-        {chips.length > 0 && (
-          <div role="group" aria-label="Applied filters" className="flex flex-wrap items-center gap-2">
-            {chips.map((chip) => (
-              <RemovableChip key={chip.key} label={chip.label} onRemove={() => onFiltersChange(chip.remove(filters))} />
-            ))}
-            <button type="button" onClick={clearAll} className="text-label-semibold text-brand-primary hover:underline">
-              Clear all
-            </button>
-          </div>
-        )}
+        <IconButton variant="outline" icon="close" label="Close jobs list" onClick={onClose} className="size-10 max-md:hidden" />
       </div>
 
       <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-6 md:px-6">
@@ -189,7 +125,7 @@ export function JobsListPanel({
                   title="No matching jobs"
                   body="Try removing a filter or searching a wider area."
                   action={
-                    <Button variant="outline" shape="rect" onClick={resetEverything}>
+                    <Button variant="outline" shape="rect" onClick={onResetFilters}>
                       Clear filters
                     </Button>
                   }

@@ -33,7 +33,7 @@ export function AppShell({ active, children }: { active?: NavKey; children: Reac
   return (
     <div data-app-frame className="flex h-dvh flex-col bg-background-primary md:flex-row">
       <aside className="hidden w-[124px] shrink-0 flex-col items-center border-r bg-background-primary px-4 pt-5 pb-6 md:flex">
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-6">
           <Wordmark />
           <nav aria-label="Primary" className="flex flex-col items-center gap-2">
             {navItems.map(({ key, ...item }) => (
@@ -111,13 +111,13 @@ function SidebarLink({
       href={href}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex w-[92px] flex-col items-center justify-center gap-1.5 p-2 text-center text-label-medium transition-colors",
+        "flex h-[62px] w-[92px] flex-col items-center justify-center gap-1.5 p-2 text-center text-label-medium transition-colors",
         isActive
-          ? "rounded-lg bg-primary-50 text-primary-600"
-          : "rounded-2xl text-grey-600 hover:bg-grey-100",
+          ? "rounded-[8px] bg-primary-50 text-primary-600"
+          : "rounded-lg text-grey-600 hover:bg-grey-100",
       )}
     >
-      <Icon name={isActive ? activeIcon : icon} className="size-6" />
+      <Icon name={isActive ? activeIcon : icon} className={cn("size-6", !isActive && "text-grey-500")} />
       {label}
     </Link>
   );

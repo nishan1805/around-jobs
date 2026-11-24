@@ -86,18 +86,12 @@ function SavedContent() {
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/illustrations/saved-empty.svg" alt="" width={280} height={200} className="hidden md:block" />
-          <EmptyBlock
-            icon="bookmark"
-            title="No saved jobs yet"
-            body="Tap the bookmark on any job to save it here for later."
-            className="md:border-0 md:bg-transparent"
-            action={
-              <Link href="/" className={buttonVariants({ shape: "pill" })}>
-                Browse jobs
-              </Link>
-            }
-          />
+          <img src="/illustrations/saved-empty.svg" alt="" width={280} height={200} className="h-auto max-w-full" />
+          <h2 className="text-center text-subheading-semibold text-text-primary">No saved jobs yet</h2>
+          <p className="text-center text-body-sm-regular text-black">Tap the bookmark on any job to save it here for later.</p>
+          <Link href="/" className={buttonVariants({ shape: "rect", className: "h-11 rounded-lg px-6" })}>
+            Browse jobs
+          </Link>
         </div>
       </div>
     );
@@ -110,7 +104,7 @@ function SavedContent() {
           title="Saved jobs"
           titleClassName="hidden"
           subtitle={subtitle}
-          mobileSubtitle={`${saved.length} saved ${saved.length === 1 ? "job" : "jobs"}${expiring ? ` · ${expiring} expiring soon` : ""}`}
+          mobileSubtitle={subtitle}
         />
       </div>
       <header className="hidden flex-col gap-1 md:flex">

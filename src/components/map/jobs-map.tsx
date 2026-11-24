@@ -226,6 +226,7 @@ export default function JobsMap({
                   html: companyMarkerHtml({
                     name: company.name,
                     count: jobCount,
+                    selected: selectedSlug === company.slug,
                   }),
                 })}
                 eventHandlers={{ click: () => onSelectCompany(company.slug) }}
